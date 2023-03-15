@@ -135,7 +135,7 @@ export default {
   methods: {
     async initUserInfo () {
       const { data: res } = await this.$http.get('/api/users/info')
-      if (res !== 200) {
+      if (res.status !== 200) {
         return this.$message.error('获取用户信息失败')
       }
       this.userinfo = res.data

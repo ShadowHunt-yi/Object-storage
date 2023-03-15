@@ -28,8 +28,8 @@
         </el-form-item>
       </el-form>
     </el-card>
-    <el-dialog title="注册" :visible.sync="dialogFormRegister"  style="width: 45%; margin: auto;">
-      <el-form :model="newuser" :rules="loginFormRules" ref="newform">
+    <el-dialog title="注册" :visible.sync="dialogFormRegister"  style="width: 45%; margin: auto;" >
+      <el-form :model="newuser" :rules="loginFormRules" ref="newuser">
         <el-form-item label="用户名" :label-width="formLabelWidth" prop="newUsername">
           <el-input v-model="newuser.newUsername" autocomplete="off" placeholder="长度在 2 到 13 个字符"></el-input>
         </el-form-item>
@@ -42,21 +42,18 @@
         <el-form-item label="手机号" :label-width="formLabelWidth" prop="newMobile">
           <el-input v-model="newuser.newMobile" autocomplete="off" placeholder="请输入规范手机号"></el-input>
         </el-form-item>
-        <el-form-item prop="newcode">
-          <el-input v-model="newuser.newCode" prefix-icon="el-icon-key" placeholder="点击图片更换验证码" type="text"
-            @keydown.enter.native="submitForm(newuser)" style="width:65%;margin-right: 10px;"></el-input>
-          <img :src="vcUrl" alt="验证码" @click="updateVerifyCode()" style="width: 25%;;position: relative;top:10px"/>
-        </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormRegister = false,updateVerifyCode()" style="float: left;">取 消</el-button>
-        <el-button type="primary" @click=submitForm(newuser),updateVerifyCode()>确 定</el-button>
+        <el-button @click="dialogFormRegister = false" style="float: left;">取 消</el-button>
+        <el-button type="primary" @click=submitForm()>注 册</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
+/* import 'axios'form */
 export default {
   data() {
     return {
@@ -110,7 +107,6 @@ export default {
         newUsername: '',
         newPassword: '',
         newEmail: '',
-        newCode:'',
         newMobile:'',
       },
       dialogFormRegister: false,
@@ -156,51 +152,22 @@ export default {
 
       })
     },
-    submitForm(user){
-      this.$refs.newform.validate((valid) => {
-        if (valid) {
-          this.$axios({
-            method: "POST",
-            url: "/register",
-            headers: {
-              "Content-Type": "application/json;charset=UTF-8",
-            },
-            data: {
-              username: this.newform.newUsername,
-              password: this.newform.newPassword,
-              email: this.newform.newEmail,
-              mobile:this.newform.newMobile,
-              code:this.newform.newCode
-            },
-          })
-            .then((res) => {
-              if (res.data.message === "SUCCESS") {
-                this.$router.push("/login");
-                this.$notify({
-                  title: "提示",
-                  message: "注册成功",
-                  duration: 2000,
-                });
-              } else {
-                this.$notify({
-                  title: "提示",
-                  message: "注册失败",
-                  duration: 2000,
-                });
-              }
-            })
-            .catch(() => {
-              his.$notify({
-                title: "提示",
-                message: "用户访问错误",
-                duration: 2000,
-              });
-            });
-        } else {
-          console.log("error submit!!");
-          return false;
+    submitForm(){
+      this.$refs.newuser.validate(async valid=> {
+        if (!valid) return
+        console.log(this.newuser);
+        const { data: res } = await this.$http.post('/api/users',{
+          username:this.newuser.newUsername,
+          password:this.newuser.newPassword,
+          email:this.newuser.newEmail,
+          mobile:this.newuser.newMobile
+        })
+        if (res.status !== 200) {
+          return this.$message.error(res.msg)
         }
-      });
+        this.$message.success('注册用户成功！')
+        this.dialogFormRegister = false
+      })
     }
   }
 

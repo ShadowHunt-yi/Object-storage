@@ -24,7 +24,7 @@
           </el-upload>
         </el-card>
         <el-card>
-          <el-upload action="/api" >
+          <el-upload action="/api/uploadone" :before-upload="uploadOne" drg multiple>
             <div class="el-upload__text" style="text-align: center;">
               请拖拽文件到此处或 <em>点击此处上传</em>
             </div>
@@ -37,11 +37,11 @@
 
 <script>
 import md5 from "../../lib/md5";
-import { taskInfo, initTask, preSignUrl, merge, addHeaders } from "../../lib/api";
+import { taskInfo, initTask, preSignUrl, merge } from "../../lib/api";
 import axios from "axios";
 import { ref } from "vue";
 import Queue from "promise-queue-plus";
-import {HTTP_SUCCESS_CODE} from '@/lib/api.code.js'
+import { HTTP_SUCCESS_CODE } from '@/lib/api.code.js'
 // 文件上传分块任务的队列（用于移除文件时，停止该文件的上传队列） key：fileUid value： queue object
 const fileUploadChunkQueue = ref({}).value
 
@@ -104,13 +104,17 @@ const handleUpload = (file, taskRecord, options) => {
     const start = new Number(chunkSize) * (partNumber - 1)
     const end = start + new Number(chunkSize)
     const blob = file.slice(start, end)
+    const _http = axios.create()
     const { code, data, msg } = await preSignUrl({ identifier: fileIdentifier, partNumber: partNumber })
     if (code === HTTP_SUCCESS_CODE && data) {
-      await axios.request({
+      await _http.request({
         url: data,
         method: 'PUT',
         data: blob,
-        headers: { 'Content-Type': 'application/octet-stream' }
+        headers: {
+          'Content-Type': 'application/octet-stream',
+
+        }
       })
       return Promise.resolve({ partNumber: partNumber, uploadedSize: blob.size })
     }
@@ -184,8 +188,8 @@ const handleHttpRequest = async function (options) {
   const file = options.file
   let _this = this;
 
-    const task = await getTaskInfo(file)
-    console.log(task);
+  const task = await getTaskInfo(file)
+  console.log(task);
 
   if (task) {
     const { finished, path, taskRecord } = task
@@ -230,13 +234,11 @@ const handleRemoveFile = (uploadFile, uploadFiles) => {
 }
 
 
-
-
 export default {
   data() {
     return {
       headers: {
-        Authorization: 'Bearer ' + window.sessionStorage.getItem('token')
+        /* Authorization: 'Bearer ' + window.sessionStorage.getItem('token') */
       },
       params: {
         path: 'default'
@@ -247,7 +249,28 @@ export default {
   methods: {
     handleHttpRequest,
     handleRemoveFile,
-    getTaskInfo
+    getTaskInfo,
+    uploadone(e){
+      var that=this
+      var files = e
+      let file = e.target.files[0]
+      let param = new FormData()       // 创建form对象
+      param.append('file', file)       // 通过append向form对象添加数据
+      let config = {
+         headers: {'Content-Type': 'multipart/form-data'}
+      }
+      this.axios.post("/uploadone",param, config).then((res)=>{
+          if(res.succeed){
+              this.$message.success("添加成功")  //需要引入elemrnt
+          }else{
+                this.$message.warning("添加失败")
+          }
+        }).catch((err)=>{
+              this.$message.warning("上传失败，请重新上传!")
+        })
+     }
+
+
   },
 
 }
@@ -285,5 +308,4 @@ export default {
   margin-top: 10px;
   width: 100%;
 }
-
 </style>

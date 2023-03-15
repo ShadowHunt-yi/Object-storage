@@ -23,16 +23,16 @@ http.interceptors.response.use(response => {
 
 function addHeaders(config) {
     const token = window.sessionStorage.getItem('token') || '';
-    console.log(config['headers'])
-    config.headers['Authorization'] = `Bearer ${token}`
+    /* config.headers['Authorization'] = `Bearer ${token}` */
     return config
 }
 http.interceptors.request.use(addHeaders)
-    /**
-     * 根据文件的md5获取未上传完的任务
-     * @param identifier 文件md5
-     * @returns {Promise<AxiosResponse<any>>}
-     */
+
+/**
+ * 根据文件的md5获取未上传完的任务
+ * @param identifier 文件md5
+ * @returns {Promise<AxiosResponse<any>>}
+ */
 const taskInfo = (identifier) => {
     return http.get(`/v1/minio/tasks/${identifier}`);
 }

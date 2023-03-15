@@ -14,7 +14,7 @@
       </div>
       <div class="bottom">
         <el-table :data="filelist">
-          <el-table-column label="文件名" width="400px">
+          <el-table-column label="文件名" width="600px">
             <!-- 模板区域 -->
             <template slot-scope="scope">
               <!-- 图标 -->
@@ -22,18 +22,28 @@
                 <svg class="icon" aria-hidden="true">
                   <use :xlink:href="iconName(scope.row.type)"></use>
                 </svg>
-                <span style=" font-size:16px"> {{scope.row.name}} </span>
+                <span style=" font-size:16px"> {{scope.row.fileName}} </span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="大小" prop="size">
+          <el-table-column label="大小" prop="size" width="100px">
+            <template slot-scope="scope">
+              <div>
+                <span style=" font-size:16px"> {{scope.row.fileSize}} </span>
+              </div>
+            </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="mtime">
+            <template slot-scope="scope">
+              <div>
+                <span style=" font-size:16px"> {{scope.row.updateTime}} </span>
+              </div>
+            </template>
           </el-table-column>
           <el-table-column label="操作" width="300px">
             <template slot-scope="scope" v-if="scope.row.type!=='directory'">
               <el-button size="mini" type="primary" @click="showDetail(scope.row.md5)">详情</el-button>
-              <el-button size="mini" type="success" @click="downloadfile(scope.row.path,scope.row.name)">下载</el-button>
+              <el-button size="mini" type="success" @click="downloadfile(scope.row.fileName)">下载</el-button>
               <el-button size="mini" type="danger" @click="deletefile(scope.row)">删除</el-button>
             </template>
           </el-table-column>
@@ -62,7 +72,8 @@ export default {
       detailVisable: false,
       fileDetails: {},
       previewVisible: false,
-      dialogImageUrl: ''
+      dialogImageUrl: '',
+
     }
   },
   created () {
@@ -82,7 +93,7 @@ export default {
     },
     // 获取一级目录
     async getParentFile () {
-      const { data: res } = await this.$http.get('/api/file/getParentFile')
+      const { data: res } = await this.$http.get('/api/fileList')
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       }
@@ -135,7 +146,7 @@ export default {
       if (confirmResult !== 'confirm') {
         return this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete(`/api/file/delete/${fileInfo.md5}`)
+      const { data: res } = await this.$http.delete(`/api/remove/${fileInfo.md5}`)
       if (res.status !== 200) {
         return this.$message.error('删除失败')
       }
@@ -143,13 +154,12 @@ export default {
       this.filelist.splice(this.filelist.indexOf(fileInfo), 1)
       return this.$message.success('删除成功')
     },
-    downloadfile (path, name) {
+    downloadfile (name) {
       const params = {
-        path: path,
-        name: name
+        fileName: name
       }
       this.$http({
-        url: '/api/file/downloadFile',
+        url: '/api/download',
         method: 'get',
         params: params,
         responseType: 'blob' // 接收类型设置，否者返回字符型

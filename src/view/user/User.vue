@@ -228,7 +228,7 @@ export default {
         if (!valid) return
         const { data: res } = await this.$http.post('/api/users', this.addForm)
         if (res.status !== 200) {
-          return this.$message.error('添加用户失败！')
+          return this.$message.error(res.msg)
         }
         this.$message.success('添加用户成功！')
         this.dialogVisible = false
