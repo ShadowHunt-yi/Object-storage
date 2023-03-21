@@ -8,7 +8,7 @@
             <i class="fa fa-calculator"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.totalFileCount}}30
+            {{ consoleParam.TotalCount}}
           </div>
         </el-card>
       </el-col>
@@ -19,7 +19,7 @@
             <i class="fa fa-file-archive-o"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.totalFileSize}}3.0GB
+            {{ consoleParam.TotalSize}}
           </div>
         </el-card>
       </el-col>
@@ -29,7 +29,7 @@
             磁盘总空间<i class="fa fa-cubes"></i>
           </div>
           <div class="page-view-totla">
-            {{consoleParam.diskTotalSize}}64GB
+            {{consoleParam.diskTotalSize}}
           </div>
         </el-card>
       </el-col>
@@ -40,7 +40,7 @@
             <i class="fa fa-cube"></i>
           </div>
           <div class="page-view-totla">
-            {{consoleParam.diskFreeSize}}60GB
+            {{consoleParam.diskFreeSize}}
           </div>
         </el-card>
       </el-col>
@@ -144,7 +144,7 @@ export default {
   },
   methods: {
     async getConsoleState () {
-      const { data: res } = await this.$http.get('/api/console/state')
+      const { data: res } = await this.$http.get('/api/getCountAndSize')
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }

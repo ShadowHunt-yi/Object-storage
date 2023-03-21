@@ -4,7 +4,7 @@
       <div slot="header" class="card-head">
         <div class="bread">
           <el-breadcrumb separator="/" style="font-size:12px;">
-            <el-breadcrumb-item><a href="javascript:;" @click="getFileList()"> 全部文件</a> </el-breadcrumb-item>
+            <el-breadcrumb-item><a href="javascript:;" @click="rollbackFile()"> 全部文件</a> </el-breadcrumb-item>
             <el-breadcrumb-item v-for="(item, index) in pathlist" :key="index">
               <a href="javascript:;" @click="listChange(index)">{{ item }}</a>
             </el-breadcrumb-item>
@@ -21,31 +21,31 @@
               <!-- 图标 -->
               <div @click="getDirFile(scope.row)" style="cursor: pointer;">
                 <svg class="icon" aria-hidden="true">
-                  <use :xlink:href="iconName(scope.row.type)"></use>
+                  <use :xlink:href="iconName(scope.row.subString || scope.row.type)"></use>
                 </svg>
-                <span style=" font-size:16px"> {{ scope.row.virtualName }}{{ scope.row.fileName }}</span>
+                <span style=" font-size:16px"> {{ scope.row.fileName || scope.row.virtualName }}</span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="大小" prop="size" width="100px">
             <template slot-scope="scope">
               <div>
-                <span style=" font-size:16px"> {{ scope.row.fileSize }} </span>
+                <span style=" font-size:16px"> {{ totalSize(scope.row) }} </span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="mtime">
             <template slot-scope="scope">
               <div>
-                <span style=" font-size:16px"> {{ scope.row.updateTime }} </span>
+                <span style=" font-size:16px"> {{ formatTime(scope.row.updateTime) }} </span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="300px">
-            <template slot-scope="scope" v-if="scope.row.type !== 'directory'">
+            <template slot-scope="scope">
               <el-button size="mini" type="primary"
-                @click="dialogNewname = true, oldname = scope.row.fileName">重命名</el-button>
-              <el-button size="mini" type="success" @click="downloadfile(scope.row.virtualName)">下载</el-button>
+                @click="dialogNewname = true, oldname = scope.row.fileName, _subString = scope.row.subString"  v-if="scope.row.type !== 'directory'">重命名</el-button>
+              <el-button size="mini" type="success" @click="downloadfile(scope.row.objectKey)"  v-if="scope.row.type !== 'directory'">下载</el-button>
               <el-button size="mini" type="danger" @click="deletefile(scope.row)">删除</el-button>
             </template>
           </el-table-column>
@@ -57,13 +57,14 @@
       </el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogNewname = false, newname = ''">取 消</el-button>
-        <el-button type="primary" @click="rename(oldname, newname)">确 定</el-button>
+        <el-button type="primary" @click="rename(oldname, newname, _subString)">确 定</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
+var moment = require('moment');
 import qs from 'qs'
 import * as fileUtil from '@/utils/fileUtil'
 import { rename } from 'fs'
@@ -80,6 +81,7 @@ export default {
       dialogNewname: false,
       newname: '',
       oldname: '',
+      _subString: ''
 
     }
   },
@@ -95,21 +97,42 @@ export default {
     }
   },
   methods: {
+    formatSize(byte) {
+      if (byte > 1024 * 1024) {
+        return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB"
+      }
+      if (byte > 1024) {
+        return parseFloat(byte / 1024).toFixed(2) + " KB"
+      }
+      return parseFloat(byte).toFixed(2) + " B"
+    },
+    totalSize(e) {
+      if (e.type != 'directory') {
+        return this.formatSize(e.Size)
+      } else {
+        let sumSize = 0;
+        for (let item of e.children.data) {
+          sumSize += parseFloat(item.Size);
+        }
+        return this.formatSize(sumSize);
+      }
+    },
+    formatTime(e) {
+      moment.locale('zh-cn');
+      return moment(e).format('MMMM Do YYYY, h:mm:ss a')
+    },
     gotoUpload() {
       this.$router.push('upload')
     },
     // 获取一级目录
     async getFlieList() {
-      const { data: res } = await this.$http.get('/api/lists1', { params: { prefix: '' } })
+      const { data: res } = await this.$http.get('/api/getLists', { params: { prefix: '' } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       } else this.$message.success('获取文件列表成功')
-      this.filelist = res.data
-      console.log(this.filelist)
-
+      this.filelist = this.prevFileList = res.data
     },
     rollbackFile() {
-      // if (!this.prevFileList) return;
       this.filelist = this.prevFileList
       this.pathlist.pop();
 
@@ -121,43 +144,26 @@ export default {
       this.filelist = fileInfo.children.data
       this.pathlist.push(fileInfo.virtualName);
       console.log(this.file);
-      /*  if (fileInfo.type !== 'directory') { return }
-       let url = ''
 
-       if (fileInfo.virtualName === '') {
-         return
-       } else {
-         url = fileInfo.virtualName
-       } */
-      /* const { data: res } = await this.$http.get('/api/lists1', { params: { prefix: url } })
-      if (res.status !== 200) {
-        return this.$message.error('获取文件列表失败')
-      }
-      this.filelist = res.data
-      console.log(this.filelist) */
     },
     async listChange(index) {
       let url = ''
+      console.log(index);
       for (let i = 0; i < index; i++) {
         url += this.pathlist[i] + '/'
       }
       url += this.pathlist[index]
-      const { data: res } = await this.$http.get('/api/lists1', { params: { prefix: url } })
+      const { data: res } = await this.$http.get('/api/getLists', { params: { prefix: url } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       }
       this.filelist = res.data
     },
     // 重命名文件
-    async rename(_old, _new) {
+    async rename(_old, _new, _type) {
+      console.log(_type);
       if (_new != '') {
-        const { data: res } = await this.$http.post('/api/rename', {
-          params: {
-            bucketName: 'minio-upload',
-            oldFileName: _old,
-            newFileName: _new
-          },
-        })
+        const { data: res } = await this.$http.post('/api/rename/' + _old + '/' + _new + '.' + _type)
 
         if (res.status !== 200) {
           return this.$message.error(msg)
