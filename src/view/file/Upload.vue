@@ -23,13 +23,6 @@
             </div>
           </el-upload>
         </el-card>
-        <el-card>
-          <el-upload action="/api/uploadone" :before-upload="uploadOne" drg multiple>
-            <div class="el-upload__text" style="text-align: center;">
-              请拖拽文件到此处或 <em>点击此处上传</em>
-            </div>
-          </el-upload>
-        </el-card>
       </el-col>
     </el-row>
   </div>

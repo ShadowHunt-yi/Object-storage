@@ -4,8 +4,8 @@
       <div slot="header" class="card-head">
         <div class="bread">
           <el-breadcrumb separator="/" style="font-size:12px;">
-            <el-breadcrumb-item><a href="javascript:;" @click="getParentFile()"> 全部文件</a> </el-breadcrumb-item>
-            <el-breadcrumb-item v-for="(item,index) in pathlist" :key="index">
+            <el-breadcrumb-item><a href="javascript:;" @click="getFileList()"> 全部文件</a> </el-breadcrumb-item>
+            <el-breadcrumb-item v-for="(item, index) in pathlist" :key="index">
               <a href="javascript:;" @click="listChange(index)">{{ item }}</a>
             </el-breadcrumb-item>
           </el-breadcrumb>
@@ -13,6 +13,7 @@
         <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
       </div>
       <div class="bottom">
+
         <el-table :data="filelist">
           <el-table-column label="文件名" width="600px">
             <!-- 模板区域 -->
@@ -22,41 +23,42 @@
                 <svg class="icon" aria-hidden="true">
                   <use :xlink:href="iconName(scope.row.type)"></use>
                 </svg>
-                <span style=" font-size:16px"> {{scope.row.fileName}} </span>
+                <span style=" font-size:16px"> {{ scope.row.virtualName }}{{ scope.row.fileName }}</span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="大小" prop="size" width="100px">
             <template slot-scope="scope">
               <div>
-                <span style=" font-size:16px"> {{scope.row.fileSize}} </span>
+                <span style=" font-size:16px"> {{ scope.row.fileSize }} </span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="mtime">
             <template slot-scope="scope">
               <div>
-                <span style=" font-size:16px"> {{scope.row.updateTime}} </span>
+                <span style=" font-size:16px"> {{ scope.row.updateTime }} </span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="300px">
-            <template slot-scope="scope" v-if="scope.row.type!=='directory'">
-              <el-button size="mini" type="primary" @click="showDetail(scope.row.md5)">详情</el-button>
-              <el-button size="mini" type="success" @click="downloadfile(scope.row.fileName)">下载</el-button>
+            <template slot-scope="scope" v-if="scope.row.type !== 'directory'">
+              <el-button size="mini" type="primary"
+                @click="dialogNewname = true, oldname = scope.row.fileName">重命名</el-button>
+              <el-button size="mini" type="success" @click="downloadfile(scope.row.virtualName)">下载</el-button>
               <el-button size="mini" type="danger" @click="deletefile(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
     </el-card>
-    <el-dialog title="文件详情" :visible.sync="detailVisable" width="30%">
-      <div>
-        <p><b>名称：</b>{{ fileDetails.name }}</p>
-        <p><b>文件路径：</b>{{ fileDetails.path }}</p>
-        <p><b>大小：</b>{{ fileDetails.size }} </p>
-        <p><b>创建时间：</b>{{ fileDetails.timeStamp }}</p>
-      </div>
+    <el-dialog title="重命名" :visible.sync="dialogNewname" width="30%">
+      <el-input placeholder="请输入新名字" v-model="newname" clearable>
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogNewname = false, newname = ''">取 消</el-button>
+        <el-button type="primary" @click="rename(oldname, newname)">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -64,23 +66,28 @@
 <script>
 import qs from 'qs'
 import * as fileUtil from '@/utils/fileUtil'
+import { rename } from 'fs'
 export default {
-  data () {
+  data() {
     return {
+      // 前一个文件夹
+      prevFileList: [],
       filelist: [],
       pathlist: [],
-      detailVisable: false,
       fileDetails: {},
       previewVisible: false,
       dialogImageUrl: '',
+      dialogNewname: false,
+      newname: '',
+      oldname: '',
 
     }
   },
-  created () {
-    this.getParentFile()
+  created() {
+    this.getFlieList()
   },
   computed: {
-    iconName () {
+    iconName() {
       return function (type) {
         const iconName = fileUtil.getIconName(type)
         return iconName
@@ -88,56 +95,80 @@ export default {
     }
   },
   methods: {
-    gotoUpload () {
+    gotoUpload() {
       this.$router.push('upload')
     },
     // 获取一级目录
-    async getParentFile () {
-      const { data: res } = await this.$http.get('/api/fileList')
+    async getFlieList() {
+      const { data: res } = await this.$http.get('/api/lists1', { params: { prefix: '' } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
-      }
+      } else this.$message.success('获取文件列表成功')
       this.filelist = res.data
+      console.log(this.filelist)
+
+    },
+    rollbackFile() {
+      // if (!this.prevFileList) return;
+      this.filelist = this.prevFileList
+      this.pathlist.pop();
+
     },
     // 根据目录获取
-    async getDirFile (fileInfo) {
-      if (fileInfo.type !== 'directory') { return }
-      let url = ''
-      if (fileInfo.path === '') {
-        url = fileInfo.name
-      } else {
-        url = fileInfo.path + '/' + fileInfo.name
-      }
-      const { data: res } = await this.$http.get('/api/file/getDirFile', { params: { dir: url } })
+    getDirFile(fileInfo) {
+      console.log(fileInfo);
+      this.prevFileList = this.filelist;
+      this.filelist = fileInfo.children.data
+      this.pathlist.push(fileInfo.virtualName);
+      console.log(this.file);
+      /*  if (fileInfo.type !== 'directory') { return }
+       let url = ''
+
+       if (fileInfo.virtualName === '') {
+         return
+       } else {
+         url = fileInfo.virtualName
+       } */
+      /* const { data: res } = await this.$http.get('/api/lists1', { params: { prefix: url } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       }
-      this.pathlist = url.split('/')
       this.filelist = res.data
+      console.log(this.filelist) */
     },
-    async listChange (index) {
+    async listChange(index) {
       let url = ''
       for (let i = 0; i < index; i++) {
         url += this.pathlist[i] + '/'
       }
       url += this.pathlist[index]
-      const { data: res } = await this.$http.get('/api/file/getDirFile', { params: { dir: url } })
+      const { data: res } = await this.$http.get('/api/lists1', { params: { prefix: url } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       }
       this.filelist = res.data
     },
-    // 获取文件详情
-    async showDetail (key) {
-      const { data: res } = await this.$http.post('/api/file/details', qs.stringify({ md5: key }))
+    // 重命名文件
+    async rename(_old, _new) {
+      if (_new != '') {
+        const { data: res } = await this.$http.post('/api/rename', {
+          params: {
+            bucketName: 'minio-upload',
+            oldFileName: _old,
+            newFileName: _new
+          },
+        })
 
-      if (res.status !== 200) {
-        return this.$message.error('获取失败')
-      }
-      this.fileDetails = res.data
-      this.detailVisable = true
+        if (res.status !== 200) {
+          return this.$message.error(msg)
+        }
+        this.fileName = res.data
+        this.dialogNewname = false
+        this.newname = ''
+      } return
     },
-    async deletefile (fileInfo) {
+    //删除文件
+    async deletefile(fileInfo) {
       const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -154,7 +185,7 @@ export default {
       this.filelist.splice(this.filelist.indexOf(fileInfo), 1)
       return this.$message.success('删除成功')
     },
-    downloadfile (name) {
+    downloadfile(name) {
       const params = {
         fileName: name
       }
@@ -193,19 +224,24 @@ export default {
   overflow: hidden;
   margin-right: 5px;
 }
+
 .el-button {
   font-size: 16px;
 }
+
 .el-table {
   margin-bottom: 10px;
   font-size: 16px;
 }
+
 .bread a {
   color: #606266;
 }
+
 .bread a:hover {
   color: #000000;
 }
+
 .card-head {
   display: flex;
   flex-direction: row;
