@@ -15,15 +15,30 @@
         </el-card>
       </el-col>
       <el-col :span="24" class="fileupload-bottom">
-        <el-card style="width: 100%; margin:auto" header="文件分片上传">
+        <el-card style="width: 50%;" header="文件分片上传">
           <el-upload style="width: 100%;" action="/api" :headers="headers" drag multiple :http-request="handleHttpRequest"
             :on-remove="handleRemoveFile">
+            <i class="el-icon-upload"></i>
             <div class="el-upload__text" style="text-align: center;">
               请拖拽文件到此处或 <em>点击此处上传</em>
             </div>
           </el-upload>
+
         </el-card>
+        <el-card style="width: 50%; margin:0 auto" header="文件压缩上传">
+            <el-upload  action="/api" :headers="headers" drag  :http-request="handleHttpRequestzip"
+            :on-remove="handleRemoveFile"
+            style="width: 100%;">
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text" style="text-align: center;">
+              请拖拽文件到此处或<em>点击此处上传</em>
+            </div>
+          </el-upload>
+          </el-card>
       </el-col>
+      <!-- <el-col :span="24" class="fileupload-bottom">
+
+      </el-col> -->
     </el-row>
   </div>
 </template>
@@ -35,6 +50,29 @@ import axios from "axios";
 import { ref } from "vue";
 import Queue from "promise-queue-plus";
 import { HTTP_SUCCESS_CODE } from '@/lib/api.code.js'
+const handleHttpRequestzip=async function (options){
+  const file =options.file
+  const identifier=await md5(file)
+  console.log(identifier);
+  const totalSize=file.size
+  const chunkSize=5 * 1024 *1024
+  const fileName=file.name
+  let FormDatas = new FormData()
+  FormDatas.append('file',file)
+  console.log(FormDatas.get('file'));
+  const _up=axios.create()
+  _up.request({
+    url: '/api/zip/upload',
+    method: 'POST',
+
+    data:FormDatas,
+    params:{identifier:  identifier,
+    fileName:  fileName,
+    totalSize:  totalSize,
+    chunkSize:  chunkSize}
+  })
+  console.log(1);
+}
 // 文件上传分块任务的队列（用于移除文件时，停止该文件的上传队列） key：fileUid value： queue object
 const fileUploadChunkQueue = ref({}).value
 
@@ -235,12 +273,13 @@ export default {
       },
       params: {
         path: 'default'
-      }
+      },
     }
   },
 
   methods: {
     handleHttpRequest,
+    handleHttpRequestzip,
     handleRemoveFile,
     getTaskInfo,
     uploadone(e){
@@ -299,6 +338,14 @@ export default {
 
 .fileupload-bottom {
   margin-top: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+/deep/ .el-upload{
+  width: 100%;
+}
+/deep/ .el-upload .el-upload-dragger{
   width: 100%;
 }
 </style>

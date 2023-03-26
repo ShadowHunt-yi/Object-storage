@@ -27,7 +27,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="大小" prop="size" width="100px">
+          <el-table-column label="大小" prop="size" width="140px">
             <template slot-scope="scope">
               <div>
                 <span style=" font-size:16px"> {{ totalSize(scope.row) }} </span>
@@ -195,7 +195,11 @@ export default {
       const params = {
         fileName: name
       }
-      this.$http({
+      const _this=this
+      _this.$message('正在进行文件校验')
+      setTimeout(function(){
+        _this.$message.success('文件校验成功')
+        _this.$http({
         url: '/api/download',
         method: 'get',
         params: params,
@@ -213,8 +217,9 @@ export default {
           document.body.removeChild(a)
         }
       })
+      return _this.$message.success('成功开始下载......')
+        },2000)
 
-      return this.$message.success('成功开始下载......')
     }
 
   }

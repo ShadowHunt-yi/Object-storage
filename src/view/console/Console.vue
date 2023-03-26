@@ -26,7 +26,7 @@
       <el-col>
         <el-card shadow="hover">
           <div slot="header">
-            磁盘总空间<i class="fa fa-cubes"></i>
+            桶数目<i class="fa fa-cubes"></i>
           </div>
           <div class="page-view-totla">
             {{consoleParam.diskTotalSize}}
@@ -82,7 +82,7 @@
                 <td>当前版本</td>
                 <td>
                   <span> {{consoleParam.version }} </span>
-                  <a href="https://github.com/kcqnly" style="color: #009688" target="_blank">更新日志</a>
+                  <a href="https://github.com/ShadowHunt-yi/Object-storage" style="color: #009688" target="_blank">更新日志</a>
                 </td>
               </tr>
               <tr>
@@ -102,12 +102,12 @@
         </el-card>
       </el-col>
     </el-row>
-    <!-- <el-row>
+    <el-row>
       <el-card>
         <div slot="header" style="fontsize:18;text-align:center;"> 文件统计(30天)</div>
         <div id="main" style="height:400px"></div>
       </el-card>
-    </el-row> -->
+    </el-row>
   </div>
 </template>
 
