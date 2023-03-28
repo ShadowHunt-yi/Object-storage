@@ -117,7 +117,6 @@ export default {
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }
-      console.log(this);
       this.menuList = res.data
     },
     toggleChange () {

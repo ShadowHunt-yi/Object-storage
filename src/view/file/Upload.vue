@@ -2,21 +2,73 @@
   <div>
     <el-row :gutter="20">
       <el-col :span="24">
-        <el-card>
+        <el-card shadow="hover">
           <div slot="header" class="clearfix">
-            <span>上传配置</span>
+            <span>上传路径</span>
           </div>
           <div class="inputlist">
             <div class="input">
-              <div class="title">路径：</div>
-              <el-input placehold="请输入路径" v-model="params.path"></el-input>
+              <div class="title">桶名：</div>
+              <el-input placehold="请输入桶名" v-model="bucketNameShow" style="width: 80% ;margin: 0 20px;"></el-input>
+              <el-button type="primary" plain @click="dialogTableVisible = true">选择桶</el-button>
+              <el-dialog title="选择桶" :visible.sync="dialogTableVisible">
+                <el-table :data="buckets" width="1600px">
+                  <el-table-column label="桶名" width="200">
+                    <template slot-scope="scope">
+                      <div>
+                        <span>{{ scope.row.name }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="备注" width="200">
+                    <template slot-scope="scope">
+                      <div>
+                        <span>{{ scope.row.creationDate }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="文件数量">
+                    <template slot-scope="scope">
+                      <div>
+                        <span>{{ scope.row.fileCount }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="文件总大小" width="150">
+                    <template slot-scope="scope">
+                      <div>
+                        <span>{{ scope.row.size }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="250">
+                    <template slot-scope="scope" v-if="buckets == [{}]">
+                      <el-button size="mini" type="primary" @click="rebucketName(scope.row.bucketName)">重命名</el-button>
+                      <el-button size="mini" type="success"
+                        @click="select(scope.row.name), dialogTableVisible = false">选择</el-button>
+                      <el-button size="mini" type="danger" @click="removeBucket(scope.row.bucketName)">删除</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
+              <el-button type="primary" plain @click="dialogFormVisible = true" style="margin: 0 10px;">创建桶</el-button>
+              <el-dialog title="创建桶" :visible.sync="dialogFormVisible" width="600px">
+                <div>
+                  <span>桶名：</span>
+                  <el-input v-model="newbucket">
+                  </el-input>
+                  <el-button @click="dialogFormVisible = false, newbucket = ''" style="margin: 10px 0;">取消</el-button>
+                  <el-button @click="dialogFormVisible = false, createBusket(newbucket)"
+                    style="float: right;margin: 10px 0;">创建</el-button>
+                </div>
+              </el-dialog>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="24" class="fileupload-bottom">
-        <el-card style="width: 50%;" header="文件分片上传">
-          <el-upload style="width: 100%;" action="/api" :headers="headers" drag multiple :http-request="handleHttpRequest"
+        <el-card style="width: 50%;margin: 0 10px 0 0;" header="文件分片上传" shadow="hover">
+          <el-upload style="width: 100%;" action="/api" drag multiple :http-request="handleHttpRequest"
             :on-remove="handleRemoveFile">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text" style="text-align: center;">
@@ -25,16 +77,15 @@
           </el-upload>
 
         </el-card>
-        <el-card style="width: 50%; margin:0 auto" header="文件压缩上传">
-            <el-upload  action="/api" :headers="headers" drag  :http-request="handleHttpRequestzip"
-            :on-remove="handleRemoveFile"
+        <el-card style="width: 50%;margin: 0 0 0 10px;" header="文件压缩上传" shadow="hover">
+          <el-upload action="/api" drag :http-request="handleHttpRequestzip" :on-remove="handleRemoveFile"
             style="width: 100%;">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text" style="text-align: center;">
               请拖拽文件到此处或<em>点击此处上传</em>
             </div>
           </el-upload>
-          </el-card>
+        </el-card>
       </el-col>
       <!-- <el-col :span="24" class="fileupload-bottom">
 
@@ -50,26 +101,29 @@ import axios from "axios";
 import { ref } from "vue";
 import Queue from "promise-queue-plus";
 import { HTTP_SUCCESS_CODE } from '@/lib/api.code.js'
-const handleHttpRequestzip=async function (options){
-  const file =options.file
-  const identifier=await md5(file)
-  console.log(identifier);
-  const totalSize=file.size
-  const chunkSize=5 * 1024 *1024
-  const fileName=file.name
-  let FormDatas = new FormData()
-  FormDatas.append('file',file)
-  console.log(FormDatas.get('file'));
-  const _up=axios.create()
-  _up.request({
-    url: '/api/zip/upload',
-    method: 'POST',
 
-    data:FormDatas,
-    params:{identifier:  identifier,
-    fileName:  fileName,
-    totalSize:  totalSize,
-    chunkSize:  chunkSize}
+//压缩上传
+const handleHttpRequestzip = async function (options) {
+  const file = options.file
+  const identifier = await md5(file)
+  console.log(identifier);
+  const totalSize = file.size
+  const chunkSize = 5 * 1024 * 1024
+  const fileName = file.name
+  let FormDatas = new FormData()
+  FormDatas.append('file', file)
+  console.log(FormDatas.get('file'));
+  const _up = axios.create()
+  _up.request({
+    url: '/api/zip/upload'+this.bucketNameShow,
+    method: 'POST',
+    data: FormDatas,
+    params: {
+      identifier: identifier,
+      fileName: fileName,
+      totalSize: totalSize,
+      chunkSize: chunkSize
+    }
   })
   console.log(1);
 }
@@ -268,39 +322,78 @@ const handleRemoveFile = (uploadFile, uploadFiles) => {
 export default {
   data() {
     return {
-      headers: {
-        /* Authorization: 'Bearer ' + window.sessionStorage.getItem('token') */
-      },
-      params: {
+      /*  headers: {
+         Authorization: 'Bearer ' + window.sessionStorage.getItem('token')
+       }, */
+      /* params: {
         path: 'default'
-      },
+      }, */
+      dialogTableVisible: false,
+      dialogFormVisible: false,
+      buckets: [{}],
+      bucketNameShow: '',
+      newbucket: ''
     }
   },
-
+  created() {
+    this.getBuckets()
+  },
   methods: {
     handleHttpRequest,
     handleHttpRequestzip,
     handleRemoveFile,
     getTaskInfo,
-    uploadone(e){
-      var that=this
+    uploadone(e) {
+      var that = this
       var files = e
       let file = e.target.files[0]
       let param = new FormData()       // 创建form对象
       param.append('file', file)       // 通过append向form对象添加数据
       let config = {
-         headers: {'Content-Type': 'multipart/form-data'}
+        headers: { 'Content-Type': 'multipart/form-data' }
       }
-      this.axios.post("/uploadone",param, config).then((res)=>{
-          if(res.succeed){
-              this.$message.success("添加成功")  //需要引入elemrnt
-          }else{
-                this.$message.warning("添加失败")
-          }
-        }).catch((err)=>{
-              this.$message.warning("上传失败，请重新上传!")
-        })
-     }
+      this.axios.post("/uploadone", param, config).then((res) => {
+        if (res.succeed) {
+          this.$message.success("添加成功")  //需要引入elemrnt
+        } else {
+          this.$message.warning("添加失败")
+        }
+      }).catch((err) => {
+        this.$message.warning("上传失败，请重新上传!")
+      })
+    },
+    select(bucketName) {
+      this.bucketNameShow = bucketName;
+    },
+    async removeBucket(bucketName) {
+      const { data: res } = await this.$http.get('/api/removeBucket', { params: { bucketName: bucketName } })
+      if (res.status !== 200) {
+        return this.$message.error("删除桶失败")
+      } else this.$message.success('删除成功')
+      this.buckets = res.data
+
+    },
+    rebucketName() {
+
+    },
+    async getBuckets() {
+      const { data: res } = await this.$http.get('/api/buckets')
+      if (res.status !== 200) {
+        return this.$message.error('获取桶列表失败')
+      } else this.$message.success('获取桶列表成功')
+      this.buckets = res.data
+      console.log(this.buckets);
+    },
+    async createBusket(name) {
+      if (this.newbucket != '') {
+        const { data: res } = await this.$http.post('/api/createBuckets' + '/' + name)
+        if (res.status !== 200) {
+          return this.$message.error('创建桶失败' + res.msg)
+        } else this.$message.success('创建桶成功')
+        this.newbucket = ''
+      }
+
+    }
 
 
   },
@@ -327,7 +420,7 @@ export default {
 }
 
 .title {
-  width: 5%;
+  width: 6%;
   text-align: left;
 }
 
@@ -342,10 +435,21 @@ export default {
   display: flex;
   flex-direction: row;
 }
-/deep/ .el-upload{
+
+/deep/ .el-upload {
   width: 100%;
 }
-/deep/ .el-upload .el-upload-dragger{
+
+/deep/ .el-upload .el-upload-dragger {
   width: 100%;
+}
+
+.el-dropdown-link {
+  cursor: pointer;
+  color: #409EFF;
+}
+
+.el-icon-arrow-down {
+  font-size: 12px;
 }
 </style>

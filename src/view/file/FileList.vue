@@ -10,12 +10,32 @@
             </el-breadcrumb-item>
           </el-breadcrumb>
         </div>
+        <div>
+          <el-button type="primary" @click="dialogTableVisible=true" style="margin: 10px;">选择桶</el-button>
+            <el-dialog title="选择桶" :visible.sync="dialogTableVisible">
+              <el-table :data="buckets" width="600px">
+                <el-table-column  label="桶名" width="200">
+                    <template slot-scope="scope">
+                      <div>
+                        <span>{{ scope.row.name }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="250">
+                    <template slot-scope="scope">
+                      <el-button size="mini" type="success"
+                        @click="getFlieList(scope.row.name), dialogTableVisible = false">选择</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+            </el-dialog>
         <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
+        </div>
       </div>
       <div class="bottom">
 
         <el-table :data="filelist">
-          <el-table-column label="文件名" width="600px">
+          <el-table-column label="文件名" width="500px">
             <!-- 模板区域 -->
             <template slot-scope="scope">
               <!-- 图标 -->
@@ -27,7 +47,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="大小" prop="size" width="140px">
+          <el-table-column label="大小" prop="size" width="150px">
             <template slot-scope="scope">
               <div>
                 <span style=" font-size:16px"> {{ totalSize(scope.row) }} </span>
@@ -81,12 +101,15 @@ export default {
       dialogNewname: false,
       newname: '',
       oldname: '',
-      _subString: ''
-
+      _subString: '',
+      buckets:'',
+      dialogTableVisible:false,
+      selectionName:'',
     }
   },
   created() {
-    this.getFlieList()
+
+    this.getBuckets()
   },
   computed: {
     iconName() {
@@ -97,6 +120,15 @@ export default {
     }
   },
   methods: {
+
+    async getBuckets() {
+      const { data: res } = await this.$http.get('/api/buckets')
+      if (res.status !== 200) {
+        return this.$message.error('获取桶列表失败')
+      } else this.$message.success('获取桶列表成功')
+      this.buckets = res.data
+      console.log(this.buckets);
+    },
     formatSize(byte) {
       if (byte > 1024 * 1024) {
         return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB"
@@ -125,8 +157,8 @@ export default {
       this.$router.push('upload')
     },
     // 获取一级目录
-    async getFlieList() {
-      const { data: res } = await this.$http.get('/api/getLists', { params: { prefix: '' } })
+    async getFlieList(name) {
+      const { data: res } = await this.$http.get('/api/getLists/'+name, { params: { prefix: '' } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       } else this.$message.success('获取文件列表成功')
@@ -148,12 +180,13 @@ export default {
     },
     async listChange(index) {
       let url = ''
+
       console.log(index);
       for (let i = 0; i < index; i++) {
         url += this.pathlist[i] + '/'
       }
       url += this.pathlist[index]
-      const { data: res } = await this.$http.get('/api/getLists', { params: { prefix: url } })
+      const { data: res } = await this.$http.get('/api/getLists/'+this.selectionName, { params: { prefix: url } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
       }
