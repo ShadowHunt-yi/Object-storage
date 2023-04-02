@@ -448,6 +448,7 @@ export default {
       for (const key in res.data) {
         if (res.data[key].name == 'base') {
           res.data.splice(key, 1)
+
         }
       }
       this.buckets = res.data
@@ -553,7 +554,7 @@ export default {
                },
                data: formData ,
          }); */
--
+
       })
     },
 
