@@ -12,16 +12,16 @@
         </div>
         <div>
           <el-button type="primary" @click="dialogTableVisible=true" style="margin: 10px;">选择桶</el-button>
-            <el-dialog title="选择桶" :visible.sync="dialogTableVisible">
+            <el-dialog title="选择桶" :visible.sync="dialogTableVisible" width="500px">
               <el-table :data="buckets" width="600px">
-                <el-table-column  label="桶名" width="200">
+                <el-table-column  label="桶名" width="300px">
                     <template slot-scope="scope">
                       <div>
                         <span>{{ scope.row.name }}</span>
                       </div>
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" width="250">
+                  <el-table-column label="操作" width="100px">
                     <template slot-scope="scope">
                       <el-button size="mini" type="success"
                         @click="getFlieList(scope.row.name), dialogTableVisible = false">选择</el-button>
@@ -35,7 +35,7 @@
       <div class="bottom">
 
         <el-table :data="filelist">
-          <el-table-column label="文件名" width="500px">
+          <el-table-column label="文件名" width="500px" >
             <!-- 模板区域 -->
             <template slot-scope="scope">
               <!-- 图标 -->
@@ -47,22 +47,27 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="大小" prop="size" width="150px">
+          <el-table-column label="大小" prop="size" width="150px" align="center">
             <template slot-scope="scope">
               <div>
                 <span style=" font-size:16px"> {{ totalSize(scope.row) }} </span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="mtime">
+          <el-table-column label="创建时间" prop="mtime" align="center">
             <template slot-scope="scope">
               <div>
                 <span style=" font-size:16px"> {{ formatTime(scope.row.updateTime) }} </span>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="300px">
+          <el-table-column label="操作" width="400px" align="center">
             <template slot-scope="scope">
+              <el-button size="mini" type="primary"
+              @click="shareFile(scope.row.objectKey)" v-if="scope.row.type !== 'directory'" style="margin: 0 10px;">分享</el-button>
+              <el-dialog :visible.sync="dialogUrl" title="分享链接" width="30%">
+                <span>{{ url }}</span>
+              </el-dialog>
               <el-button size="mini" type="primary"
                 @click="dialogNewname = true, oldname = scope.row.fileName, _subString = scope.row.subString"  v-if="scope.row.type !== 'directory'">重命名</el-button>
               <el-button size="mini" type="success" @click="downloadfile(scope.row.objectKey)"  v-if="scope.row.type !== 'directory'">下载</el-button>
@@ -105,6 +110,9 @@ export default {
       buckets:'',
       dialogTableVisible:false,
       selectionName:'',
+      bucketName:'',
+      dialogUrl:false,
+      url:''
     }
   },
   created() {
@@ -126,6 +134,11 @@ export default {
       if (res.status !== 200) {
         return this.$message.error('获取桶列表失败')
       } else this.$message.success('获取桶列表成功')
+      for (const key in res.data) {
+       if(res.data[key].name=='base'){
+        res.data.splice(key,1)
+       }
+      }
       this.buckets = res.data
       console.log(this.buckets);
     },
@@ -158,6 +171,7 @@ export default {
     },
     // 获取一级目录
     async getFlieList(name) {
+      this.bucketName=name
       const { data: res } = await this.$http.get('/api/getLists/'+name, { params: { prefix: '' } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
@@ -175,12 +189,10 @@ export default {
       this.prevFileList = this.filelist;
       this.filelist = fileInfo.children.data
       this.pathlist.push(fileInfo.virtualName);
-      console.log(this.file);
 
     },
     async listChange(index) {
       let url = ''
-
       console.log(index);
       for (let i = 0; i < index; i++) {
         url += this.pathlist[i] + '/'
@@ -204,6 +216,8 @@ export default {
         this.fileName = res.data
         this.dialogNewname = false
         this.newname = ''
+        this.getFlieList(this.bucketName)
+
       } return
     },
     //删除文件
@@ -216,7 +230,7 @@ export default {
       if (confirmResult !== 'confirm') {
         return this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete(`/api/remove/${fileInfo.md5}`)
+      const { data: res } = await this.$http.delete(`/api/remove/${this.bucketName}/${fileInfo.md5}`)
       if (res.status !== 200) {
         return this.$message.error('删除失败')
       }
@@ -225,8 +239,10 @@ export default {
       return this.$message.success('删除成功')
     },
     downloadfile(name) {
+      const _bucketName=this.bucketName
       const params = {
-        fileName: name
+        fileName: name,
+        bucketName:_bucketName
       }
       const _this=this
       _this.$message('正在进行文件校验')
@@ -253,6 +269,15 @@ export default {
       return _this.$message.success('成功开始下载......')
         },2000)
 
+    },
+    async shareFile(key){
+      const { data: res } = await this.$http.get('/api/getUrl', { params: { bucketName: this.bucketName,fileName:key } })
+      if(res.status!=200){
+        this.$message.error(res.msg)
+      }this.url=res.data
+      this.dialogUrl=true
+     /*  console.log(navigator);
+      navigator.clipboard.writeText(res.data).then(function log(){this.$message.success("成功写入剪贴板")}); */
     }
 
   }

@@ -42,11 +42,11 @@
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="250">
-                    <template slot-scope="scope" v-if="buckets == [{}]">
-                      <el-button size="mini" type="primary" @click="rebucketName(scope.row.bucketName)">重命名</el-button>
+                    <template slot-scope="scope" v-if="buckets !== [{}]">
+                      <el-button size="mini" type="primary" @click="rebucketName(scope.row.name)">重命名</el-button>
                       <el-button size="mini" type="success"
                         @click="select(scope.row.name), dialogTableVisible = false">选择</el-button>
-                      <el-button size="mini" type="danger" @click="removeBucket(scope.row.bucketName)">删除</el-button>
+                      <el-button size="mini" type="danger" @click="removeBucket(scope.row.name)">删除</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -55,7 +55,7 @@
               <el-dialog title="创建桶" :visible.sync="dialogFormVisible" width="600px">
                 <div>
                   <span>桶名：</span>
-                  <el-input v-model="newbucket">
+                  <el-input v-model="newbucket" placeholder="请输入英文名称">
                   </el-input>
                   <el-button @click="dialogFormVisible = false, newbucket = ''" style="margin: 10px 0;">取消</el-button>
                   <el-button @click="dialogFormVisible = false, createBusket(newbucket)"
@@ -87,14 +87,42 @@
           </el-upload>
         </el-card>
       </el-col>
-      <!-- <el-col :span="24" class="fileupload-bottom">
+      <el-col>
+        <el-card style="width: 100%;height: 200px; margin: 10px 0 0 0; " header="图片裁剪上传" shadow="hover">
+          <el-upload class="upload-demo" action="/api" :auto-upload="false" :show-file-list="false"
+            :on-change="changeUpload" style="height: 100%;">
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">点击上传</div>
+            <div class="el-upload__tip">支持绝大多数图片格式</div>
+          </el-upload>
 
-      </el-col> -->
+          <el-dialog title="图片剪裁" :visible.sync="dialogVisible" append-to-body>
+            <div class="cropper-content">
+              <div class="cropper">
+                <vueCropper ref="cropper" :img="option.img" :outputSize="option.size" :outputType="option.outputType"
+                  :info="true" :full="option.full" :canMove="option.canMove" :canMoveBox="option.canMoveBox"
+                  :original="option.original" :autoCrop="option.autoCrop" :fixed="option.fixed"
+                  :fixedNumber="option.fixedNumber" :centerBox="option.centerBox" :infoTrue="option.infoTrue"
+                  :fixedBox="option.fixedBox"></vueCropper>
+              </div>
+            </div>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="finish(), dialogVisible = false" :loading="loading">确认</el-button>
+            </div>
+          </el-dialog>
+
+
+          <!-- <el-button type="primary" @click="handleHttpRequestPic()">确认上传<i
+              class="el-icon-upload el-icon--right"></i></el-button> -->
+        </el-card>
+      </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
+import { VueCropper } from 'vue-cropper';
 import md5 from "../../lib/md5";
 import { taskInfo, initTask, preSignUrl, merge } from "../../lib/api";
 import axios from "axios";
@@ -115,7 +143,7 @@ const handleHttpRequestzip = async function (options) {
   console.log(FormDatas.get('file'));
   const _up = axios.create()
   _up.request({
-    url: '/api/zip/upload'+this.bucketNameShow,
+    url: '/api/zip/upload/' + this.bucketNameShow,
     method: 'POST',
     data: FormDatas,
     params: {
@@ -320,6 +348,7 @@ const handleRemoveFile = (uploadFile, uploadFiles) => {
 
 
 export default {
+
   data() {
     return {
       /*  headers: {
@@ -330,9 +359,44 @@ export default {
       }, */
       dialogTableVisible: false,
       dialogFormVisible: false,
-      buckets: [{}],
+      buckets: [],
       bucketNameShow: '',
-      newbucket: ''
+      newbucket: '',
+      disabled: false,
+      imgFileList: [],
+      dialogImageUrl: '',
+      showCropper: false,
+      cropperImg: '',
+      cropperedImg: '',
+      editImgs: [],
+
+
+      isPreview: false,
+      dialogVisible: false,
+      previewImg: '', // 预览图片地址
+      // 裁剪组件的基础配置option
+      option: {
+        img: '', // 裁剪图片的地址
+        info: true, // 裁剪框的大小信息
+        outputSize: 1, // 裁剪生成图片的质量
+        outputType: 'png', // 裁剪生成图片的格式
+        canScale: true, // 图片是否允许滚轮缩放
+        autoCrop: true, // 是否默认生成截图框
+        canMoveBox: true, // 截图框能否拖动
+        autoCropWidth: 200, // 默认生成截图框宽度
+        autoCropHeight: 200, // 默认生成截图框高度
+        fixedBox: false, // 固定截图框大小 不允许改变
+        fixed: false, // 是否开启截图框宽高固定比例
+        fixedNumber: [1, 1], // 截图框的宽高比例
+        full: false, // 是否输出原图比例的截图
+        original: false, // 上传图片按照原始比例渲染
+        centerBox: true, // 截图框是否被限制在图片里面
+        infoTrue: true // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+      },
+      // 防止重复提交
+      loading: false
+
+
     }
   },
   created() {
@@ -366,12 +430,12 @@ export default {
       this.bucketNameShow = bucketName;
     },
     async removeBucket(bucketName) {
-      const { data: res } = await this.$http.get('/api/removeBucket', { params: { bucketName: bucketName } })
+      console.log(bucketName);
+      const { data: res } = await this.$http.delete(`/api/deleteBuckets/${bucketName}`)
       if (res.status !== 200) {
         return this.$message.error("删除桶失败")
       } else this.$message.success('删除成功')
-      this.buckets = res.data
-
+      this.getBuckets()
     },
     rebucketName() {
 
@@ -381,23 +445,119 @@ export default {
       if (res.status !== 200) {
         return this.$message.error('获取桶列表失败')
       } else this.$message.success('获取桶列表成功')
+      for (const key in res.data) {
+        if (res.data[key].name == 'base') {
+          res.data.splice(key, 1)
+        }
+      }
       this.buckets = res.data
       console.log(this.buckets);
+
     },
     async createBusket(name) {
       if (this.newbucket != '') {
         const { data: res } = await this.$http.post('/api/createBuckets' + '/' + name)
         if (res.status !== 200) {
           return this.$message.error('创建桶失败' + res.msg)
+          this.newbucket = ''
         } else this.$message.success('创建桶成功')
         this.newbucket = ''
+        this.getBuckets()
       }
 
-    }
+    },
+    changeUpload(file, fileList) {
 
+      //提前存一下文件名字 一会转文件的时候能用
+      this.fileName = file.name
+      let url = URL.createObjectURL(file.raw)
+      // 上传成功后将图片地址赋值给裁剪框显示图片
+      this.$nextTick(() => {
+        this.option.img = url
+        this.dialogVisible = true
+      })
+    },
 
-  },
+    // 放大/缩小
+    changeScaleHandle(num) {
+      num = num || 1;
+      this.$refs.cropper.changeScale(num);
+    },
+    // 左旋转
+    rotateLeftHandle() {
+      this.$refs.cropper.rotateLeft();
+    },
+    // 右旋转
+    rotateRightHandle() {
+      this.$refs.cropper.rotateRight();
+    },
+    // 下载
+    downloadHandle(type) {
+      let aLink = document.createElement('a')
+      aLink.download = 'author-img'
+      if (type === 'blob') {
+        this.$refs.cropper.getCropBlob((data) => {
+          let downImg = window.URL.createObjectURL(data)
+          aLink.href = window.URL.createObjectURL(data)
+          aLink.click()
+        })
+      } else {
+        this.$refs.cropper.getCropData((data) => {
+          let downImg = data;
+          aLink.href = data;
+          aLink.click()
+        })
+      }
+    },
+    // 清理图片
+    clearImgHandle() {
+      this.option.img = ''
+    },
+    // 截图框移动回调函数
+    cropMoving(data) {
+      // 截图框的左上角 x，y和右下角坐标x，y
+      // let cropAxis = [data.axis.x1, data.axis.y1, data.axis.x2, data.axis.y2]
+      // console.log(cropAxis)
+    },
+    finish() {
+      this.$refs.cropper.getCropBlob(async (data) => {
+        let file = new window.File([data], this.fileName, { type: 'image/jpg' })
+        const identifier = await md5(file)
+        console.log(identifier);
+        const totalSize = file.size
+        const chunkSize = 5 * 1024 * 1024
+        const fileName = file.name
+        let FormDatas = new FormData()
+        FormDatas.append('file', file)
+        console.log(FormDatas.get('file'));
+        const _up = axios.create()
+        _up.request({
+          url: '/api/zip/upload/' + this.bucketNameShow,
+          method: 'POST',
+          data: FormDatas,
+          params: {
+            identifier: identifier,
+            fileName: fileName,
+            totalSize: totalSize,
+            chunkSize: chunkSize
+          }
+        })
 
+        /*  var formData = new FormData();
+         formData.append('file',file);
+         const { data: resImg } = await this.$http({
+               url: "/api/",
+               method: "post",
+               headers: {
+                 "Content-Type": "multipart/form-data; boundary=----webKitFormBoundary8A5ernVhiq6kqEZB",
+               },
+               data: formData ,
+         }); */
+-
+      })
+    },
+
+  }
 }
 
 </script>
@@ -451,5 +611,11 @@ export default {
 
 .el-icon-arrow-down {
   font-size: 12px;
+}
+
+.cropper {
+  text-align: center;
+  width: auto;
+  height: 400px;
 }
 </style>

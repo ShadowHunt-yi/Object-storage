@@ -21,13 +21,17 @@ specifiers:
   eslint-plugin-vue: ^6.1.2
   less: ^3.11.1
   less-loader: ^5.0.0
+  moment: ^2.29.4
   nprogress: ^0.2.0
   promise-queue-plus: ^1.2.2
   qs: ^6.9.3
+  sass-loader: ^13.2.2
   screenfull: ^5.0.2
+  scss: ^0.2.4
   spark-md5: ^3.0.2
   vue: ^2.6.11
   vue-cli-plugin-element: ^1.0.1
+  vue-cropper: ^0.5.11
   vue-router: ^3.1.5
   vue-template-compiler: ^2.6.11
 
@@ -37,19 +41,23 @@ dependencies:
   core-js: registry.npmmirror.com/core-js/3.29.1
   echarts: registry.npmmirror.com/echarts/4.9.0
   element-ui: registry.npmmirror.com/element-ui/2.15.13_vue@2.7.14
+  moment: registry.npmmirror.com/moment/2.29.4
   nprogress: registry.npmmirror.com/nprogress/0.2.0
   promise-queue-plus: registry.npmmirror.com/promise-queue-plus/1.2.2
   qs: registry.npmmirror.com/qs/6.11.1
+  sass-loader: registry.npmmirror.com/sass-loader/13.2.2
   screenfull: registry.npmmirror.com/screenfull/5.2.0
+  scss: registry.npmmirror.com/scss/0.2.4
   spark-md5: registry.npmmirror.com/spark-md5/3.0.2
   vue: registry.npmmirror.com/vue/2.7.14
+  vue-cropper: registry.npmmirror.com/vue-cropper/0.5.11
   vue-router: registry.npmmirror.com/vue-router/3.6.5
 
 devDependencies:
   '@vue/cli-plugin-babel': registry.npmmirror.com/@vue/cli-plugin-babel/4.5.19_2dacb0cea8cfbd89239ebc716832e7d4
   '@vue/cli-plugin-eslint': registry.npmmirror.com/@vue/cli-plugin-eslint/4.5.19_291eed2a4b15311c68aabdde8b2cf70f
   '@vue/cli-plugin-router': registry.npmmirror.com/@vue/cli-plugin-router/4.5.19_@vue+cli-service@4.5.19
-  '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8
+  '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731
   '@vue/eslint-config-standard': registry.npmmirror.com/@vue/eslint-config-standard/5.1.2_0cfd36b4dfbfc9fbd46e170867a508a5
   babel-eslint: registry.npmmirror.com/babel-eslint/10.1.0_eslint@6.8.0
   babel-plugin-component: registry.npmmirror.com/babel-plugin-component/1.1.1
@@ -2135,7 +2143,7 @@ packages:
     dependencies:
       '@babel/core': registry.npmmirror.com/@babel/core/7.21.3
       '@vue/babel-preset-app': registry.npmmirror.com/@vue/babel-preset-app/4.5.19_vue@2.7.14
-      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8
+      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731
       '@vue/cli-shared-utils': registry.npmmirror.com/@vue/cli-shared-utils/4.5.19
       babel-loader: registry.npmmirror.com/babel-loader/8.3.0_c6c5ba67053b2e90d8e2f2bc7c5cdb00
       cache-loader: registry.npmmirror.com/cache-loader/4.1.0_webpack@4.46.0
@@ -2157,7 +2165,7 @@ packages:
       '@vue/cli-service': ^3.0.0 || ^4.0.0-0
       eslint: '>= 1.6.0 < 7.0.0'
     dependencies:
-      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8
+      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731
       '@vue/cli-shared-utils': registry.npmmirror.com/@vue/cli-shared-utils/4.5.19
       eslint: registry.npmmirror.com/eslint/6.8.0
       eslint-loader: registry.npmmirror.com/eslint-loader/2.2.1_eslint@6.8.0+webpack@4.46.0
@@ -2179,7 +2187,7 @@ packages:
     peerDependencies:
       '@vue/cli-service': ^3.0.0 || ^4.0.0-0
     dependencies:
-      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8
+      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731
       '@vue/cli-shared-utils': registry.npmmirror.com/@vue/cli-shared-utils/4.5.19
     dev: true
 
@@ -2191,10 +2199,10 @@ packages:
     peerDependencies:
       '@vue/cli-service': ^3.0.0 || ^4.0.0-0
     dependencies:
-      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8
+      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731
     dev: true
 
-  registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8:
+  registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731:
     resolution: {integrity: sha512-+Wpvj8fMTCt9ZPOLu5YaLkFCQmB4MrZ26aRmhhKiCQ/4PMoL6mLezfqdt6c+m2htM+1WV5RunRo+0WHl2DfwZA==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@vue/cli-service/-/cli-service-4.5.19.tgz}
     id: registry.npmmirror.com/@vue/cli-service/4.5.19
     name: '@vue/cli-service'
@@ -2270,6 +2278,7 @@ packages:
       pnp-webpack-plugin: registry.npmmirror.com/pnp-webpack-plugin/1.7.0
       portfinder: registry.npmmirror.com/portfinder/1.0.32
       postcss-loader: registry.npmmirror.com/postcss-loader/3.0.0
+      sass-loader: registry.npmmirror.com/sass-loader/13.2.2
       ssri: registry.npmmirror.com/ssri/8.0.1
       terser-webpack-plugin: registry.npmmirror.com/terser-webpack-plugin/1.4.5_webpack@4.46.0
       thread-loader: registry.npmmirror.com/thread-loader/2.1.3_webpack@4.46.0
@@ -2463,7 +2472,7 @@ packages:
       '@vue/cli-service':
         optional: true
     dependencies:
-      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_77cb9e59680fe18c0ae8024e68b86cb8
+      '@vue/cli-service': registry.npmmirror.com/@vue/cli-service/4.5.19_50feafebb51c8da4d8a46b8f37d7e731
       eslint: registry.npmmirror.com/eslint/6.8.0
       eslint-config-standard: registry.npmmirror.com/eslint-config-standard/14.1.1_cfb0340e44e23e9d26d209e9d7bb7235
       eslint-import-resolver-node: registry.npmmirror.com/eslint-import-resolver-node/0.3.7
@@ -8083,6 +8092,12 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  registry.npmmirror.com/klona/2.0.6:
+    resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/klona/-/klona-2.0.6.tgz}
+    name: klona
+    version: 2.0.6
+    engines: {node: '>= 8'}
+
   registry.npmmirror.com/launch-editor-middleware/2.6.0:
     resolution: {integrity: sha512-K2yxgljj5TdCeRN1lBtO3/J26+AIDDDw+04y6VAiZbWcTdBwsYN6RrZBnW5DN/QiSIdKNjKdATLUUluWWFYTIA==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/launch-editor-middleware/-/launch-editor-middleware-2.6.0.tgz}
     name: launch-editor-middleware
@@ -8630,6 +8645,12 @@ packages:
       minimist: registry.npmmirror.com/minimist/1.2.8
     dev: true
 
+  registry.npmmirror.com/moment/2.29.4:
+    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/moment/-/moment-2.29.4.tgz}
+    name: moment
+    version: 2.29.4
+    dev: false
+
   registry.npmmirror.com/move-concurrently/1.0.1:
     resolution: {integrity: sha512-hdrFxZOycD/g6A6SoI2bB5NA/5NEqD0569+S47WZhPvm46sD50ZHdYaFmnua5lndde9rCHGjmfK7Z8BuCt/PcQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/move-concurrently/-/move-concurrently-1.0.1.tgz}
     name: move-concurrently
@@ -8776,7 +8797,6 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/neo-async/-/neo-async-2.6.2.tgz}
     name: neo-async
     version: 2.6.2
-    dev: true
 
   registry.npmmirror.com/nice-try/1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/nice-try/-/nice-try-1.0.5.tgz}
@@ -9058,6 +9078,13 @@ packages:
     name: obuf
     version: 1.1.2
     dev: true
+
+  registry.npmmirror.com/ometa/0.2.2:
+    resolution: {integrity: sha512-LZuoK/yjU3FvrxPjUXUlZ1bavCfBPqauA7fsNdwi+AVhRdyk2IzgP3JRnevvjzQ6fKHdUw8YISshf53FmpHrng==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/ometa/-/ometa-0.2.2.tgz}
+    name: ometa
+    version: 0.2.2
+    engines: {node: '>= 0.2.0'}
+    dev: false
 
   registry.npmmirror.com/on-finished/2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/on-finished/-/on-finished-2.4.1.tgz}
@@ -10674,6 +10701,30 @@ packages:
     version: 2.1.2
     dev: true
 
+  registry.npmmirror.com/sass-loader/13.2.2:
+    resolution: {integrity: sha512-nrIdVAAte3B9icfBiGWvmMhT/D+eCDwnk+yA7VE/76dp/WkHX+i44Q/pfo71NYbwj0Ap+PGsn0ekOuU1WFJ2AA==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/sass-loader/-/sass-loader-13.2.2.tgz}
+    name: sass-loader
+    version: 13.2.2
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      fibers: '>= 3.1.0'
+      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+      sass: ^1.3.0
+      sass-embedded: '*'
+      webpack: ^5.0.0
+    peerDependenciesMeta:
+      fibers:
+        optional: true
+      node-sass:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+    dependencies:
+      klona: registry.npmmirror.com/klona/2.0.6
+      neo-async: registry.npmmirror.com/neo-async/2.6.2
+
   registry.npmmirror.com/sax/1.2.4:
     resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/sax/-/sax-1.2.4.tgz}
     name: sax
@@ -10707,6 +10758,15 @@ packages:
     name: screenfull
     version: 5.2.0
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  registry.npmmirror.com/scss/0.2.4:
+    resolution: {integrity: sha512-4u8V87F+Q/upVhUmhPnB4C1R11xojkRkWjExL2v0CX2EXTg18VrKd+9JWoeyCp2VEMdSpJsyAvVU+rVjogh51A==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/scss/-/scss-0.2.4.tgz}
+    name: scss
+    version: 0.2.4
+    engines: {node: '>= 0.2.0'}
+    dependencies:
+      ometa: registry.npmmirror.com/ometa/0.2.2
     dev: false
 
   registry.npmmirror.com/select-hose/2.0.0:
@@ -12193,6 +12253,12 @@ packages:
     name: vue-cli-plugin-element
     version: 1.0.1
     dev: true
+
+  registry.npmmirror.com/vue-cropper/0.5.11:
+    resolution: {integrity: sha512-UeA3qL2BLCTGkOEAxEsxSNFO+qLYAn6YRHv4oS32cP9lMhF1vFmnAf/z+ZamtR0/Fh3sbZeZUCLVR2Ol2/dpTQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vue-cropper/-/vue-cropper-0.5.11.tgz}
+    name: vue-cropper
+    version: 0.5.11
+    dev: false
 
   registry.npmmirror.com/vue-eslint-parser/7.11.0_eslint@6.8.0:
     resolution: {integrity: sha512-qh3VhDLeh773wjgNTl7ss0VejY9bMMa0GoDG2fQVyDzRFdiU3L7fw74tWZDHNQXdZqxO3EveQroa9ct39D2nqg==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vue-eslint-parser/-/vue-eslint-parser-7.11.0.tgz}

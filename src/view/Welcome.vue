@@ -1,6 +1,6 @@
 <template>
   <div class="function-wrapper">
-    <h2>欢迎使用点击对象存储</h2>
+    <h2>欢迎使用点击对象存储平台</h2>
     <div class="function-title">功能介绍</div>
     <ul class="function-list">
       <li class="function-item" v-for="(item, index) in functionList" :key="index">
@@ -26,7 +26,7 @@ export default {
         {
           icon: require('../assets/home/function/store.png'),
           title: '多种存储方式',
-          desc: ' OSS 对象存储、FastDFS 存储、MinIO 存储、七牛云 KODO 对象存储',
+          desc: ' OSS 对象存储、MinIO 存储',
         },
         {
           icon: require('../assets/home/function/shard.png'),
@@ -35,14 +35,13 @@ export default {
         },
         {
           icon: require('../assets/home/function/edit.png'),
-          title: '在线编辑文档',
-          desc: '提供 Word, Excel, PowerPoint 文档的在线创建、在线编辑、协同编辑功能',
+          title: '图片裁剪上传',
+          desc: '提供图片墙上传，以及对图片进行裁剪后上传',
         },
-
         {
           icon: require('../assets/home/function/type.png'),
-          title: '多种文件分类 & 查看模式',
-          desc: '支持以图片、文档、视频、音乐、其他五种分类查看文件；提供了列表模式',
+          title: '控制台数据展示',
+          desc: '展示存储桶的相关数据，并以可视化形式展现',
         },
         {
           icon: require('../assets/home/function/preview.png'),
@@ -52,7 +51,7 @@ export default {
         {
           icon: require('../assets/home/function/operation.png'),
           title: '基本操作',
-          desc: '支持拖拽上传文件，支持文件重命名、解压缩、下载、删除',
+          desc: '支持拖拽上传文件，支持文件重命名、压缩上传、下载、删除',
         },
       ]
     }
@@ -65,40 +64,41 @@ export default {
   margin-bottom: 10px;
 
 }
-
-
 .function-title {
   padding: 0 0;
   text-align: center;
   font-size: 28px;
+  width: 90%;
+  margin: 0 auto;
 }
 
 .function-list {
   width: 100%;
   padding: 0;
+  margin: 10px 0;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: space-around;
   list-style: none;
 }
 
 .function-item {
-  margin: 20px;
-  width: 26%;
-
+  margin: 40px 0;
+  width: 27%;
 }
 
 .function-live {
   display: block;
-  border-radius: 10px;
-  background: #ecf5ff;
+  border-radius: 15%;
+  background: rgba(rgb(240, 80, 80), rgb(97, 214, 97), rgb(66, 66, 218), 0.7);
+/*   border: 1px solid black; */
   width: 100%;
   height: 100%;
   padding: 15px;
   text-align: center;
 }
 .function-live:hover{
-  background: #13cff0f3;
+  background: #6adef386;
 }
 
 .img-wrapper {

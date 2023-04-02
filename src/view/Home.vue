@@ -19,20 +19,20 @@
       <el-menu background-color="#304156" text-color="#fff" active-text-color="#409eff" unique-opened
         :collapse="isCollapse" :collapse-transition="false" :router="true" :default-active="acvtivePath">
         <!-- 一级菜单 -->
-        <el-submenu :index="item.id+''" v-for="item in menuList" :key="item.id">
+        <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
           <!-- 模板区域 -->
           <template slot="title">
             <!-- 图标 -->
             <i :class="iconObj[item.id]"></i>
-            <span>{{item.name}}</span>
+            <span>{{ item.name }}</span>
           </template>
           <!-- 二级菜单 -->
-          <el-menu-item :index="'/'+subItem.path" v-for="subItem in item.children" :key="subItem.id"
-            @click="saveNavState('/'+subItem.path)">
+          <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id"
+            @click="saveNavState('/' + subItem.path)">
             <template slot="title">
               <!-- 图标 -->
               <i class="el-icon-menu"></i>
-              <span>{{subItem.name}}</span>
+              <span>{{ subItem.name }}</span>
             </template>
           </el-menu-item>
         </el-submenu>
@@ -44,7 +44,7 @@
         <!-- <div class="toggle-button" @click="toggleCollapse">|||</div> -->
         <hamburger :is-active="!isCollapse" class="hamburger-container" @toggleClick="toggleChange()" />
         <div style="display: flex;align-items: center;">
-          <span style="margin-left: 15px;">点击对象存储</span>
+          <span style="margin-left: 15px;">点击对象存储平台</span>
         </div>
         <div @click="screenfull()" class="fullscreen">
           <svg t="1586700823354" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -60,7 +60,9 @@
       <el-main>
         <breadCrumb />
         <!-- 路由占位符 -->
-        <router-view></router-view>
+        <transition :name="transitionName">
+          <router-view></router-view>
+        </transition>
       </el-main>
     </el-container>
   </el-container>
@@ -74,7 +76,7 @@ export default {
   components: {
     Hamburger, BreadCrumb
   },
-  data () {
+  data() {
     return {
       // 左侧菜单数据
       menuList: "",
@@ -90,14 +92,15 @@ export default {
       isFullscreen: false,
       isCollapse: false,
       // 被激活的连接地址
-      acvtivePath: ''
+      acvtivePath: '',
+      transitionName:'',
     }
   },
-  created () {
+  created() {
     this.getMenuList()
     this.acvtivePath = window.sessionStorage.getItem('acvtivePath')
   },
-  mounted () {
+  mounted() {
     window.onresize = () => {
       // 全屏下监控是否按键了ESC
       if (!this.checkFull()) {
@@ -106,12 +109,19 @@ export default {
       }
     }
   },
+  watch: {
+  '$route' (to, from) {
+    const toDepth = to.path.split('/').length
+    const fromDepth = from.path.split('/').length
+    this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
+  }
+  },
   methods: {
-    logout () {
+    logout() {
       window.sessionStorage.clear()
       this.$router.push('login')
     },
-    async getMenuList () {
+    async getMenuList() {
       // 将data去处 重定向为res
       const { data: res } = await this.$http.get('/api/menus')
       if (res.status !== 200) {
@@ -119,24 +129,24 @@ export default {
       }
       this.menuList = res.data
     },
-    toggleChange () {
+    toggleChange() {
       this.isCollapse = !this.isCollapse
     },
-    saveNavState (acvtivePath) {
+    saveNavState(acvtivePath) {
       window.sessionStorage.setItem('acvtivePath', acvtivePath)
       this.acvtivePath = acvtivePath
     },
     /**
      * 全屏事件
      */
-    screenfull () {
+    screenfull() {
       screenfull.toggle()
       this.isFullscreen = true
     },
     /**
      * 是否全屏并按键ESC键的方法
      */
-    checkFull () {
+    checkFull() {
       var isFull = document.fullscreenEnabled || window.fullScreen || document.webkitIsFullScreen || document.msFullscreenEnabled
       // to fix : false || undefined == undefined
       if (isFull === undefined) {
@@ -152,6 +162,7 @@ export default {
 .home-container {
   height: 100%;
 }
+
 .el-header {
   background-color: #ffffff;
   display: flex;
@@ -161,21 +172,27 @@ export default {
   color: #97a8be;
   font-size: 18px;
 }
+
 .el-aside {
   background-color: #304156;
+
   .el-menu {
     border-right: none;
   }
 }
+
 .el-main {
   background-color: #eff1f4;
 }
+
 span {
   font-size: 16px;
 }
+
 .iconfont {
   margin-right: 10px;
 }
+
 .hamburger-container {
   line-height: 46px;
   height: 100%;
@@ -188,14 +205,41 @@ span {
     background: rgba(0, 0, 0, 0.025);
   }
 }
+
 .breadcrumb-container {
   float: left;
 }
+
 .iconfont {
   margin-right: 10px;
 }
+
 .fullscreen {
   position: absolute;
   right: 110px;
 }
-</style>
+.slide-right-enter-active, .slide-right-leave-active, .slide-left-enter-active, .slide-left-leave-active {
+      will-change: transform;
+      transition: all 500ms;
+      position: absolute;
+    }
+
+    .slide-right-enter {
+      opacity: 0;
+      transform: translate3d(-100%, 0, 0);
+    }
+
+    .slide-right-leave-active {
+      opacity: 0;
+      transform: translate3d(100%, 0, 0);
+    }
+
+    .slide-left-enter {
+      opacity: 0;
+      transform: translate3d(100%, 0, 0);
+    }
+
+    .slide-left-leave-active {
+      opacity: 0;
+      transform: translate3d(-100%, 0, 0);
+    }</style>

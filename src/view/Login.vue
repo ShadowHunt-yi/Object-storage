@@ -9,7 +9,7 @@
         <i class="el-icon-cloudy" style="color: #409EFF; font-size:50px;"></i>
       </div>
       <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules">
-        <h2 class="login-title">点击对象存储</h2>
+        <h2 class="login-title">点击对象存储平台</h2>
         <el-form-item prop="username">
           <el-input v-model="loginForm.username" prefix-icon="iconfont icon-iconuser" placeholder="用户名"></el-input>
         </el-form-item>
@@ -57,7 +57,7 @@
 export default {
   data() {
     return {
-      str: '欢迎您来到点击对象存储',
+      str: '欢迎您来到点击对象存储平台',
       i: 0,
       timer: 0,
       str2: '',

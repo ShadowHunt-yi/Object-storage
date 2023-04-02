@@ -10,7 +10,8 @@ import axios from 'axios'
 // 导入NProgress包对应的JS和CSS
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-
+import VueCropper from 'vue-cropper'
+Vue.use(VueCropper)
 axios.interceptors.request.use(config => {
     NProgress.start()
     config.headers.Authorization = 'Bearer ' + window.sessionStorage.getItem('token')
