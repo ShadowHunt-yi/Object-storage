@@ -44,7 +44,7 @@
         <!-- <div class="toggle-button" @click="toggleCollapse">|||</div> -->
         <hamburger :is-active="!isCollapse" class="hamburger-container" @toggleClick="toggleChange()" />
         <div style="display: flex;align-items: center;">
-          <span style="margin-left: 15px;">点击对象存储平台</span>
+          <span style="margin-left: 15px;">智域云图-对象存储平台</span>
         </div>
         <div @click="screenfull()" class="fullscreen">
           <svg t="1586700823354" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"

@@ -12,7 +12,7 @@
         "axios-extra": "^0.0.6",
         "core-js": "^3.6.4",
         "echarts": "^4.7.0",
-        "element-ui": "^2.4.5",
+        "element-ui": "^2.15.13",
         "moment": "^2.29.4",
         "nprogress": "^0.2.0",
         "promise-queue-plus": "^1.2.2",

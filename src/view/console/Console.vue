@@ -47,7 +47,7 @@
     </el-row>
     <!-- 第二行 -->
     <el-row :gutter="20" type="flex" justify="center">
-      <el-col>
+      <el-col v-if="authority()">
         <el-card shadow="hover" :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }">
           <div slot="header">
             快捷操作<i class="el-icon-s-tools" style="float:right"></i>
@@ -89,6 +89,10 @@
               </el-table-column>
             </el-table>
           </el-dialog>
+          <a class="shortcut-button" @click="toRestore">
+            <span class="shortcut-button-icon"><i class="el-icon-refresh" style="font-size: 25px"></i></span>
+            <span>恢复备份</span>
+          </a>
         </el-card>
       </el-col>
       <el-col>
@@ -129,18 +133,6 @@
     </el-row>
     <el-row>
       <el-card>
-        <el-dropdown>
-          <span class="el-dropdown-link">
-            选择桶<i class="el-icon-arrow-down el-icon--right"></i>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>黄金糕</el-dropdown-item>
-            <el-dropdown-item>狮子头</el-dropdown-item>
-            <el-dropdown-item>螺蛳粉</el-dropdown-item>
-            <el-dropdown-item disabled>双皮奶</el-dropdown-item>
-            <el-dropdown-item divided>蚵仔煎</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
         <div slot="header" style="fontsize:18;text-align:center;"> 文件统计(30天)</div>
         <div id="main" style="height:400px"></div>
       </el-card>
@@ -234,20 +226,32 @@ export default {
           name: '文件大小',
           type: 'bar',
           data: chart.dayFileSizeList,
-          markPoint: {
-            data: [{
-              type: 'max',
-              name: '最大值'
-            }, {
-              type: 'min',
-              name: '最小值'
-            }]
-          }
+          // markPoint: {
+          //   data: [{
+          //     label: '最大值'
+          //   }, {
+          //     label: '最小值'
+          //   }]
+          // },
+          itemStyle: {
+            normal: {
+              label: {
+                show: true, //开启显示
+                position: 'top', //在上方显示
+                textStyle: { //数值样式
+                  color: 'black',
+                  fontSize: 16
+                }
+              }
+            }
+          },
+
+
         }, {
           name: '文件数量',
           type: 'bar',
           data: chart.dayFileCountList,
-          markPoint: {
+          /* markPoint: {
             data: [{
               type: 'max',
               name: '最大值'
@@ -255,7 +259,19 @@ export default {
               type: 'min',
               name: '最小值'
             }]
-          }
+          }, */
+          itemStyle: {
+            normal: {
+              label: {
+                show: true, //开启显示
+                position: 'top', //在上方显示
+                textStyle: { //数值样式
+                  color: 'black',
+                  fontSize: 16
+                }
+              }
+            }
+          },
         }]
 
       })
@@ -287,6 +303,15 @@ export default {
         return parseFloat(byte / 1024).toFixed(2) + " KB"
       }
       return parseFloat(byte).toFixed(2) + " B"
+    },
+    async toRestore(){
+      const { data: res } = await this.$http.post('/api/sql/execute',{params:{objectName:'base/backups/mytable/mytable_test.sql.gz'}})
+      if (res.status !== 200) {
+        return this.$message.error(res.msg)
+      }
+    },
+    authority(){
+      return sessionStorage.getItem('authority')=='0'||sessionStorage.getItem('authority')=='1'
     }
   }
 
@@ -366,11 +391,13 @@ export default {
   text-align: center;
   line-height: 55px;
 }
+
 .el-dropdown-link {
-    cursor: pointer;
-    color: #409EFF;
-  }
-  .el-icon-arrow-down {
-    font-size: 12px;
-  }
+  cursor: pointer;
+  color: #409EFF;
+}
+
+.el-icon-arrow-down {
+  font-size: 12px;
+}
 </style>

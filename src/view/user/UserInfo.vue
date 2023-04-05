@@ -1,10 +1,10 @@
 <template>
   <div>
-    <el-card class="box-card">
-      <div slot="header">
+    <el-card class="box-card" >
+      <div slot="header" align="center">
         {{ userinfo.username }}
       </div>
-      <div class="card-body">
+      <div class="card-body"  align="center">
         <div>邮箱：
           <el-tag>{{userinfo.email}}</el-tag>
         </div>
@@ -186,7 +186,8 @@ export default {
 
 <style lang="less" scoped>
 .box-card {
-  width: 400px;
+  width: 1000px;
+  margin: 0 auto;
 }
 .card-body {
   display: flex;

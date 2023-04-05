@@ -1,6 +1,6 @@
 <template>
   <div class="function-wrapper">
-    <h2>欢迎使用点击对象存储平台</h2>
+    <h2>欢迎使用智域云图-对象存储平台</h2>
     <div class="function-title">功能介绍</div>
     <ul class="function-list">
       <li class="function-item" v-for="(item, index) in functionList" :key="index">
