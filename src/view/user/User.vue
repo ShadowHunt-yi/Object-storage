@@ -226,7 +226,7 @@ export default {
     addUser () {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post('/api/users', this.addForm)
+        const { data: res } = await this.$http.post('/api/addUser', this.addForm)
         if (res.status !== 200) {
           return this.$message.error(res.msg)
         }

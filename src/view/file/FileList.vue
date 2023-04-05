@@ -61,17 +61,18 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="400px" align="center">
+          <el-table-column label="操作" width="300px" align="center" style="display: flex;">
             <template slot-scope="scope">
               <el-button size="mini" type="primary"
-              @click="shareFile(scope.row.objectKey)" v-if="scope.row.type !== 'directory'" style="margin: 0 10px;">分享</el-button>
+              @click="shareFile(scope.row.objectKey),dialogUrl=true" v-if="scope.row.type !== 'directory'" style="margin: 0 10px;">分享</el-button>
               <el-dialog :visible.sync="dialogUrl" title="分享链接" width="30%">
                 <span>{{ url }}</span>
               </el-dialog>
               <el-button size="mini" type="primary"
-                @click="dialogNewname = true, oldname = scope.row.fileName, _subString = scope.row.subString"  v-if="scope.row.type !== 'directory'">重命名</el-button>
-              <el-button size="mini" type="success" @click="downloadfile(scope.row.objectKey)"  v-if="scope.row.type !== 'directory'">下载</el-button>
-              <el-button size="mini" type="danger" @click="deletefile(scope.row)">删除</el-button>
+                @click="dialogNewname = true, oldname = scope.row.fileName, _subString = scope.row.subString"  v-if="scope.row.type !== 'directory'" style="margin: 10px;">重命名</el-button>
+              <el-button size="mini" type="success" @click="downloadfile(scope.row.objectKey)"  v-if="scope.row.type !== 'directory'" style="margin: 10px;">下载</el-button>
+              <el-button size="mini" type="danger" @click="deletefile(scope.row)" style="margin: 10px;">删除</el-button>
+              <el-button size="mini" type="success" @click="preview(scope.row.objectKey)" v-if="scope.row.subString=='xls'|'doc'|'ppt'|'docs'" style="margin: 10px;">预览</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -110,7 +111,7 @@ export default {
       buckets:'',
       dialogTableVisible:false,
       selectionName:'',
-      bucketName:'',
+      bucketName:sessionStorage.getItem("bucketName")||'',
       dialogUrl:false,
       url:''
     }
@@ -118,6 +119,10 @@ export default {
   created() {
 
     this.getBuckets()
+    if(this.bucketName!=''){
+      this.getFlieList(this.bucketName)
+    }
+
   },
   computed: {
     iconName() {
@@ -140,7 +145,6 @@ export default {
        }
       }
       this.buckets = res.data
-      console.log(this.buckets);
     },
     formatSize(byte) {
       if (byte > 1024 * 1024) {
@@ -172,6 +176,7 @@ export default {
     // 获取一级目录
     async getFlieList(name) {
       this.bucketName=name
+      sessionStorage.setItem('bucketName',name);
       const { data: res } = await this.$http.get('/api/getLists/'+name, { params: { prefix: '' } })
       if (res.status !== 200) {
         return this.$message.error('获取文件列表失败')
@@ -185,7 +190,6 @@ export default {
     },
     // 根据目录获取
     getDirFile(fileInfo) {
-      console.log(fileInfo);
       this.prevFileList = this.filelist;
       this.filelist = fileInfo.children.data
       this.pathlist.push(fileInfo.virtualName);
@@ -275,11 +279,19 @@ export default {
       if(res.status!=200){
         this.$message.error(res.msg)
       }this.url=res.data
-      this.dialogUrl=true
+
      /*  console.log(navigator);
       navigator.clipboard.writeText(res.data).then(function log(){this.$message.success("成功写入剪贴板")}); */
-    }
 
+    },
+    async preview(key){
+
+      await this.shareFile(key)
+      const _url= this.url
+      console.log(this.url);
+      this.$http.post('https://view.officeapps.live.com/op/view.aspx?src='+_url)
+      console.log(1);
+    }
   }
 }
 </script>

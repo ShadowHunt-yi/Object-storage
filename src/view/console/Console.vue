@@ -8,7 +8,7 @@
             <i class="fa fa-calculator"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.TotalCount}}
+            {{ consoleParam.TotalCount }}
           </div>
         </el-card>
       </el-col>
@@ -19,7 +19,7 @@
             <i class="fa fa-file-archive-o"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.TotalSize}}
+            {{ consoleParam.TotalSize }}
           </div>
         </el-card>
       </el-col>
@@ -29,7 +29,7 @@
             桶数目<i class="fa fa-cubes"></i>
           </div>
           <div class="page-view-totla">
-            {{consoleParam.diskTotalSize}}
+            {{ consoleParam.diskTotalSize }}
           </div>
         </el-card>
       </el-col>
@@ -40,7 +40,7 @@
             <i class="fa fa-cube"></i>
           </div>
           <div class="page-view-totla">
-            {{consoleParam.diskFreeSize}}
+            {{ consoleParam.diskFreeSize }}
           </div>
         </el-card>
       </el-col>
@@ -48,7 +48,7 @@
     <!-- 第二行 -->
     <el-row :gutter="20" type="flex" justify="center">
       <el-col>
-        <el-card shadow="hover" :body-style="{height: '170px',padding: '5px 10px 5px 5px'}">
+        <el-card shadow="hover" :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }">
           <div slot="header">
             快捷操作<i class="el-icon-s-tools" style="float:right"></i>
           </div>
@@ -60,18 +60,42 @@
             <span class="shortcut-button-icon"><i class="el-icon-document" style="font-size: 25px"></i></span>
             <span>文件列表</span>
           </a>
-          <a class="shortcut-button" @click="removeEmptyDir">
-            <span class="shortcut-button-icon"><i class="el-icon-delete" style="font-size: 25px"></i></span>
-            <span>删除空目录</span>
+          <a class="shortcut-button" @click="toDisplay">
+            <span class="shortcut-button-icon"><i class="el-icon-takeaway-box" style="font-size: 25px"></i></span>
+            <span>归档数据</span>
           </a>
+          <el-dialog title="归档" :visible.sync="dialogDisplay" width="900px" style="margin: 0 auto;">
+            <el-table :data="archiving">
+              <el-table-column label="文件名" width="500px" style="text-align: center;">
+                <template slot-scope="scope">
+                  <div>
+                    <span style=" font-size:16px">{{ scope.row.fileName }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="大小" width="150px" align="center">
+                <template slot-scope="scope">
+                  <div>
+                    <span style=" font-size:16px"> {{ norm(scope.row.totalSize) }} </span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建时间" width="150px" align="center">
+                <template slot-scope="scope">
+                  <div>
+                    <span style=" font-size:16px"> {{ formatTime(scope.row.objectKey) }} </span>
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-dialog>
         </el-card>
       </el-col>
       <el-col>
-        <el-card shadow="hover" :body-style="{height: '170px',padding: '5px 10px 5px 5px'}">
+        <el-card shadow="hover" :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }">
           <div slot="header">
             版本信息<i class="el-icon-info" style="float:right"></i>
           </div>
-
           <table class="console-table">
             <colgroup>
               <col width="200">
@@ -81,8 +105,9 @@
               <tr>
                 <td>当前版本</td>
                 <td>
-                  <span> {{consoleParam.version }} </span>
-                  <a href="https://github.com/ShadowHunt-yi/Object-storage" style="color: #009688" target="_blank">更新日志</a>
+                  <span> {{ consoleParam.version }} </span>
+                  <a href="https://github.com/ShadowHunt-yi/Object-storage" style="color: #009688"
+                    target="_blank">更新日志</a>
                 </td>
               </tr>
               <tr>
@@ -91,11 +116,11 @@
               </tr>
               <tr>
                 <td>操作系统</td>
-                <td> {{consoleParam.osName}}</td>
+                <td> {{ consoleParam.osName }}</td>
               </tr>
               <tr>
                 <td>系统架构</td>
-                <td> {{consoleParam.osArch}}</td>
+                <td> {{ consoleParam.osArch }}</td>
               </tr>
             </tbody>
           </table>
@@ -104,6 +129,18 @@
     </el-row>
     <el-row>
       <el-card>
+        <el-dropdown>
+          <span class="el-dropdown-link">
+            选择桶<i class="el-icon-arrow-down el-icon--right"></i>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>黄金糕</el-dropdown-item>
+            <el-dropdown-item>狮子头</el-dropdown-item>
+            <el-dropdown-item>螺蛳粉</el-dropdown-item>
+            <el-dropdown-item disabled>双皮奶</el-dropdown-item>
+            <el-dropdown-item divided>蚵仔煎</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
         <div slot="header" style="fontsize:18;text-align:center;"> 文件统计(30天)</div>
         <div id="main" style="height:400px"></div>
       </el-card>
@@ -114,7 +151,7 @@
 <script>
 import echarts from 'echarts'
 export default {
-  data () {
+  data() {
     return {
       consoleParam: {
         totalFileCount: '',
@@ -128,29 +165,31 @@ export default {
         dayNumList: [],
         dayFileSizeList: [],
         dayFileCountList: []
-      }
+      },
+      dialogDisplay: false,
+      archiving: []
     }
   },
-  created () {
+  created() {
     this.getConsoleState()
   },
-  mounted () {
+  mounted() {
     this.initCharts()
   },
   watch: {
-    consoleParam (newVal) {
+    consoleParam(newVal) {
       this.initCharts()
     }
   },
   methods: {
-    async getConsoleState () {
+    async getConsoleState() {
       const { data: res } = await this.$http.get('/api/getCountAndSize')
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }
       this.consoleParam = res.data
     },
-    initCharts () {
+    initCharts() {
       var chart = {
         dayNumList: this.consoleParam.dayNumList,
         dayFileCountList: this.consoleParam.dayFileCountList,
@@ -221,18 +260,33 @@ export default {
 
       })
     },
-    toUpload () {
+    toUpload() {
       this.$router.push('upload')
     },
-    toFileList () {
+    toFileList() {
+      z
       this.$router.push('filelist')
     },
-    async removeEmptyDir () {
-      const { data: res } = await this.$http.post('/api/console/remove_empty_dir')
+    async toDisplay() {
+      const { data: res } = await this.$http.get('/api/v1/minio/tasks/getArchving')
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }
       this.$message.success(res.msg)
+      this.archiving = res.data
+      this.dialogDisplay = true
+    },
+    formatTime(e) {
+      return e.split('/')[0]
+    },
+    norm(byte) {
+      if (byte > 1024 * 1024) {
+        return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB"
+      }
+      if (byte > 1024) {
+        return parseFloat(byte / 1024).toFixed(2) + " KB"
+      }
+      return parseFloat(byte).toFixed(2) + " B"
     }
   }
 
@@ -242,10 +296,12 @@ export default {
 <style lang="less" scoped>
 .el-row {
   margin-bottom: 20px;
+
   &:last-child {
     margin-bottom: 0;
   }
 }
+
 .fa {
   float: right;
 }
@@ -260,6 +316,7 @@ export default {
   word-break: break-all;
   white-space: nowrap;
 }
+
 .console-table {
   border-collapse: collapse;
   border-spacing: 0px;
@@ -268,6 +325,7 @@ export default {
   color: #666666;
   margin: 5px 0;
 }
+
 .console-table tr {
   transition: all 0.3s;
   -webkit-transition: all 0.3s;
@@ -289,6 +347,7 @@ export default {
   line-height: 20px;
   font-size: 14px;
 }
+
 .shortcut-button {
   width: 100px;
   height: 80px;
@@ -300,10 +359,18 @@ export default {
   text-align: center;
   background: rgb(248, 248, 248);
 }
+
 .shortcut-button-icon {
   display: block;
   height: 55px;
   text-align: center;
   line-height: 55px;
 }
+.el-dropdown-link {
+    cursor: pointer;
+    color: #409EFF;
+  }
+  .el-icon-arrow-down {
+    font-size: 12px;
+  }
 </style>

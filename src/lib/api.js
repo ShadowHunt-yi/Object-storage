@@ -33,8 +33,8 @@ http.interceptors.request.use(addHeaders)
  * @param identifier 文件md5
  * @returns {Promise<AxiosResponse<any>>}
  */
-const taskInfo = (identifier) => {
-    return http.get(`/v1/minio/tasks/${identifier}`);
+const taskInfo = (identifier, bucketName) => {
+    return http.get(`/v1/minio/tasks/${identifier}/${bucketName}`);
 }
 
 /**
@@ -45,8 +45,8 @@ const taskInfo = (identifier) => {
  * @param chunkSize 分块大小
  * @returns {Promise<AxiosResponse<any>>}
  */
-const initTask = ({ identifier, fileName, totalSize, chunkSize }) => {
-    return http.post('/v1/minio/tasks', { identifier, fileName, totalSize, chunkSize })
+const initTask = ({ identifier, fileName, totalSize, chunkSize, bucketName }) => {
+    return http.post('/v1/minio/tasks', { identifier, fileName, totalSize, chunkSize }, { params: { bucketName } })
 }
 
 /**
@@ -55,9 +55,9 @@ const initTask = ({ identifier, fileName, totalSize, chunkSize }) => {
  * @param partNumber 分片编号
  * @returns {Promise<AxiosResponse<any>>}
  */
-const preSignUrl = ({ identifier, partNumber }) => {
-    console.log(identifier);
-    return http.get(`/v1/minio/tasks/${identifier}/${partNumber}`)
+const preSignUrl = ({ identifier, partNumber, bucketName }) => {
+    console.log(identifier, 'id');
+    return http.get(`/v1/minio/tasks/pre/${identifier}/${partNumber}`, { params: { bucketName } })
 }
 
 /**
@@ -65,8 +65,8 @@ const preSignUrl = ({ identifier, partNumber }) => {
  * @param identifier
  * @returns {Promise<AxiosResponse<any>>}
  */
-const merge = (identifier) => {
-    return http.post(`/v1/minio/tasks/merge/${identifier}`)
+const merge = (identifier, bucketName) => {
+    return http.post(`/v1/minio/tasks/merge/${identifier}/${bucketName}`)
 }
 
 export {

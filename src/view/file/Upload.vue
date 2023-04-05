@@ -161,10 +161,11 @@ const fileUploadChunkQueue = ref({}).value
 /**
  * 获取一个上传任务，没有则初始化一个
  */
-const getTaskInfo = async function (file) {
+const getTaskInfo = async function (file,bucketName) {
   let task;
   const identifier = await md5(file)
-  const { code, data, msg } = await taskInfo(identifier)
+  console.log(bucketName);
+  const { code, data, msg } = await taskInfo(identifier,bucketName)
   if (code === HTTP_SUCCESS_CODE) {
     task = data
     if (!task) {
@@ -172,7 +173,8 @@ const getTaskInfo = async function (file) {
         identifier,
         fileName: file.name,
         totalSize: file.size,
-        chunkSize: 5 * 1024 * 1024
+        chunkSize: 5 * 1024 * 1024,
+        bucketName
       }
       const { code, data, msg } = await initTask(initTaskData)
       if (code === HTTP_SUCCESS_CODE) {
@@ -195,7 +197,7 @@ const getTaskInfo = async function (file) {
 /**
  * 上传逻辑处理，如果文件已经上传完成（完成分块合并操作），则不会进入到此方法中
  */
-const handleUpload = (file, taskRecord, options) => {
+const handleUpload = (file, taskRecord, options,bucketName) => {
 
   let lastUploadedSize = 0; // 上次断点续传时上传的总大小
   let uploadedSize = 0 // 已上传的大小
@@ -218,7 +220,7 @@ const handleUpload = (file, taskRecord, options) => {
     const end = start + new Number(chunkSize)
     const blob = file.slice(start, end)
     const _http = axios.create()
-    const { code, data, msg } = await preSignUrl({ identifier: fileIdentifier, partNumber: partNumber })
+    const { code, data, msg } = await preSignUrl({ identifier: fileIdentifier, partNumber: partNumber,bucketName:bucketName })
     if (code === HTTP_SUCCESS_CODE && data) {
       await _http.request({
         url: data,
@@ -300,8 +302,8 @@ const handleUpload = (file, taskRecord, options) => {
 const handleHttpRequest = async function (options) {
   const file = options.file
   let _this = this;
-
-  const task = await getTaskInfo(file)
+  const selectbucket =this.bucketNameShow
+  const task = await getTaskInfo(file,selectbucket)
   console.log(task);
 
   if (task) {
@@ -310,14 +312,14 @@ const handleHttpRequest = async function (options) {
     if (finished) {
       return path
     } else {
-      const errorList = await handleUpload(file, taskRecord, options)
+      const errorList = await handleUpload(file, taskRecord, options,selectbucket)
       if (errorList.length > 0) {
         _this.$message.error({
           message: '部分分片上传失败，请尝试重新上传文件'
         })
         return;
       }
-      const { code, data, msg } = await merge(identifier)
+      const { code, data, msg } = await merge(identifier,selectbucket)
       if (code === HTTP_SUCCESS_CODE) {
         return path;
       } else {
@@ -360,7 +362,7 @@ export default {
       dialogTableVisible: false,
       dialogFormVisible: false,
       buckets: [],
-      bucketNameShow: '',
+      bucketNameShow: sessionStorage.getItem("bucketName")||'',
       newbucket: '',
       disabled: false,
       imgFileList: [],
@@ -428,6 +430,7 @@ export default {
     },
     select(bucketName) {
       this.bucketNameShow = bucketName;
+      sessionStorage.setItem('bucketName',bucketName);
     },
     async removeBucket(bucketName) {
       console.log(bucketName);
@@ -544,16 +547,6 @@ export default {
           }
         })
 
-        /*  var formData = new FormData();
-         formData.append('file',file);
-         const { data: resImg } = await this.$http({
-               url: "/api/",
-               method: "post",
-               headers: {
-                 "Content-Type": "multipart/form-data; boundary=----webKitFormBoundary8A5ernVhiq6kqEZB",
-               },
-               data: formData ,
-         }); */
 
       })
     },

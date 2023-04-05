@@ -156,7 +156,7 @@ export default {
       this.$refs.newuser.validate(async valid=> {
         if (!valid) return
         console.log(this.newuser);
-        const { data: res } = await this.$http.post('/api/users',{
+        const { data: res } = await this.$http.post('/api/addUser',{
           username:this.newuser.newUsername,
           password:this.newuser.newPassword,
           email:this.newuser.newEmail,
@@ -176,9 +176,10 @@ export default {
 
 <style lang="less" scoped>
 h1 {
-  color: black;
+  color:black;
   text-align: center;
   font-size: 50px;
+
 }
 
 .login-container {
