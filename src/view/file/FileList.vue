@@ -72,7 +72,7 @@
                 @click="dialogNewname = true, oldname = scope.row.fileName, _subString = scope.row.subString"  v-if="scope.row.type !== 'directory'" style="margin: 10px;">重命名</el-button>
               <el-button size="mini" type="success" @click="downloadfile(scope.row.objectKey)"  v-if="scope.row.type !== 'directory'" style="margin: 10px;">下载</el-button>
               <el-button size="mini" type="danger" @click="deletefile(scope.row)" style="margin: 10px;">删除</el-button>
-              <el-button size="mini" type="success" @click="preview(scope.row.objectKey)" v-if="scope.row.subString=='xls'|'doc'|'ppt'|'docs'" style="margin: 10px;">预览</el-button>
+              <el-button size="mini" type="success" @click="preview(scope.row.objectKey)" v-if="scope.row.subString=='xls'||scope.row.subString=='doc'||scope.row.subString=='ppt'||scope.row.subString=='docs'||scope.row.subString=='pdf'" style="margin: 10px;">预览</el-button>
             </template>
           </el-table-column>
         </el-table>

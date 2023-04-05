@@ -201,7 +201,7 @@ export default {
         return this.$message.error('获取用户列表失败')
       }
       this.userlist = res.data.users
-      this.total = res.data.total
+      this.total = Number(res.data.total)
     },
     // 监听 pageSize 改变
     handleSizeChange (newSize) {

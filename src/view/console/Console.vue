@@ -8,7 +8,7 @@
             <i class="fa fa-calculator"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.TotalCount }}
+            {{ consoleData.TotalCount }}
           </div>
         </el-card>
       </el-col>
@@ -19,7 +19,7 @@
             <i class="fa fa-file-archive-o"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.TotalSize }}
+            {{ consoleData.TotalSize }}
           </div>
         </el-card>
       </el-col>
@@ -29,7 +29,7 @@
             桶数目<i class="fa fa-cubes"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.diskTotalSize }}
+            {{ consoleData.diskTotalSize }}
           </div>
         </el-card>
       </el-col>
@@ -40,7 +40,7 @@
             <i class="fa fa-cube"></i>
           </div>
           <div class="page-view-totla">
-            {{ consoleParam.diskFreeSize }}
+            {{ consoleData.diskFreeSize }}
           </div>
         </el-card>
       </el-col>
@@ -109,22 +109,22 @@
               <tr>
                 <td>当前版本</td>
                 <td>
-                  <span> {{ consoleParam.version }} </span>
+                  <span> {{ consoleData.version }} </span>
                   <a href="https://github.com/ShadowHunt-yi/Object-storage" style="color: #009688"
                     target="_blank">更新日志</a>
                 </td>
               </tr>
               <tr>
                 <td>发布日期</td>
-                <td>{{ consoleParam.versionDate }}</td>
+                <td>{{ consoleData.versionDate }}</td>
               </tr>
               <tr>
                 <td>操作系统</td>
-                <td> {{ consoleParam.osName }}</td>
+                <td> {{ consoleData.osName }}</td>
               </tr>
               <tr>
                 <td>系统架构</td>
-                <td> {{ consoleParam.osArch }}</td>
+                <td> {{ consoleData.osArch }}</td>
               </tr>
             </tbody>
           </table>
@@ -133,6 +133,24 @@
     </el-row>
     <el-row>
       <el-card>
+        <el-button type="primary" @click="dialogTable = true" style="margin: 10px;">选择桶</el-button>
+        <el-dialog title="选择桶" :visible.sync="dialogTable" width="500px">
+          <el-table :data="buckets" width="600px">
+            <el-table-column label="桶名" width="300px">
+              <template slot-scope="scope">
+                <div>
+                  <span>{{ scope.row.name }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100px">
+              <template slot-scope="scope">
+                <el-button size="mini" type="success"
+                  @click="Select(scope.row.name), dialogTableVisible = false">选择</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-dialog>
         <div slot="header" style="fontsize:18;text-align:center;"> 文件统计(30天)</div>
         <div id="main" style="height:400px"></div>
       </el-card>
@@ -159,14 +177,25 @@ export default {
         dayFileCountList: []
       },
       dialogDisplay: false,
-      archiving: []
+      archiving: [],
+      dialogTable: false,
+      buckets: '',
+      bucketName: sessionStorage.getItem("bucketName") || '',
+      consoleData: {}
     }
   },
   created() {
     this.getConsoleState()
+    this.getTable()
+    this.getBuckets()
+
   },
   mounted() {
+
     this.initCharts()
+  },
+  update(){
+     this.getTable()
   },
   watch: {
     consoleParam(newVal) {
@@ -179,7 +208,7 @@ export default {
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }
-      this.consoleParam = res.data
+      this.consoleData = res.data
     },
     initCharts() {
       var chart = {
@@ -187,8 +216,9 @@ export default {
         dayFileCountList: this.consoleParam.dayFileCountList,
         dayFileSizeList: this.consoleParam.dayFileSizeList
       }
-      var myChart = echarts.init(document.getElementById('main'))
-      myChart.setOption({
+      setTimeout(() => {
+        var myChart = echarts.init(document.getElementById('main'))
+        myChart.setOption({
         color: ['#445e75', '#45a7ca', '#98d5ef'],
         tooltip: {
           trigger: 'axis',
@@ -275,6 +305,9 @@ export default {
         }]
 
       })
+      }, 600);
+
+
     },
     toUpload() {
       this.$router.push('upload')
@@ -282,6 +315,18 @@ export default {
     toFileList() {
       z
       this.$router.push('filelist')
+    },
+    async getBuckets() {
+      const { data: res } = await this.$http.get('/api/buckets')
+      if (res.status !== 200) {
+        return this.$message.error('获取桶列表失败')
+      } else this.$message.success('获取桶列表成功')
+      for (const key in res.data) {
+        if (res.data[key].name == 'base') {
+          res.data.splice(key, 1)
+        }
+      }
+      this.buckets = res.data
     },
     async toDisplay() {
       const { data: res } = await this.$http.get('/api/v1/minio/tasks/getArchving')
@@ -304,14 +349,28 @@ export default {
       }
       return parseFloat(byte).toFixed(2) + " B"
     },
-    async toRestore(){
-      const { data: res } = await this.$http.post('/api/sql/execute',{params:{objectName:'base/backups/mytable/mytable_test.sql.gz'}})
+    async toRestore() {
+      const { data: res } = await this.$http.post('/api/sql/execute', { params: { objectName: 'base/backups/mytable/mytable_test.sql.gz' } })
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }
     },
-    authority(){
-      return sessionStorage.getItem('authority')=='0'||sessionStorage.getItem('authority')=='1'
+    authority() {
+      return sessionStorage.getItem('authority') == '0' || sessionStorage.getItem('authority') == '1'
+    },
+    Select(e) {
+      sessionStorage.setItem('bucketName', e),
+        this.bucketName = e
+      this.getTable()
+      this.dialogTable = false
+    },
+    async getTable() {
+      console.log(this.bucketName);
+      const { data: res } = await this.$http.get('/api/getTable/' + this.bucketName)
+      if (res.status !== 200) {
+        return this.$message.error(res.msg)
+      }
+      this.consoleParam = res.data
     }
   }
 

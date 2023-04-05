@@ -461,7 +461,6 @@ export default {
         }
       }
       this.buckets = res.data
-      console.log(this.buckets);
 
     },
     async createBusket(name) {
