@@ -8,5 +8,5 @@
 - axios
 - echarts
 - element-ui
-
+- Vue-cropper
 
