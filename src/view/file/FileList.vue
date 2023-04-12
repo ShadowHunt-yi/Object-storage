@@ -167,8 +167,8 @@ export default {
       }
     },
     formatTime(e) {
-      moment.locale('zh-cn');
-      return moment(e).format('MMMM Do YYYY, h:mm:ss a')
+      moment.locale("zh_CN");
+      return moment(e).format('YYYY-MM-DD HH:mm:ss');
     },
     gotoUpload() {
       this.$router.push('upload')

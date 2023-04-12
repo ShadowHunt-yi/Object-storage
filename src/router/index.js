@@ -99,7 +99,7 @@ const router = new VueRouter({
     routes
 })
 
-// 挂载路由守卫
+/* // 挂载路由守卫
 router.beforeEach((to, from, next) => {
     // to 将要访问的路径
     // from 代表从哪个路径跳转而来
@@ -114,6 +114,6 @@ router.beforeEach((to, from, next) => {
     } else {
         next()
     }
-})
+}) */
 
 export default router

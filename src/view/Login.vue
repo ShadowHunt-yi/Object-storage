@@ -145,7 +145,7 @@ export default {
         if (res.status !== 200) {
           return this.$message.error(res.msg)
         }else {
-          sessionStorage.setItem('authority',res.data.permission)
+          window.sessionStorage.setItem('authority',res.data.id)
           this.$message.success(res.msg)
           window.sessionStorage.setItem('token', res.data.token)
           this.$router.push('home')

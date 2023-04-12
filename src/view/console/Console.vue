@@ -60,7 +60,7 @@
             <span class="shortcut-button-icon"><i class="el-icon-document" style="font-size: 25px"></i></span>
             <span>文件列表</span>
           </a>
-          <a class="shortcut-button" @click="toDisplay">
+          <a class="shortcut-button" @click="toDisplay" v-if="admin()">
             <span class="shortcut-button-icon"><i class="el-icon-takeaway-box" style="font-size: 25px"></i></span>
             <span>归档数据</span>
           </a>
@@ -371,6 +371,9 @@ export default {
         return this.$message.error(res.msg)
       }
       this.consoleParam = res.data
+    },
+    admin(){
+      return sessionStorage.getItem('authority') == '0'
     }
   }
 

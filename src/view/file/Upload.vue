@@ -132,7 +132,8 @@ import { HTTP_SUCCESS_CODE } from '@/lib/api.code.js'
 
 //压缩上传
 const handleHttpRequestzip = async function (options) {
-  if(bucketNameShow=''){
+  console.log(this.bucketNameShow);
+  if(this.bucketNameShow==''){
     return this.$message('未选择桶')
   }
   const file = options.file
@@ -231,7 +232,6 @@ const handleUpload = (file, taskRecord, options,bucketName) => {
         data: blob,
         headers: {
           'Content-Type': 'application/octet-stream',
-
         }
       })
       return Promise.resolve({ partNumber: partNumber, uploadedSize: blob.size })
@@ -303,7 +303,7 @@ const handleUpload = (file, taskRecord, options,bucketName) => {
  * el-upload 自定义上传方法入口
  */
 const handleHttpRequest = async function (options) {
-  if(bucketNameShow=''){
+  if(this.bucketNameShow==''){
     return this.$message('未选择桶')
   }
   const file = options.file
@@ -529,7 +529,7 @@ export default {
       // console.log(cropAxis)
     },
     finish() {
-      if(bucketNameShow=''){
+      if(this.bucketNameShow==''){
     return this.$message('未选择桶')
   }
       this.$refs.cropper.getCropBlob(async (data) => {

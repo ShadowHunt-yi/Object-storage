@@ -31,27 +31,27 @@ export default {
         {
           icon: require('../assets/home/function/shard.png'),
           title: '分片、断点续传及极速秒传',
-          desc: '集成 vue-simple-uploader，实现文件分片上传，提高上传速度；准确识别已上传文件，达到秒传效果，以分片为维度，可实现断点续传',
+          desc: '实现文件分片上传；准确识别已上传文件，达到秒传效果，以分片为维度，可实现断点续传',
         },
         {
           icon: require('../assets/home/function/edit.png'),
           title: '图片裁剪上传',
-          desc: '提供图片墙上传，以及对图片进行裁剪后上传',
+          desc: '提供图片裁剪后上传,可即时预览裁剪后的图片',
         },
         {
           icon: require('../assets/home/function/type.png'),
           title: '控制台数据展示',
-          desc: '展示存储桶的相关数据，并以可视化形式展现',
+          desc: '展示存储桶的相关数据，并以图表可视化形式展现最近上传信息',
         },
         {
           icon: require('../assets/home/function/preview.png'),
           title: '权限管理',
-          desc: '支持通过权限控制可以为特定用户设置权限',
+          desc: '支持通过权限控制个性化设置角色，再为相应用户设置特定角色',
         },
         {
           icon: require('../assets/home/function/operation.png'),
           title: '基本操作',
-          desc: '支持拖拽上传文件，支持文件重命名、压缩上传、下载、删除',
+          desc: '支持拖拽上传文件，支持文件重命名、压缩上传、下载、删除、分享',
         },
       ]
     }
@@ -89,8 +89,12 @@ export default {
 
 .function-live {
   display: block;
-  border-radius: 15%;
-  background: rgba(rgb(240, 80, 80), rgb(97, 214, 97), rgb(66, 66, 218), 0.7);
+  background: rgba( 255, 255, 255, 0.25 );
+	box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.27 );
+	backdrop-filter: blur( 5px );
+	-webkit-backdrop-filter: blur( 5px );
+	border-radius: 15px;
+	border: 1px solid rgba( 255, 255, 255, 0.18 );
 /*   border: 1px solid black; */
   width: 100%;
   height: 100%;
@@ -103,7 +107,7 @@ export default {
 
 .img-wrapper {
   border-radius: 50%;
-  background: #fff;
+  /* background: #fff; */
   margin: 0 auto;
   padding:13px 0;
   width: 100px;
@@ -113,6 +117,7 @@ export default {
 .img {
   width: 70px;
   height: 70px;
+  color: white;
 }
 
 .content {
@@ -120,18 +125,27 @@ export default {
 }
 
 .desc {
-  color: #808080;
+  color: #000000;
+  font-size: 18px;
 }
 
 .title {
   margin: 0 0 24px;
   color: #333;
   font-weight: normal;
-  font-size: 18px;
+  font-size: 30px;
 }
 h2 {
   text-align: center;
   font-size: 40px;
 }
-</style>
 
+</style>
+<style >
+main{
+  background-image: url('.././assets/image/display.webp');
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  background-attachment:fixed;
+}
+</style>
