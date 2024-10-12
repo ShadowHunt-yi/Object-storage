@@ -8,12 +8,14 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
+        "@mediapipe/camera_utils": "^0.3.1675466862",
+        "@mediapipe/hands": "^0.4.1675469240",
         "axios": "^0.21.1",
         "axios-extra": "^0.0.6",
         "core-js": "^3.6.4",
+        "dayjs": "^1.11.13",
         "echarts": "^4.7.0",
         "element-ui": "^2.15.13",
-        "moment": "^2.29.4",
         "nprogress": "^0.2.0",
         "promise-queue-plus": "^1.2.2",
         "qs": "^6.9.3",

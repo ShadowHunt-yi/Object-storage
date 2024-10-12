@@ -41,14 +41,7 @@
             style="width: 30%; position: relative; top: 10px"
           />
         </el-form-item>
-        <el-form-item style="margin-bottom: 5px; text-align: center">
-          <el-button
-            class="user-btn"
-            style="width: 30%"
-            type="primary"
-            @click="login()"
-            >登录</el-button
-          >
+        <!-- <el-form-item style="margin-bottom: 5px; text-align: center">
           <el-button
             class="user-btn"
             style="width: 30%"
@@ -56,9 +49,19 @@
             @click="faceApprove()"
             >人脸认证</el-button
           >
+        </el-form-item> -->
+        <el-form-item style="margin-bottom: 5px; text-align: center">
           <el-button
             class="user-btn"
-            style="width: 30%"
+            style="width: 45%"
+            type="primary"
+            @click="login()"
+            >登录</el-button
+          >
+
+          <el-button
+            class="user-btn"
+            style="width: 45%"
             type="primary"
             @click="(dialogFormRegister = true), updateVerifyCode()"
             >注册</el-button
@@ -69,7 +72,7 @@
     <el-dialog
       title="注册"
       :visible.sync="dialogFormRegister"
-      style="width: 60%; margin: auto"
+      style="width: 60%; margin: auto; position: relative; top: -50px"
     >
       <el-form
         :model="newuser"
@@ -127,7 +130,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="请选择拍摄正脸照片以用于后续登录认证"
+          label="请选择拍摄正脸照片以用于后续登录认证（点击图片重新拍摄）"
           label-position="left"
           :label-width="formLabelWidth"
           prop="newMobile"
@@ -135,7 +138,13 @@
           <el-button v-if="!capturedImage" type="primary" @click="faceApprove()"
             >开始拍摄</el-button
           >
-          <img v-if="capturedImage" :src="capturedImage" alt="Captured Image" />
+          <img
+            v-if="capturedImage"
+            :src="capturedImage"
+            alt="Captured Image"
+            width="90%"
+            @click="faceApprove()"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -146,10 +155,17 @@
       </div>
     </el-dialog>
     <el-dialog :visible.sync="dialogface">
-      <video ref="video" autoplay></video>
-      <button @click="capture">Capture</button>
+      <h1>{{ facetitle }}</h1>
+      <video ref="video" autoplay width="100%"></video>
+      <br />
+      <el-button v-if="this.facetitle == '人脸认证'" @click="captureTorecognize"
+        >人脸识别</el-button
+      >
+      <el-button v-if="this.facetitle !== '人脸认证'" @click="capture"
+        >拍摄</el-button
+      >
       <canvas ref="canvas" style="display: none"></canvas>
-      <img :src="capturedImage" alt="Captured Image" />
+      <!-- <img :src="capturedImage" alt="Captured Image" /> -->
     </el-dialog>
   </div>
 </template>
@@ -215,6 +231,42 @@ export default {
           },
         ],
       },
+      registerRules: {
+        newUsername: [
+          { required: true, message: "请输入用户名", trigger: "blur" },
+          {
+            min: 3,
+            max: 15,
+            message: "用户名长度在 3 到 15 个字符",
+            trigger: "blur",
+          },
+        ],
+        newPassword: [
+          { required: true, message: "请输入密码", trigger: "blur" },
+          {
+            min: 6,
+            max: 20,
+            message: "密码长度在 6 到 20 个字符",
+            trigger: "blur",
+          },
+        ],
+        newEmail: [
+          { required: true, message: "请输入邮箱地址", trigger: "blur" },
+          {
+            type: "email",
+            message: "请输入正确的邮箱地址格式",
+            trigger: "blur,change",
+          },
+        ],
+        newMobile: [
+          { required: true, message: "请输入手机号", trigger: "blur" },
+          {
+            pattern: /^1[3-9]\d{9}$/,
+            message: "请输入正确的手机号码格式",
+            trigger: "blur",
+          },
+        ],
+      },
       newuser: {
         newUsername: "",
         newPassword: "",
@@ -227,6 +279,7 @@ export default {
       capturedImage: null,
       mediaStream: null,
       imageUrl: "",
+      facetitle: "",
     };
   },
   mounted() {
@@ -265,9 +318,10 @@ export default {
           return this.$message.error(res.msg);
         } else {
           window.sessionStorage.setItem("authority", res.data.id);
-          this.$message.success(res.msg);
           window.sessionStorage.setItem("token", res.data.token);
-          this.$router.push("home");
+          this.facetitle = "人脸认证";
+          this.startCamera();
+          this.dialogface = true;
         }
       });
     },
@@ -282,21 +336,27 @@ export default {
           email: this.newuser.newEmail,
           mobile: this.newuser.newMobile,
         });
+        if (res.status !== 200) {
+          return this.$message.error(res.msg);
+        }
         const fromData = new FormData();
-        const bolbfile = await fetch(this.imageUrl).then((res) => {
-          return res.blob();
+        const bolbfile = await fetch(this.capturedImage).then((res) => {
+          console.log(res);
+          return res.blob().then((res) => {
+            return new File([res], this.newuser.newUsername + ".jpg", {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+          });
         });
-        fromData.append("file", bolbfile);
+        fromData.append("image", bolbfile);
         fromData.append("imageId", this.newuser.newUsername);
-        console.log(fromData.get("file"), fromData, this.imageUrl);
+        console.log(fromData.get("image"), fromData, this.capturedImage);
+        console.log(fromData);
+
         const { data: res2 } = await axios.post(
-          "http://127.0.0.1:9000/uploadImage",
-          fromData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          "http://127.0.0.1:7000/uploadImage",
+          fromData
         );
         if (res.status == 200 && res2.status == 200) {
           this.$message.success("注册用户成功！");
@@ -329,9 +389,37 @@ export default {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      this.capturedImage = canvas.toDataURL("image/png");
+      this.capturedImage = canvas.toDataURL("image/jpeg");
+      this.dialogface = false;
       //这个是要上传的图片base64格式
       console.log(this.capturedImage);
+    },
+    async captureTorecognize() {
+      const video = this.$refs.video;
+      const canvas = this.$refs.canvas;
+      const context = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      this.capturedImage = canvas.toDataURL("image/jpeg");
+      this.dialogface = false;
+      const formData = new FormData();
+      const bolbfile = await fetch(this.capturedImage).then((res) => {
+        return res.blob();
+      });
+      formData.append("file", bolbfile);
+      const { data: res } = await axios.post(
+        "http://127.0.0.1:7000/recognize",
+        formData
+      );
+      if (res.person_names[0] === this.loginForm.username) {
+        this.$message.success("人脸识别成功");
+        this.$router.push("home");
+      } else {
+        console.log(res.person_names[0], this.loginForm.username);
+        this.$message.error("人脸识别失败");
+        window.sessionStorage.clear();
+      }
     },
     stopCamera() {
       if (this.mediaStream) {
@@ -404,6 +492,11 @@ export default {
   background-color: #00000059;
   border-color: #00000057;
 }
+.face-btn {
+  color: #fff;
+  background-color: #00000059;
+  border-color: #00000057;
+}
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
@@ -427,5 +520,8 @@ export default {
   width: 178px;
   height: 178px;
   display: block;
+}
+/deep/.el-form-item__label {
+  text-align: left;
 }
 </style>
