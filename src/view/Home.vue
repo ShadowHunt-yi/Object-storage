@@ -103,8 +103,17 @@
             >手势模式</el-button
           >
           <div style="position: absolute; right: 0">
-            <video ref="videoElement" autoplay muted width="200px"></video>
-            <canvas ref="canvasElement" style="display: none"></canvas>
+            <video
+              ref="videoElement"
+              autoplay
+              muted
+              width="200px"
+              style="display: none"
+            ></video>
+            <canvas
+              ref="canvasElement"
+              style="width: 192px; height: 108px"
+            ></canvas>
           </div>
           <el-button type="info" @click="logout">退出</el-button>
         </div>
@@ -122,6 +131,7 @@
 
 <script>
 import { Camera } from "@mediapipe/camera_utils";
+import * as drawingUtils from "@mediapipe/drawing_utils";
 import * as mpHands from "@mediapipe/hands";
 import screenfull from "screenfull";
 import Hamburger from "../components/Hamburger";
@@ -158,11 +168,16 @@ export default {
       videoElement: null,
       canvasElement: null,
       canvasCtx: null,
+      config: null,
+      gestureMarked: null,
+      gestureMarked1: null,
+      timeMarked: new Date().getTime(),
     };
   },
   created() {
     this.getMenuList();
     this.acvtivePath = window.sessionStorage.getItem("acvtivePath");
+    console.log("created");
   },
   mounted() {
     window.onresize = () => {
@@ -171,8 +186,17 @@ export default {
         // 全屏下按键esc后要执行的动作
         this.isFullscreen = false;
       }
-      this.initCamera();
     };
+    console.log("mounted");
+    this.config = {
+      locateFile: (file) => {
+        console.log(file, 111);
+        // return `https://fastly.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
+        return `http://127.0.0.1:10000/${file}`;
+        // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@/${file}`;
+      },
+    };
+    this.initCamera();
   },
   watch: {
     $route(to, from) {
@@ -231,6 +255,7 @@ export default {
       // this.hands.onResults(onResults);
     },
     onResults(results) {
+      // console.log(4);
       this.canvasCtx.save();
       this.canvasCtx.clearRect(
         0,
@@ -245,53 +270,302 @@ export default {
         this.canvasElement.width,
         this.canvasElement.height
       );
-
       if (results.multiHandLandmarks && results.multiHandedness) {
-        results.multiHandLandmarks.forEach((landmarks, index) => {
+        for (
+          let index = 0;
+          index < results.multiHandLandmarks.length;
+          index++
+        ) {
           const classification = results.multiHandedness[index];
           const isRightHand = classification.label === "Right";
+          const landmarks = results.multiHandLandmarks[index];
           drawingUtils.drawConnectors(
             this.canvasCtx,
             landmarks,
             mpHands.HAND_CONNECTIONS,
-            {
-              color: isRightHand ? "#00FF00" : "#FF0000",
-            }
+            { color: isRightHand ? "#00FF00" : "#FF0000" }
           );
           drawingUtils.drawLandmarks(this.canvasCtx, landmarks, {
             color: isRightHand ? "#00FF00" : "#FF0000",
             fillColor: isRightHand ? "#FF0000" : "#00FF00",
+            radius: (data) => {
+              return drawingUtils.lerp(data.from.z, -0.15, 0.1, 8, 1);
+            },
           });
-        });
+          //打印坐标
+          //console.log(index, landmarks);
+          let t = new Date().getTime();
+          let gesture = this.isFistGesture(landmarks);
+          if (gesture) {
+            // 调用你的函数
+            let timeMark = t;
+
+            if (this.timeMarked <= timeMark - 1000) {
+              //单击事件需要刷新时间与手势状态，以接收下一个手势
+              console.log("gesture:" + gesture);
+              console.log("gestureMarked:" + this.gestureMarked);
+
+              if (gesture == this.gestureMarked) {
+                // let element = document.getElementsByClassName("notion")[0];
+                // element.style.display = "block";
+                if (gesture == 5) {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  //平移，传入中指指尖，用指尖的相对移动来移动模型xy轴
+                  console.log("传入中指尖参数：{}", landmarks[12]);
+                  // moveModel(landmarks[12]);
+                } else if (gesture == 4) {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  //平移，传入中指指尖，用指尖的相对移动来移动模型xy轴
+                  console.log("传入中指尖参数：{}", landmarks[12]);
+                  // moveCam(landmarks[12]);
+                } else if (gesture == 2) {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  // rotateCam();
+                } else {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  if (gesture == 6 || gesture == 7) {
+                    // setSize(gesture);
+                  }
+
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  // yourFunction();
+                }
+              }
+              //长按或拖动等操作需要判断当前手势是否改变
+            }
+            //与上一帧的手势不同
+            if (gesture != this.gestureMarked1 || gesture == false) {
+              console.log("手势变化，gesture：" + gesture);
+              console.log("手势变化，gestureMarked1：" + this.gestureMarked1);
+              this.gestureMarked1 = gesture;
+              //刷新时间
+              this.gestureMarked = gesture;
+              this.timeMarked = t;
+              console.log("刷新时间");
+            }
+
+            // yourFunction();
+          }
+        }
       }
       this.canvasCtx.restore();
     },
     initCamera() {
       this.videoElement = this.$refs.videoElement;
       this.canvasElement = this.$refs.canvasElement;
+      console.log("initCamera", this.canvasElement);
       this.canvasCtx = this.canvasElement.getContext("2d");
-
-      const config = {
-        locateFile: (file) => {
-          console.log(file);
-
-          return `https://fastly.jsdelivr.net/npm/@mediapipe/hands@0.3/${file}`;
+      console.log(this.config, 2);
+      console.log(new mpHands.Hands());
+      this.hands = new mpHands.Hands(this.config);
+      console.log(this.hands, 3);
+      this.hands.onResults(this.onResults.bind(this.hands));
+      this.hands.setOptions({
+        selfieMode: true,
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+      const camera = new Camera(this.videoElement, {
+        onFrame: async () => {
+          await this.hands.send({ image: this.videoElement });
         },
-      };
-      console.log(config);
+        width: 1280,
+        height: 720,
+      });
+      camera.start();
+      console.log("last");
+    },
+    isFistGesture(landmarks) {
+      // 获取食指关键点信息
+      const indexFigure1 = landmarks[8];
+      const indexFigure2 = landmarks[7];
+      const indexFigure3 = landmarks[6];
+      const indexFigure4 = landmarks[5];
 
-      this.hands = new mpHands.Hands(config);
-      this.hands.onResults(this.onResults.bind(this));
+      //拇指
+      const thumb1 = landmarks[4];
+      const thumb2 = landmarks[3];
+      const thumb3 = landmarks[2];
+      const thumb4 = landmarks[1];
 
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          this.videoElement.srcObject = stream;
-          this.videoElement.play();
-        })
-        .catch((error) => {
-          console.error("Error accessing the camera.", error);
-        });
+      //指尖
+      const thumbTip = landmarks[4];
+      const middleFingerTip = landmarks[12];
+      const ringFingerTip = landmarks[16];
+      const pinkyTip = landmarks[20];
+
+      // 获取中指关键点信息
+      const middleFinger1 = landmarks[12];
+      const middleFinger2 = landmarks[11];
+      const middleFinger3 = landmarks[10];
+      const middleFinger4 = landmarks[9];
+
+      //获取无名指关键点信息
+      const ringFinger1 = landmarks[16];
+      const ringFinger2 = landmarks[15];
+      const ringFinger3 = landmarks[14];
+      const ringFinger4 = landmarks[13];
+
+      //获取小指关键点信息
+      const pinky1 = landmarks[20];
+      const pinky2 = landmarks[19];
+      const pinky3 = landmarks[18];
+      const pinky4 = landmarks[17];
+
+      //手腕
+      const figure0 = landmarks[0];
+
+      // 判断手势二
+      if (
+        // //食指
+        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //大拇指 第一 二指节弯曲
+        (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
+          this.angle(thumb2, thumb3, thumb4) > -0.9) &&
+        //无名指 小指 第二三指节 弯曲
+        //无名指
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.8 &&
+        this.angle(pinky2, pinky3, pinky4) > -0.8
+      ) {
+        console.log("手势二识别成功");
+        return 2;
+      } else if (
+        //判断手势一
+
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //大拇指 第一 二指节弯曲
+        (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
+          this.angle(thumb2, thumb3, thumb4) > -0.9) &&
+        this.angle(pinky2, pinky3, pinky4) > -0.8 &&
+        //无名指 小指 第二三指节 弯曲
+        //无名指
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //中指弯曲
+        this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5
+        //拇指
+      ) {
+        console.log("手势一识别成功！");
+        return 1;
+      } else if (
+        //食指 中指 无名指打直
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //中指 第二 三指节为打直状态
+        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+        //无名指 第二 三指节为打直状态
+        this.angle(ringFinger2, ringFinger3, ringFinger4) < -0.8 &&
+        //拇指 小指弯曲
+        (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
+          this.angle(thumb2, thumb3, thumb4) > -0.9) &&
+        this.angle(pinky2, pinky3, pinky4) > -0.8
+      ) {
+        console.log("手势三识别成功");
+        return 3;
+      } else if (
+        // //手势四
+
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //中指 第二 三指节为打直状态
+        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+        //无名指 第二 三指节为打直状态
+        this.angle(ringFinger2, ringFinger3, ringFinger4) < -0.8 &&
+        //小指 打直
+        this.angle(pinky2, pinky3, pinky4) < -0.8 &&
+        //拇指弯曲
+        this.angle(thumb1, thumb2, thumb3) > -0.9
+      ) {
+        console.log("手势四判断成功");
+        return 4;
+      } else if (
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //中指 第二 三指节为打直状态
+        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+        //无名指 第二 三指节为打直状态
+        this.angle(ringFinger2, ringFinger3, ringFinger4) < -0.8 &&
+        //小指 打直
+        this.angle(pinky2, pinky3, pinky4) < -0.8 &&
+        //拇指直
+        this.angle(thumb1, thumb2, thumb3) < -0.8
+      ) {
+        console.log("手势五判断成功");
+        return 5;
+      } else if (
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //拇指直
+        this.angle(thumb1, thumb2, thumb3) < -0.8 &&
+        //无名指
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //中指弯曲
+        this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
+        this.angle(indexFigure1, figure0, thumb1) > 0.8
+      ) {
+        console.log("手势六判断成功");
+        return 6;
+      } else if (
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //拇指直
+        this.angle(thumb1, thumb2, thumb3) < -0.8 &&
+        //无名指
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //中指弯曲
+        this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
+        this.angle(indexFigure1, figure0, thumb1) < 0.7
+      ) {
+        console.log("手势七判断成功");
+        return 7;
+      }
+
+      return false;
+    },
+    angle(p1, p2, p3) {
+      //顶角为a
+      var a = this.dist3D(p1.x, p1.y, p1.z, p3.x, p3.y, p3.z);
+      var b = this.dist3D(p1.x, p1.y, p2.z, p2.x, p2.y, p2.z);
+      var c = this.dist3D(p3.x, p3.y, p3.z, p2.x, p2.y, p2.z);
+
+      var cosA = (b * b + c * c - a * a) / (2 * c * b);
+      //console.log("cosA:"+cosA)
+      return cosA;
+    },
+    dist2D(x1, y1, x2, y2) {
+      var a = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+      return a;
+    },
+    dist3D(x1, y1, z1, x2, y2, z2) {
+      var a = Math.sqrt(
+        (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2)
+      );
+      return a;
     },
   },
 };
