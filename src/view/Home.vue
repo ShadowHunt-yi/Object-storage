@@ -158,11 +158,6 @@ export default {
       acvtivePath: "",
       transitionName: "",
       dialogVisible: false,
-      // config: new Hands({
-      //   locateFile: (file) => {
-      //     return `/node_modules/@mediapipe/hands/${file}`;
-      //   },
-      // }),
       camera: null,
       hands: null,
       videoElement: null,
