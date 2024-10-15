@@ -156,15 +156,12 @@
     </el-dialog>
     <el-dialog :visible.sync="dialogface">
       <h1>{{ facetitle }}</h1>
-      <video ref="video" autoplay width="300px"></video>
+      <video ref="video" autoplay width="100%"></video>
       <br />
-      <el-button v-if="this.facetitle == '人脸认证'" @click="initCamera"
-        >人脸识别</el-button
-      >
-      <el-button v-if="this.facetitle !== '人脸认证'" @click="capture"
+      <el-button v-if="this.facetitle == '拍摄'" @click="capture"
         >拍摄</el-button
       >
-      <canvas ref="canvas" style="width: 300px"></canvas>
+      <canvas ref="canvas" style="width: 300px; display: none"></canvas>
       <!-- <img :src="capturedImage" alt="Captured Image" /> -->
     </el-dialog>
   </div>
@@ -290,7 +287,7 @@ export default {
       videoElement: null,
       solutionOptions: null,
       lastMessageTime: 0,
-      messageInterval: 5000,
+      messageInterval: 3000,
       nowtime: Date.now(),
     };
   },
@@ -301,6 +298,16 @@ export default {
         return `http://127.0.0.1:10000/${file}`;
       },
     };
+  },
+  beforeDestroy() {
+    if (this.camera) {
+      this.camera.stop();
+      this.camera = null;
+    }
+    if (this.faceMesh) {
+      this.faceMesh.reset();
+      this.faceMesh = null;
+    }
   },
   methods: {
     changeShown() {
@@ -387,7 +394,7 @@ export default {
     },
 
     faceApprove() {
-      console.log("开启人脸识别");
+      this.facetitle = "拍摄";
       this.dialogface = true;
       this.startCamera();
     },
@@ -433,11 +440,11 @@ export default {
       );
       if (res.person_names[0] === this.loginForm.username) {
         console.log(res.person_names[0]);
-
-        // this.$message.success("人脸识别成功");
+        this.stopCamera();
         this.$router.push("home");
         this.$message.success(`欢迎${this.loginForm.username}登录`);
       } else {
+        this.stopCamera();
         console.log(res.person_names[0], this.loginForm.username);
         this.$message.error("人脸识别失败");
         window.sessionStorage.clear();
@@ -485,11 +492,14 @@ export default {
       const camera = new Camera(this.videoElement, {
         onFrame: async () => {
           await this.faceMesh.send({ image: this.videoElement });
-          this.facetitle = "请张张嘴";
+          setTimeout(() => {
+            this.facetitle = "请张张嘴";
+          }, 1500);
         },
         width: 1280,
         height: 720,
       });
+      this.$message.success("人脸识别模块加载成功");
       camera.start();
     },
     async onResults(results) {
@@ -581,7 +591,9 @@ export default {
           ) {
             this.lastMessageTime = this.nowtime;
             this.$message.success("张嘴验证成功");
-            this.captureTorecognize();
+            setTimeout(() => {
+              this.captureTorecognize();
+            }, 1500);
           }
         }
       }
@@ -617,6 +629,34 @@ export default {
       const angleInDegrees = angle * (180 / Math.PI);
 
       return angleInDegrees;
+    },
+    stopCamera() {
+      if (this.camera) {
+        this.camera.stop();
+        this.camera = null;
+      }
+      if (this.faceMesh) {
+        this.faceMesh.reset();
+        this.faceMesh = null;
+      }
+      if (this.canvasCtx) {
+        this.canvasCtx.clearRect(
+          0,
+          0,
+          this.canvasElement.width,
+          this.canvasElement.height
+        );
+      }
+      // 释放视频元素
+      if (this.videoElement) {
+        this.videoElement.pause();
+        let tracks = this.videoElement.srcObject.getTracks();
+        tracks.forEach(function (track) {
+          track.stop();
+        });
+        this.videoElement.srcObject = null;
+        this.videoElement = null;
+      }
     },
   },
 };

@@ -112,7 +112,13 @@
             ></video>
             <canvas
               ref="canvasElement"
-              style="width: 192px; height: 108px"
+              style="
+                width: 192px;
+                height: 108px;
+                position: relative;
+                right: 20px;
+                z-index: 9999;
+              "
             ></canvas>
           </div>
           <el-button type="info" @click="logout">退出</el-button>
@@ -167,6 +173,8 @@ export default {
       gestureMarked: null,
       gestureMarked1: null,
       timeMarked: new Date().getTime(),
+      handvideo: 0,
+      camera: null,
     };
   },
   created() {
@@ -191,7 +199,6 @@ export default {
         // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@/${file}`;
       },
     };
-    this.initCamera();
   },
   watch: {
     $route(to, from) {
@@ -243,11 +250,12 @@ export default {
       return isFull;
     },
     handControl() {
-      console.log("手势模式");
-      // this.dialogVisible = true;
-      console.log(this.config);
-      // this.hands = new Hands(this.config);
-      // this.hands.onResults(onResults);
+      this.handvideo = !this.handvideo;
+      if (this.handvideo) {
+        this.initCamera();
+      } else {
+        this.stopCamera();
+      }
     },
     onResults(results) {
       // console.log(4);
@@ -365,6 +373,7 @@ export default {
       this.canvasCtx.restore();
     },
     initCamera() {
+      this.$refs.canvasElement.style.display = "block";
       this.videoElement = this.$refs.videoElement;
       this.canvasElement = this.$refs.canvasElement;
       console.log("initCamera", this.canvasElement);
@@ -381,14 +390,14 @@ export default {
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5,
       });
-      const camera = new Camera(this.videoElement, {
+      this.camera = new Camera(this.videoElement, {
         onFrame: async () => {
           await this.hands.send({ image: this.videoElement });
         },
         width: 1280,
         height: 720,
       });
-      camera.start();
+      this.camera.start();
       console.log("last");
     },
     isFistGesture(landmarks) {
@@ -562,6 +571,17 @@ export default {
         (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2)
       );
       return a;
+    },
+    stopCamera() {
+      if (this.camera) {
+        this.camera.stop();
+        this.camera = null;
+      }
+      if (this.hands) {
+        this.hands.reset();
+        this.hands = null;
+      }
+      this.$refs.canvasElement.style.display = "none";
     },
   },
 };
