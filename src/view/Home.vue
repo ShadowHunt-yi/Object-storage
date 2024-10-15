@@ -291,9 +291,10 @@ export default {
           //console.log(index, landmarks);
           let t = new Date().getTime();
           let gesture = this.isFistGesture(landmarks);
-          if (gesture) {
+          if (gesture && results.multiHandedness[0].label == "Right") {
             // 调用你的函数
             let timeMark = t;
+            console.log(333333333, results);
 
             if (this.timeMarked <= timeMark - 1000) {
               //单击事件需要刷新时间与手势状态，以接收下一个手势

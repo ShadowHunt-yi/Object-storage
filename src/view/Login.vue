@@ -156,15 +156,15 @@
     </el-dialog>
     <el-dialog :visible.sync="dialogface">
       <h1>{{ facetitle }}</h1>
-      <video ref="video" autoplay width="100%"></video>
+      <video ref="video" autoplay width="300px"></video>
       <br />
-      <el-button v-if="this.facetitle == '人脸认证'" @click="captureTorecognize"
+      <el-button v-if="this.facetitle == '人脸认证'" @click="initCamera"
         >人脸识别</el-button
       >
       <el-button v-if="this.facetitle !== '人脸认证'" @click="capture"
         >拍摄</el-button
       >
-      <canvas ref="canvas" style="display: none"></canvas>
+      <canvas ref="canvas" style="width: 300px"></canvas>
       <!-- <img :src="capturedImage" alt="Captured Image" /> -->
     </el-dialog>
   </div>
@@ -172,6 +172,9 @@
 
 <script>
 import axios from "axios";
+import { Camera } from "@mediapipe/camera_utils";
+import * as drawingUtils from "@mediapipe/drawing_utils";
+import * as mpFaceMesh from "@mediapipe/face_mesh";
 export default {
   data() {
     return {
@@ -280,10 +283,24 @@ export default {
       mediaStream: null,
       imageUrl: "",
       facetitle: "",
+      config: null,
+      faceMesh: null,
+      canvasCtx: null,
+      canvasElement: null,
+      videoElement: null,
+      solutionOptions: null,
+      lastMessageTime: 0,
+      messageInterval: 5000,
+      nowtime: Date.now(),
     };
   },
   mounted() {
     this.typing();
+    this.config = {
+      locateFile: (file) => {
+        return `http://127.0.0.1:10000/${file}`;
+      },
+    };
   },
   methods: {
     changeShown() {
@@ -320,8 +337,10 @@ export default {
           window.sessionStorage.setItem("authority", res.data.id);
           window.sessionStorage.setItem("token", res.data.token);
           this.facetitle = "人脸认证";
-          this.startCamera();
           this.dialogface = true;
+          setTimeout(() => {
+            this.initCamera();
+          }, 0);
         }
       });
     },
@@ -413,8 +432,11 @@ export default {
         formData
       );
       if (res.person_names[0] === this.loginForm.username) {
-        this.$message.success("人脸识别成功");
+        console.log(res.person_names[0]);
+
+        // this.$message.success("人脸识别成功");
         this.$router.push("home");
+        this.$message.success(`欢迎${this.loginForm.username}登录`);
       } else {
         console.log(res.person_names[0], this.loginForm.username);
         this.$message.error("人脸识别失败");
@@ -440,6 +462,161 @@ export default {
       this.imageUrl = URL.createObjectURL(file.raw);
 
       return isJPG && isLt2M;
+    },
+    initCamera() {
+      console.log(this.config);
+
+      this.videoElement = this.$refs.video;
+      this.canvasElement = this.$refs.canvas;
+      console.log(this.videoElement, this.canvasElement);
+
+      this.canvasCtx = this.canvasElement.getContext("2d");
+      this.solutionOptions = {
+        selfieMode: true,
+        enableFaceGeometry: false,
+        maxNumFaces: 1,
+        refineLandmarks: false,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      };
+      this.faceMesh = new mpFaceMesh.FaceMesh(this.config);
+      this.faceMesh.setOptions(this.solutionOptions);
+      this.faceMesh.onResults(this.onResults);
+      const camera = new Camera(this.videoElement, {
+        onFrame: async () => {
+          await this.faceMesh.send({ image: this.videoElement });
+          this.facetitle = "请张张嘴";
+        },
+        width: 1280,
+        height: 720,
+      });
+      camera.start();
+    },
+    async onResults(results) {
+      this.canvasCtx.save();
+      this.canvasCtx.clearRect(
+        0,
+        0,
+        this.canvasElement.width,
+        this.canvasElement.height
+      );
+      this.canvasCtx.drawImage(
+        results.image,
+        0,
+        0,
+        this.canvasElement.width,
+        this.canvasElement.height
+      );
+      if (results.multiFaceLandmarks) {
+        for (const landmarks of results.multiFaceLandmarks) {
+          console.log(
+            landmarks,
+            mpFaceMesh,
+            this.calculateAngleCAB(landmarks[61], landmarks[291], landmarks[13])
+            // landmarks.landmark[mpFaceMesh.FaceMesh.LEFT_MOUTH]
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_TESSELATION,
+            { color: "#C0C0C070", lineWidth: 0.5 }
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_RIGHT_EYE,
+            { color: "#FF3030", lineWidth: 0.5 }
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_RIGHT_EYEBROW,
+            { color: "#FF3030", lineWidth: 0.5 }
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_LEFT_EYE,
+            { color: "#30FF30", lineWidth: 0.5 }
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_LEFT_EYEBROW,
+            { color: "#30FF30", lineWidth: 0.5 }
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_FACE_OVAL,
+            { color: "#E0E0E0", lineWidth: 0.5 }
+          );
+          drawingUtils.drawConnectors(
+            this.canvasCtx,
+            landmarks,
+            mpFaceMesh.FACEMESH_LIPS,
+            { color: "#ed494c", lineWidth: 0.5 }
+          );
+          if (this.solutionOptions.refineLandmarks) {
+            drawingUtils.drawConnectors(
+              this.canvasCtx,
+              landmarks,
+              mpFaceMesh.FACEMESH_RIGHT_IRIS,
+              { color: "#FF3030", lineWidth: 0.5 }
+            );
+            drawingUtils.drawConnectors(
+              this.canvasCtx,
+              landmarks,
+              mpFaceMesh.FACEMESH_LEFT_IRIS,
+              { color: "#30FF30", lineWidth: 0.5 }
+            );
+          }
+          if (
+            this.calculateAngleCAB(
+              landmarks[61],
+              landmarks[291],
+              landmarks[13]
+            ) > 35 &&
+            this.nowtime - this.lastMessageTime > this.messageInterval
+          ) {
+            this.lastMessageTime = this.nowtime;
+            this.$message.success("张嘴验证成功");
+            this.captureTorecognize();
+          }
+        }
+      }
+      this.canvasCtx.restore();
+    },
+    calculateAngleCAB(A, B, C) {
+      // 计算向量AB和AC
+      const AB = {
+        x: B.x - A.x,
+        y: B.y - A.y,
+        z: B.z - A.z,
+      };
+      const AC = {
+        x: C.x - A.x,
+        y: C.y - A.y,
+        z: C.z - A.z,
+      };
+
+      // 计算向量AB和AC的点积
+      const dotProduct = AB.x * AC.x + AB.y * AC.y + AB.z * AC.z;
+
+      // 计算向量AB和AC的模长
+      const magnitudeAB = Math.sqrt(AB.x ** 2 + AB.y ** 2 + AB.z ** 2);
+      const magnitudeAC = Math.sqrt(AC.x ** 2 + AC.y ** 2 + AC.z ** 2);
+
+      // 计算夹角的余弦值
+      const cosTheta = dotProduct / (magnitudeAB * magnitudeAC);
+
+      // 计算夹角，结果是弧度制
+      const angle = Math.acos(cosTheta);
+
+      // 如果需要角度制，可以转换
+      const angleInDegrees = angle * (180 / Math.PI);
+
+      return angleInDegrees;
     },
   },
 };
