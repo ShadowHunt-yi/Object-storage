@@ -30,6 +30,7 @@
       </div>
       <!-- 侧边栏菜单区域 -->
       <el-menu
+        ref="menu"
         background-color="#304156"
         text-color="#fff"
         active-text-color="#409eff"
@@ -41,6 +42,7 @@
       >
         <!-- 一级菜单 -->
         <el-submenu
+          ref="subMenu"
           :index="item.id + ''"
           v-for="item in menuList"
           :key="item.id"
@@ -49,7 +51,7 @@
           <template slot="title">
             <!-- 图标 -->
             <i :class="iconObj[item.id]"></i>
-            <span>{{ item.name }}</span>
+            <span @click="saveNavsub(item.id)">{{ item.name }}</span>
           </template>
           <!-- 二级菜单 -->
           <el-menu-item
@@ -175,6 +177,14 @@ export default {
       timeMarked: new Date().getTime(),
       handvideo: 0,
       camera: null,
+      subID: window.sessionStorage.getItem("subID"),
+      enumSub: {
+        100: 0,
+        102: 1,
+        109: 2,
+        126: 3,
+        121: 4,
+      },
     };
   },
   created() {
@@ -226,6 +236,10 @@ export default {
     saveNavState(acvtivePath) {
       window.sessionStorage.setItem("acvtivePath", acvtivePath);
       this.acvtivePath = acvtivePath;
+    },
+    saveNavsub(id) {
+      window.sessionStorage.setItem("subID", id);
+      this.subID = id;
     },
     /**
      * 全屏事件
@@ -302,8 +316,6 @@ export default {
           if (gesture && results.multiHandedness[0].label == "Right") {
             // 调用你的函数
             let timeMark = t;
-            console.log(333333333, results);
-
             if (this.timeMarked <= timeMark - 1000) {
               //单击事件需要刷新时间与手势状态，以接收下一个手势
               console.log("gesture:" + gesture);
@@ -337,12 +349,14 @@ export default {
                       gesture
                   );
                   // rotateCam();
-                } else {
+                } else if (gesture == 1) {
                   console.log(
                     timeMark - this.timeMarked,
                     "================================================================成功调用：" +
                       gesture
                   );
+                  // this.openMenu(100, gesture);
+                  this.upSubMenu();
                   if (gesture == 6 || gesture == 7) {
                     // setSize(gesture);
                   }
@@ -454,7 +468,7 @@ export default {
         this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.8 &&
         this.angle(pinky2, pinky3, pinky4) > -0.8
       ) {
-        console.log("手势二识别成功");
+        // console.log("手势二识别成功");
         return 2;
       } else if (
         //判断手势一
@@ -473,7 +487,7 @@ export default {
         this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5
         //拇指
       ) {
-        console.log("手势一识别成功！");
+        // console.log("手势一识别成功！");
         return 1;
       } else if (
         //食指 中指 无名指打直
@@ -488,7 +502,7 @@ export default {
           this.angle(thumb2, thumb3, thumb4) > -0.9) &&
         this.angle(pinky2, pinky3, pinky4) > -0.8
       ) {
-        console.log("手势三识别成功");
+        // console.log("手势三识别成功");
         return 3;
       } else if (
         // //手势四
@@ -504,7 +518,7 @@ export default {
         //拇指弯曲
         this.angle(thumb1, thumb2, thumb3) > -0.9
       ) {
-        console.log("手势四判断成功");
+        // console.log("手势四判断成功");
         return 4;
       } else if (
         //食指 第二 三指节为打直状态
@@ -518,7 +532,7 @@ export default {
         //拇指直
         this.angle(thumb1, thumb2, thumb3) < -0.8
       ) {
-        console.log("手势五判断成功");
+        // console.log("手势五判断成功");
         return 5;
       } else if (
         //食指 第二 三指节为打直状态
@@ -532,7 +546,7 @@ export default {
         this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
         this.angle(indexFigure1, figure0, thumb1) > 0.8
       ) {
-        console.log("手势六判断成功");
+        // console.log("手势六判断成功");
         return 6;
       } else if (
         //食指 第二 三指节为打直状态
@@ -546,7 +560,7 @@ export default {
         this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
         this.angle(indexFigure1, figure0, thumb1) < 0.7
       ) {
-        console.log("手势七判断成功");
+        // console.log("手势七判断成功");
         return 7;
       }
 
@@ -582,6 +596,82 @@ export default {
         this.hands = null;
       }
       this.$refs.canvasElement.style.display = "none";
+    },
+    openMenu(index, num) {
+      console.log(this.menuList);
+      switch (index) {
+        case 1:
+          if (this.$refs.menu.openedMenus[0] == 100) {
+            // console.log(this.$refs.subMenu);
+            this.$refs.subMenu[0].$children[0].handleClick();
+          } else {
+            this.$refs.subMenu[0].handleClick();
+          }
+          console.log(this.$refs.subMenu, this.$refs.menu);
+          break;
+        case 2:
+          if (this.$refs.menu.openedMenus[0] == 102) {
+            // console.log(this.$refs.subMenu);
+            this.$refs.subMenu[0].$children[0].handleClick();
+          } else {
+            this.$refs.subMenu[1].handleClick();
+          }
+          break;
+        case 3:
+          if (this.$refs.menu.openedMenus[0] == 109) {
+            if (num == 1) {
+              this.$refs.subMenu[0].$children[0].handleClick();
+            } else {
+              this.$refs.subMenu[0].$children[1].handleClick();
+            }
+          } else {
+            this.$refs.subMenu[2].handleClick();
+          }
+          break;
+        case 4:
+          if (this.$refs.menu.openedMenus[0] == 126) {
+            // console.log(this.$refs.subMenu);
+            this.$refs.subMenu[0].$children[0].handleClick();
+          } else {
+            this.$refs.subMenu[3].handleClick();
+          }
+        case 5:
+          if (this.$refs.menu.openedMenus[0] == 121) {
+            if (num == 1) {
+              this.$refs.subMenu[0].$children[0].handleClick();
+            } else {
+              this.$refs.subMenu[0].$children[1].handleClick();
+            }
+          } else {
+            this.$refs.subMenu[4].handleClick();
+          }
+      }
+    },
+    upSubMenu() {
+      if (this.enumSub[this.subID] > 0) {
+        this.$refs.subMenu[this.enumSub[this.subID] - 1].handleClick();
+        this.subID = this.$refs.menu.openedMenus[0];
+        window.sessionStorage.setItem("subID", this.subID);
+        console.log(this.subID, this.$refs.menu.openedMenus[0]);
+      } else {
+        this.$refs.subMenu[4].handleClick();
+        console.log(this.$refs.menu);
+
+        this.subID = 121;
+        window.sessionStorage.setItem("subID", this.subID);
+        console.log(this.subID, this.$refs.menu.openedMenus[0]);
+      }
+    },
+    downSubMenu() {
+      if (this.enumSub[this.subID] < 3) {
+        this.$refs.subMenu[this.enumSub[this.subID] + 1].handleClick();
+        this.subID = this.$refs.menu.openedMenus[0];
+        window.sessionStorage.setItem("subID", this.subID);
+      } else {
+        this.$refs.subMenu[0].handleClick();
+        this.subID = 100;
+        window.sessionStorage.setItem("subID", this.subID);
+      }
     },
   },
 };

@@ -299,16 +299,16 @@ export default {
       },
     };
   },
-  beforeDestroy() {
-    if (this.camera) {
-      this.camera.stop();
-      this.camera = null;
-    }
-    if (this.faceMesh) {
-      this.faceMesh.reset();
-      this.faceMesh = null;
-    }
-  },
+  // beforeDestroy() {
+  //   if (this.camera) {
+  //     this.camera.stop();
+  //     this.camera = null;
+  //   }
+  //   if (this.faceMesh) {
+  //     this.faceMesh.reset();
+  //     this.faceMesh = null;
+  //   }
+  // },
   methods: {
     changeShown() {
       this.updateVerifyCode();
@@ -421,6 +421,7 @@ export default {
       console.log(this.capturedImage);
     },
     async captureTorecognize() {
+      console.log("fas");
       const video = this.$refs.video;
       const canvas = this.$refs.canvas;
       const context = canvas.getContext("2d");
@@ -444,15 +445,10 @@ export default {
         this.$router.push("home");
         this.$message.success(`欢迎${this.loginForm.username}登录`);
       } else {
-        this.stopCamera();
         console.log(res.person_names[0], this.loginForm.username);
         this.$message.error("人脸识别失败");
         window.sessionStorage.clear();
-      }
-    },
-    stopCamera() {
-      if (this.mediaStream) {
-        this.mediaStream.getTracks().forEach((track) => track.stop());
+        this.stopCamera();
       }
     },
     onUploadChange(file) {
@@ -519,12 +515,7 @@ export default {
       );
       if (results.multiFaceLandmarks) {
         for (const landmarks of results.multiFaceLandmarks) {
-          console.log(
-            landmarks,
-            mpFaceMesh,
-            this.calculateAngleCAB(landmarks[61], landmarks[291], landmarks[13])
-            // landmarks.landmark[mpFaceMesh.FaceMesh.LEFT_MOUTH]
-          );
+          this.nowtime = Date.now();
           drawingUtils.drawConnectors(
             this.canvasCtx,
             landmarks,
@@ -638,24 +629,6 @@ export default {
       if (this.faceMesh) {
         this.faceMesh.reset();
         this.faceMesh = null;
-      }
-      if (this.canvasCtx) {
-        this.canvasCtx.clearRect(
-          0,
-          0,
-          this.canvasElement.width,
-          this.canvasElement.height
-        );
-      }
-      // 释放视频元素
-      if (this.videoElement) {
-        this.videoElement.pause();
-        let tracks = this.videoElement.srcObject.getTracks();
-        tracks.forEach(function (track) {
-          track.stop();
-        });
-        this.videoElement.srcObject = null;
-        this.videoElement = null;
       }
     },
   },
