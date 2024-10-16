@@ -190,7 +190,6 @@ export default {
   created() {
     this.getMenuList();
     this.acvtivePath = window.sessionStorage.getItem("acvtivePath");
-    console.log("created");
   },
   mounted() {
     window.onresize = () => {
@@ -200,13 +199,10 @@ export default {
         this.isFullscreen = false;
       }
     };
-    console.log("mounted");
     this.config = {
       locateFile: (file) => {
-        console.log(file, 111);
         // return `https://fastly.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
         return `http://127.0.0.1:10000/${file}`;
-        // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@/${file}`;
       },
     };
   },
@@ -272,7 +268,6 @@ export default {
       }
     },
     onResults(results) {
-      // console.log(4);
       this.canvasCtx.save();
       this.canvasCtx.clearRect(
         0,
@@ -313,6 +308,9 @@ export default {
           //console.log(index, landmarks);
           let t = new Date().getTime();
           let gesture = this.isFistGesture(landmarks);
+          // console.log(this.angle(landmarks[11], landmarks[10], landmarks[9]));
+
+          // console.log(results.multiHandedness[0].label);
           if (gesture && results.multiHandedness[0].label == "Right") {
             // 调用你的函数
             let timeMark = t;
@@ -356,7 +354,6 @@ export default {
                       gesture
                   );
                   // this.openMenu(100, gesture);
-                  this.upSubMenu();
                   if (gesture == 6 || gesture == 7) {
                     // setSize(gesture);
                   }
@@ -379,8 +376,41 @@ export default {
               this.timeMarked = t;
               console.log("刷新时间");
             }
-
-            // yourFunction();
+          }
+          if (gesture && results.multiHandedness[0].label == "Left") {
+            // 调用你的函数
+            let timeMark = t;
+            if (this.timeMarked <= timeMark - 1000) {
+              //单击事件需要刷新时间与手势状态，以接收下一个手势
+              if (gesture == this.gestureMarked) {
+                if (gesture == 1) {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  this.upSubMenu();
+                } else if (gesture == 101) {
+                  console.log("检测到行为101");
+                  this.chooseMenu1();
+                } else if (gesture == 102) {
+                  console.log("检测到行为102");
+                  this.chooseMenu2();
+                } else if (gesture == 201) {
+                  console.log("检测到行为102");
+                  this.downSubMenu();
+                }
+                this.gestureMarked = 0;
+                this.gestureMarked1 = 0;
+                this.timeMarked = t;
+              }
+            }
+            if (gesture != this.gestureMarked1 || gesture == false) {
+              this.gestureMarked1 = gesture;
+              //刷新时间
+              this.gestureMarked = gesture;
+              this.timeMarked = t;
+            }
           }
         }
       }
@@ -456,21 +486,6 @@ export default {
 
       // 判断手势二
       if (
-        // //食指
-        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
-        //食指 第二 三指节为打直状态
-        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
-        //大拇指 第一 二指节弯曲
-        (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
-          this.angle(thumb2, thumb3, thumb4) > -0.9) &&
-        //无名指 小指 第二三指节 弯曲
-        //无名指
-        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.8 &&
-        this.angle(pinky2, pinky3, pinky4) > -0.8
-      ) {
-        // console.log("手势二识别成功");
-        return 2;
-      } else if (
         //判断手势一
 
         //食指 第二 三指节为打直状态
@@ -487,7 +502,9 @@ export default {
         this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5
         //拇指
       ) {
-        // console.log("手势一识别成功！");
+        console.log("手势一识别成功！");
+        // console.log(indexFigure2, indexFigure3, indexFigure4);
+
         return 1;
       } else if (
         //食指 中指 无名指打直
@@ -502,7 +519,7 @@ export default {
           this.angle(thumb2, thumb3, thumb4) > -0.9) &&
         this.angle(pinky2, pinky3, pinky4) > -0.8
       ) {
-        // console.log("手势三识别成功");
+        console.log("手势三识别成功");
         return 3;
       } else if (
         // //手势四
@@ -518,7 +535,7 @@ export default {
         //拇指弯曲
         this.angle(thumb1, thumb2, thumb3) > -0.9
       ) {
-        // console.log("手势四判断成功");
+        console.log("手势四判断成功");
         return 4;
       } else if (
         //食指 第二 三指节为打直状态
@@ -532,36 +549,69 @@ export default {
         //拇指直
         this.angle(thumb1, thumb2, thumb3) < -0.8
       ) {
-        // console.log("手势五判断成功");
+        console.log("手势五判断成功");
         return 5;
       } else if (
-        //食指 第二 三指节为打直状态
-        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
-        //拇指直
-        this.angle(thumb1, thumb2, thumb3) < -0.8 &&
-        //无名指
-        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
-        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //食指 弯曲
+        this.angle(indexFigure2, indexFigure3, indexFigure4) > -0.5 &&
         //中指弯曲
         this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
-        this.angle(indexFigure1, figure0, thumb1) > 0.8
+        //无名指弯曲
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+        //小指弯曲
+        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //拇指伸直
+        this.angle(thumb1, thumb2, thumb3) < -0.8
       ) {
-        // console.log("手势六判断成功");
-        return 6;
+        //竖大拇指
+        console.log("竖大拇指");
+        return 101;
       } else if (
-        //食指 第二 三指节为打直状态
+        //食指 伸直
         this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
-        //拇指直
-        this.angle(thumb1, thumb2, thumb3) < -0.8 &&
-        //无名指
-        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
-        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
         //中指弯曲
         this.angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
-        this.angle(indexFigure1, figure0, thumb1) < 0.7
+        //无名指弯曲
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+        //小指弯曲
+        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //拇指伸直
+        this.angle(thumb1, thumb2, thumb3) < -0.8
       ) {
-        // console.log("手势七判断成功");
-        return 7;
+        //竖大拇指并伸出食指
+        return 102;
+      } else if (
+        //食指 伸直
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //中指伸直
+        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+        //无名指弯曲
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+        //小指弯曲
+        this.angle(pinky2, pinky3, pinky4) > -0.5 &&
+        //拇指弯曲
+        (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
+          this.angle(thumb2, thumb3, thumb4) > -0.9) &&
+        this.angle(indexFigure1, middleFinger4, middleFinger1) > 0.99
+      ) {
+        //伸出食指中指，并拢
+        console.log("伸出食指中指，并拢");
+        return 201;
+      } else if (
+        // //食指
+        this.angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+        //食指 第二 三指节为打直状态
+        this.angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+        //大拇指 第一 二指节弯曲
+        (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
+          this.angle(thumb2, thumb3, thumb4) > -0.9) &&
+        //无名指 小指 第二三指节 弯曲
+        //无名指
+        this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.8 &&
+        this.angle(pinky2, pinky3, pinky4) > -0.8
+      ) {
+        console.log("手势二识别成功");
+        return 2;
       }
 
       return false;
@@ -656,7 +706,6 @@ export default {
       } else {
         this.$refs.subMenu[4].handleClick();
         console.log(this.$refs.menu);
-
         this.subID = 121;
         window.sessionStorage.setItem("subID", this.subID);
         console.log(this.subID, this.$refs.menu.openedMenus[0]);
@@ -671,6 +720,14 @@ export default {
         this.$refs.subMenu[0].handleClick();
         this.subID = 100;
         window.sessionStorage.setItem("subID", this.subID);
+      }
+    },
+    chooseMenu1() {
+      this.$refs.subMenu[this.enumSub[this.subID]].$children[0].handleClick();
+    },
+    chooseMenu2() {
+      if (this.$refs.subMenu[this.enumSub[this.subID]].$children[1]) {
+        this.$refs.subMenu[this.enumSub[this.subID]].$children[1].handleClick();
       }
     },
   },
