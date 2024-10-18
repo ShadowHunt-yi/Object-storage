@@ -25,9 +25,7 @@
       </el-col>
       <el-col>
         <el-card shadow="hover">
-          <div slot="header">
-            桶数目<i class="fa fa-cubes"></i>
-          </div>
+          <div slot="header">桶数目<i class="fa fa-cubes"></i></div>
           <div class="page-view-totla">
             {{ consoleData.diskTotalSize }}
           </div>
@@ -48,70 +46,103 @@
     <!-- 第二行 -->
     <el-row :gutter="20" type="flex" justify="center">
       <el-col v-if="authority()">
-        <el-card shadow="hover" :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }">
+        <el-card
+          shadow="hover"
+          :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }"
+        >
           <div slot="header">
-            快捷操作<i class="el-icon-s-tools" style="float:right"></i>
+            快捷操作<i class="el-icon-s-tools" style="float: right"></i>
           </div>
           <a class="shortcut-button" @click="toUpload">
-            <span class="shortcut-button-icon"><i class="el-icon-upload" style="font-size: 25px"></i></span>
+            <span class="shortcut-button-icon"
+              ><i class="el-icon-upload" style="font-size: 25px"></i
+            ></span>
             <span>文件上传</span>
           </a>
           <a class="shortcut-button" @click="toFileList">
-            <span class="shortcut-button-icon"><i class="el-icon-document" style="font-size: 25px"></i></span>
+            <span class="shortcut-button-icon"
+              ><i class="el-icon-document" style="font-size: 25px"></i
+            ></span>
             <span>文件列表</span>
           </a>
           <a class="shortcut-button" @click="toDisplay" v-if="admin()">
-            <span class="shortcut-button-icon"><i class="el-icon-takeaway-box" style="font-size: 25px"></i></span>
+            <span class="shortcut-button-icon"
+              ><i class="el-icon-takeaway-box" style="font-size: 25px"></i
+            ></span>
             <span>归档数据</span>
           </a>
-          <el-dialog title="归档" :visible.sync="dialogDisplay" width="900px" style="margin: 0 auto;">
+          <el-dialog
+            title="归档"
+            :visible.sync="dialogDisplay"
+            width="900px"
+            style="margin: 0 auto"
+          >
             <el-table :data="archiving">
-              <el-table-column label="文件名" width="500px" style="text-align: center;">
+              <el-table-column
+                label="文件名"
+                width="500px"
+                style="text-align: center"
+              >
                 <template slot-scope="scope">
                   <div>
-                    <span style=" font-size:16px">{{ scope.row.fileName }}</span>
+                    <span style="font-size: 16px">{{
+                      scope.row.fileName
+                    }}</span>
                   </div>
                 </template>
               </el-table-column>
               <el-table-column label="大小" width="150px" align="center">
                 <template slot-scope="scope">
                   <div>
-                    <span style=" font-size:16px"> {{ norm(scope.row.totalSize) }} </span>
+                    <span style="font-size: 16px">
+                      {{ norm(scope.row.totalSize) }}
+                    </span>
                   </div>
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" width="150px" align="center">
                 <template slot-scope="scope">
                   <div>
-                    <span style=" font-size:16px"> {{ formatTime(scope.row.objectKey) }} </span>
+                    <span style="font-size: 16px">
+                      {{ formatTime(scope.row.objectKey) }}
+                    </span>
                   </div>
                 </template>
               </el-table-column>
             </el-table>
           </el-dialog>
           <a class="shortcut-button" @click="toRestore">
-            <span class="shortcut-button-icon"><i class="el-icon-refresh" style="font-size: 25px"></i></span>
+            <span class="shortcut-button-icon"
+              ><i class="el-icon-refresh" style="font-size: 25px"></i
+            ></span>
             <span>恢复备份</span>
           </a>
         </el-card>
       </el-col>
       <el-col>
-        <el-card shadow="hover" :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }">
+        <el-card
+          shadow="hover"
+          :body-style="{ height: '170px', padding: '5px 10px 5px 5px' }"
+        >
           <div slot="header">
-            版本信息<i class="el-icon-info" style="float:right"></i>
+            版本信息<i class="el-icon-info" style="float: right"></i>
           </div>
           <table class="console-table">
             <colgroup>
-              <col width="200">
-              <col>
+              <col width="200" />
+              <col />
             </colgroup>
             <tbody>
               <tr>
                 <td>当前版本</td>
                 <td>
                   <span> {{ consoleData.version }} </span>
-                  <a href="https://github.com/ShadowHunt-yi/Object-storage" style="color: #009688"
-                    target="_blank">更新日志</a>
+                  <a
+                    href="https://github.com/ShadowHunt-yi/Object-storage"
+                    style="color: #009688"
+                    target="_blank"
+                    >更新日志</a
+                  >
                 </td>
               </tr>
               <tr>
@@ -120,11 +151,11 @@
               </tr>
               <tr>
                 <td>操作系统</td>
-                <td> {{ consoleData.osName }}</td>
+                <td>{{ consoleData.osName }}</td>
               </tr>
               <tr>
                 <td>系统架构</td>
-                <td> {{ consoleData.osArch }}</td>
+                <td>{{ consoleData.osArch }}</td>
               </tr>
             </tbody>
           </table>
@@ -133,7 +164,13 @@
     </el-row>
     <el-row>
       <el-card>
-        <el-button type="primary" @click="dialogTable = true" style="margin: 10px;">选择桶</el-button>
+        <el-button
+          type="primary"
+          @click="dialogTable = true"
+          style="margin: 10px"
+          >选择桶</el-button
+        >
+        <div>当前桶：{{ bucketName }}</div>
         <el-dialog title="选择桶" :visible.sync="dialogTable" width="500px">
           <el-table :data="buckets" width="600px">
             <el-table-column label="桶名" width="300px">
@@ -145,239 +182,244 @@
             </el-table-column>
             <el-table-column label="操作" width="100px">
               <template slot-scope="scope">
-                <el-button size="mini" type="success"
-                  @click="Select(scope.row.name), dialogTableVisible = false">选择</el-button>
+                <el-button
+                  size="mini"
+                  type="success"
+                  @click="Select(scope.row.name), (dialogTableVisible = false)"
+                  >选择</el-button
+                >
               </template>
             </el-table-column>
           </el-table>
         </el-dialog>
-        <div slot="header" style="fontsize:18;text-align:center;"> 文件统计(30天)</div>
-        <div id="main" style="height:400px"></div>
+        <div slot="header" style="fontsize: 18; text-align: center">
+          文件统计(30天)
+        </div>
+        <div id="main" style="height: 400px"></div>
       </el-card>
     </el-row>
   </div>
 </template>
 
 <script>
-import echarts from 'echarts'
+import echarts from "echarts";
 export default {
   data() {
     return {
       consoleParam: {
-        totalFileCount: '',
-        totalFileSize: '',
-        diskTotalSize: '',
-        diskFreeSize: '',
-        osName: '',
-        osArch: '',
-        versionDate: '',
-        version: '',
+        totalFileCount: "",
+        totalFileSize: "",
+        diskTotalSize: "",
+        diskFreeSize: "",
+        osName: "",
+        osArch: "",
+        versionDate: "",
+        version: "",
         dayNumList: [],
         dayFileSizeList: [],
-        dayFileCountList: []
+        dayFileCountList: [],
       },
       dialogDisplay: false,
       archiving: [],
       dialogTable: false,
-      buckets: '',
-      bucketName: sessionStorage.getItem("bucketName") || '',
-      consoleData: {}
-    }
+      buckets: "",
+      bucketName: sessionStorage.getItem("bucketName") || "",
+      consoleData: {},
+    };
   },
   created() {
-    this.getConsoleState()
-    this.getTable()
-    this.getBuckets()
-
+    this.getConsoleState();
+    this.getTable();
+    this.getBuckets();
   },
   mounted() {
-
-    this.initCharts()
+    this.initCharts();
   },
-  update(){
-     this.getTable()
+  update() {
+    this.getTable();
   },
   watch: {
     consoleParam(newVal) {
-      this.initCharts()
-    }
+      this.initCharts();
+    },
   },
   methods: {
     async getConsoleState() {
-      const { data: res } = await this.$http.get('/api/getCountAndSize')
+      const { data: res } = await this.$http.get("/api/getCountAndSize");
       if (res.status !== 200) {
-        return this.$message.error(res.msg)
+        return this.$message.error(res.msg);
       }
-      this.consoleData = res.data
+      this.consoleData = res.data;
     },
     initCharts() {
       var chart = {
         dayNumList: this.consoleParam.dayNumList,
         dayFileCountList: this.consoleParam.dayFileCountList,
-        dayFileSizeList: this.consoleParam.dayFileSizeList
-      }
-      setTimeout(() => {
-        var myChart = echarts.init(document.getElementById('main'))
+        dayFileSizeList: this.consoleParam.dayFileSizeList,
+      };
+      this.$nextTick(() => {
+        var myChart = echarts.init(document.getElementById("main"));
         myChart.setOption({
-        color: ['#445e75', '#45a7ca', '#98d5ef'],
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
+          color: ["#445e75", "#45a7ca", "#98d5ef"],
+          tooltip: {
+            trigger: "axis",
+            axisPointer: {
+              type: "shadow",
+            },
+            formatter: "{a}:{c}MB<br>{a1}:{c1}",
           },
-          formatter: '{a}:{c}MB<br>{a1}:{c1}'
-        },
-        legend: {
-          data: ['文件大小', '文件数量'],
-          top: '20'
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          top: '15%',
-          bottom: '11%',
-          containLabel: true
-        },
-        calculable: true,
-        xAxis: [{
-          type: 'category',
-          data: chart.dayNumList
-        }],
-        yAxis: [{
-          type: 'value',
-          nameLocation: 'middle',
-          nameGap: 30,
-          nameTextStyle: {
-            fontWeight: 'bold',
-            fontSize: '14'
-          }
-        }],
-        series: [{
-          name: '文件大小',
-          type: 'bar',
-          data: chart.dayFileSizeList,
-          // markPoint: {
-          //   data: [{
-          //     label: '最大值'
-          //   }, {
-          //     label: '最小值'
-          //   }]
-          // },
-          itemStyle: {
-            normal: {
-              label: {
-                show: true, //开启显示
-                position: 'top', //在上方显示
-                textStyle: { //数值样式
-                  color: 'black',
-                  fontSize: 16
-                }
-              }
-            }
+          legend: {
+            data: ["文件大小", "文件数量"],
+            top: "20",
           },
-
-
-        }, {
-          name: '文件数量',
-          type: 'bar',
-          data: chart.dayFileCountList,
-          /* markPoint: {
-            data: [{
-              type: 'max',
-              name: '最大值'
-            }, {
-              type: 'min',
-              name: '最小值'
-            }]
-          }, */
-          itemStyle: {
-            normal: {
-              label: {
-                show: true, //开启显示
-                position: 'top', //在上方显示
-                textStyle: { //数值样式
-                  color: 'black',
-                  fontSize: 16
-                }
-              }
-            }
+          grid: {
+            left: "3%",
+            right: "4%",
+            top: "15%",
+            bottom: "11%",
+            containLabel: true,
           },
-        }]
-
-      })
-      }, 600);
-
-
+          calculable: true,
+          xAxis: [
+            {
+              type: "category",
+              data: chart.dayNumList,
+            },
+          ],
+          yAxis: [
+            {
+              type: "value",
+              nameLocation: "middle",
+              nameGap: 30,
+              nameTextStyle: {
+                fontWeight: "bold",
+                fontSize: "14",
+              },
+            },
+          ],
+          series: [
+            {
+              name: "文件大小",
+              type: "bar",
+              data: chart.dayFileSizeList,
+              itemStyle: {
+                normal: {
+                  label: {
+                    show: true, //开启显示
+                    position: "top", //在上方显示
+                    textStyle: {
+                      //数值样式
+                      color: "black",
+                      fontSize: 16,
+                    },
+                  },
+                },
+              },
+            },
+            {
+              name: "文件数量",
+              type: "bar",
+              data: chart.dayFileCountList,
+              itemStyle: {
+                normal: {
+                  label: {
+                    show: true, //开启显示
+                    position: "top", //在上方显示
+                    textStyle: {
+                      //数值样式
+                      color: "black",
+                      fontSize: 16,
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        });
+        window.addEventListener("resize", () => {
+          myChart.resize();
+        });
+        setTimeout(() => {
+          myChart.resize();
+        }, 1500);
+      });
     },
     toUpload() {
-      this.$router.push('upload')
+      this.$router.push("upload");
     },
     toFileList() {
-      z
-      this.$router.push('filelist')
+      z;
+      this.$router.push("filelist");
     },
     async getBuckets() {
-      const { data: res } = await this.$http.get('/api/buckets')
+      const { data: res } = await this.$http.get("/api/buckets");
       if (res.status !== 200) {
-        return this.$message.error('获取桶列表失败')
-      } else this.$message.success('获取桶列表成功')
+        return this.$message.error("获取桶列表失败");
+      } else this.$message.success("获取桶列表成功");
       for (const key in res.data) {
-        if (res.data[key].name == 'base') {
-          res.data.splice(key, 1)
+        if (res.data[key].name == "base") {
+          res.data.splice(key, 1);
         }
       }
-      this.buckets = res.data
+      this.buckets = res.data;
     },
     async toDisplay() {
-      const { data: res } = await this.$http.get('/api/v1/minio/tasks/getArchving')
+      const { data: res } = await this.$http.get(
+        "/api/v1/minio/tasks/getArchving"
+      );
       if (res.status !== 200) {
-        return this.$message.error(res.msg)
+        return this.$message.error(res.msg);
       }
-      this.$message.success(res.msg)
-      this.archiving = res.data
-      this.dialogDisplay = true
+      this.$message.success(res.msg);
+      this.archiving = res.data;
+      this.dialogDisplay = true;
     },
     formatTime(e) {
-      return e.split('/')[0]
+      return e.split("/")[0];
     },
     norm(byte) {
       if (byte > 1024 * 1024) {
-        return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB"
+        return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB";
       }
       if (byte > 1024) {
-        return parseFloat(byte / 1024).toFixed(2) + " KB"
+        return parseFloat(byte / 1024).toFixed(2) + " KB";
       }
-      return parseFloat(byte).toFixed(2) + " B"
+      return parseFloat(byte).toFixed(2) + " B";
     },
     async toRestore() {
-      const { data: res } = await this.$http.post('/api/sql/execute', { params: { objectName: 'base/backups/mytable/mytable_test.sql.gz' } })
+      const { data: res } = await this.$http.post("/api/sql/execute", {
+        params: { objectName: "base/backups/mytable/mytable_test.sql.gz" },
+      });
       if (res.status !== 200) {
-        return this.$message.error(res.msg)
+        return this.$message.error(res.msg);
       }
     },
     authority() {
-      return sessionStorage.getItem('authority') == '0' || sessionStorage.getItem('authority') == '1'
+      return (
+        sessionStorage.getItem("authority") == "0" ||
+        sessionStorage.getItem("authority") == "1"
+      );
     },
     Select(e) {
-      sessionStorage.setItem('bucketName', e),
-        this.bucketName = e
-      this.getTable()
-      this.dialogTable = false
+      sessionStorage.setItem("bucketName", e), (this.bucketName = e);
+      this.getTable();
+      this.dialogTable = false;
     },
     async getTable() {
       console.log(this.bucketName);
-      const { data: res } = await this.$http.get('/api/getTable/' + this.bucketName)
+      const { data: res } = await this.$http.get(
+        "/api/getTable/" + this.bucketName
+      );
       if (res.status !== 200) {
-        return this.$message.error(res.msg)
+        return this.$message.error(res.msg);
       }
-      this.consoleParam = res.data
+      this.consoleParam = res.data;
     },
-    admin(){
-      return sessionStorage.getItem('authority') == '0'
-    }
-  }
-
-}
+    admin() {
+      return sessionStorage.getItem("authority") == "0";
+    },
+  },
+};
 </script>
 
 <style lang="less" scoped>
@@ -456,7 +498,7 @@ export default {
 
 .el-dropdown-link {
   cursor: pointer;
-  color: #409EFF;
+  color: #409eff;
 }
 
 .el-icon-arrow-down {
