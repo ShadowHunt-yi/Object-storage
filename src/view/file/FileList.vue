@@ -50,12 +50,16 @@
         </div>
       </div>
       <div class="bottom">
-        <el-table :data="filelist">
+        <el-table :data="paginatedFilelist">
           <el-table-column label="文件名" width="500px">
             <!-- 模板区域 -->
             <template slot-scope="scope">
               <!-- 图标 -->
-              <div @click="getDirFile(scope.row)" style="cursor: pointer">
+              <div
+                @click="getDirFile(scope.row)"
+                style="cursor: pointer"
+                ref="files"
+              >
                 <svg class="icon" aria-hidden="true">
                   <use
                     :xlink:href="
@@ -154,6 +158,16 @@
             </template>
           </el-table-column>
         </el-table>
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[5, 10, 20, 50]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalItems"
+        >
+        </el-pagination>
       </div>
     </el-card>
     <el-dialog title="重命名" :visible.sync="dialogNewname" width="30%">
@@ -197,6 +211,9 @@ export default {
       bucketName: sessionStorage.getItem("bucketName") || "",
       dialogUrl: false,
       url: "",
+      currentPage: 1, // 当前页码
+      pageSize: 5, // 每页显示的条目数
+      totalItems: 0, // 总条目数
     };
   },
   created() {
@@ -205,12 +222,26 @@ export default {
       this.getFlieList(this.bucketName);
     }
   },
+  mounted() {
+    window.eventBus.$on("getDirFileInfo", () => {
+      // 不带参数
+      this.getDirFileInfo();
+    });
+    window.eventBus.$on("getDirFileByIndex", (a) => {
+      this.getDirFileByIndex(a);
+    });
+  },
   computed: {
     iconName() {
       return function (type) {
         const iconName = fileUtil.getIconName(type);
         return iconName;
       };
+    },
+    paginatedFilelist() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.filelist.slice(start, end);
     },
   },
   methods: {
@@ -266,6 +297,7 @@ export default {
         return this.$message.error("获取文件列表失败");
       } else this.$message.success("获取文件列表成功");
       this.filelist = this.prevFileList = res.data;
+      this.totalItems = this.filelist.length;
     },
     rollbackFile() {
       this.filelist = this.prevFileList;
@@ -278,6 +310,16 @@ export default {
         this.filelist = fileInfo.children.data;
         this.pathlist.push(fileInfo.virtualName);
       }
+    },
+    getDirFileByIndex(index) {
+      if (this.filelist[index - 1].type == "directory") {
+        this.prevFileList = this.filelist;
+        this.pathlist.push(this.filelist[index - 1].virtualName);
+        this.filelist = this.filelist[index - 1].children.data;
+      }
+    },
+    getDirFileInfo() {
+      console.log(this.$refs.files, this.filelist);
     },
     async listChange(index) {
       let url = "";
@@ -391,6 +433,13 @@ export default {
         "https://view.officeapps.live.com/op/view.aspx?src=" + _url
       );
       console.log(1);
+    },
+    handleSizeChange(newSize) {
+      this.pageSize = newSize;
+      this.currentPage = 1; // 重置到第一页
+    },
+    handleCurrentChange(newPage) {
+      this.currentPage = newPage;
     },
   },
 };

@@ -328,6 +328,7 @@ export default {
                     "================================================================成功调用：" +
                       gesture
                   );
+                  window.eventBus.$emit("getDirFileByIndex", 5);
                   //平移，传入中指指尖，用指尖的相对移动来移动模型xy轴
                   console.log("传入中指尖参数：{}", landmarks[12]);
                   // moveModel(landmarks[12]);
@@ -338,22 +339,34 @@ export default {
                       gesture
                   );
                   //平移，传入中指指尖，用指尖的相对移动来移动模型xy轴
+                  window.eventBus.$emit("getDirFileByIndex", 4);
+
                   console.log("传入中指尖参数：{}", landmarks[12]);
                   // moveCam(landmarks[12]);
+                } else if (gesture == 3) {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  window.eventBus.$emit("getDirFileByIndex", 3);
                 } else if (gesture == 2) {
                   console.log(
                     timeMark - this.timeMarked,
                     "================================================================成功调用：" +
                       gesture
                   );
-                  // rotateCam();
+                  window.eventBus.$emit("getDirFileByIndex", 2);
                 } else if (gesture == 1) {
                   console.log(
                     timeMark - this.timeMarked,
                     "================================================================成功调用：" +
                       gesture
                   );
-                  // this.openMenu(100, gesture);
+                  window.eventBus.$emit("getDirFileInfo");
+                  window.eventBus.$emit("getDirFileByIndex", 1);
+                  console.log("getDirFileInfo");
+
                   if (gesture == 6 || gesture == 7) {
                     // setSize(gesture);
                   }
