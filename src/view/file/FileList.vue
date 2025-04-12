@@ -230,6 +230,9 @@ export default {
     window.eventBus.$on("getDirFileByIndex", (a) => {
       this.getDirFileByIndex(a);
     });
+    window.eventBus.$on("rollbackFile", () => {
+      this.rollbackFile();
+    });
   },
   computed: {
     iconName() {
@@ -302,6 +305,8 @@ export default {
     rollbackFile() {
       this.filelist = this.prevFileList;
       this.pathlist.pop();
+      this.currentPage = 1;
+      this.totalItems = this.filelist.length;
     },
     // 根据目录获取
     getDirFile(fileInfo) {
@@ -309,6 +314,8 @@ export default {
         this.prevFileList = this.filelist;
         this.filelist = fileInfo.children.data;
         this.pathlist.push(fileInfo.virtualName);
+        this.currentPage = 1;
+        this.totalItems = this.filelist.length;
       }
     },
     getDirFileByIndex(index) {

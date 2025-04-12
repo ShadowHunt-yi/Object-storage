@@ -343,8 +343,9 @@ export default {
         } else {
           window.sessionStorage.setItem("authority", res.data.id);
           window.sessionStorage.setItem("token", res.data.token);
+          this.$router.push("home");
           this.facetitle = "人脸认证";
-          this.dialogface = true;
+          // this.dialogface = true;
           setTimeout(() => {
             this.initCamera();
           }, 0);

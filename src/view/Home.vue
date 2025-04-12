@@ -314,14 +314,19 @@ export default {
           if (gesture && results.multiHandedness[0].label == "Right") {
             // 调用你的函数
             let timeMark = t;
+            let landmarksMarked;
             if (this.timeMarked <= timeMark - 1000) {
               //单击事件需要刷新时间与手势状态，以接收下一个手势
               console.log("gesture:" + gesture);
               console.log("gestureMarked:" + this.gestureMarked);
-
+              if (landmarksMarked) {
+                console.log(
+                  landmarks[8],
+                  landmarksMarked[8],
+                  "++++++++++++++++"
+                );
+              }
               if (gesture == this.gestureMarked) {
-                // let element = document.getElementsByClassName("notion")[0];
-                // element.style.display = "block";
                 if (gesture == 5) {
                   console.log(
                     timeMark - this.timeMarked,
@@ -329,6 +334,10 @@ export default {
                       gesture
                   );
                   window.eventBus.$emit("getDirFileByIndex", 5);
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  landmarksMarked = landmarks;
                   //平移，传入中指指尖，用指尖的相对移动来移动模型xy轴
                   console.log("传入中指尖参数：{}", landmarks[12]);
                   // moveModel(landmarks[12]);
@@ -340,7 +349,10 @@ export default {
                   );
                   //平移，传入中指指尖，用指尖的相对移动来移动模型xy轴
                   window.eventBus.$emit("getDirFileByIndex", 4);
-
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  landmarksMarked = landmarks;
                   console.log("传入中指尖参数：{}", landmarks[12]);
                   // moveCam(landmarks[12]);
                 } else if (gesture == 3) {
@@ -350,6 +362,10 @@ export default {
                       gesture
                   );
                   window.eventBus.$emit("getDirFileByIndex", 3);
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  landmarksMarked = landmarks;
                 } else if (gesture == 2) {
                   console.log(
                     timeMark - this.timeMarked,
@@ -357,6 +373,33 @@ export default {
                       gesture
                   );
                   window.eventBus.$emit("getDirFileByIndex", 2);
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  landmarksMarked = landmarks;
+                } else if (gesture == 101) {
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：" +
+                      gesture
+                  );
+                  window.eventBus.$emit("rollbackFile", 101);
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  landmarksMarked = landmarks;
+                } else if (gesture == 201) {
+                  landmarksMarked = landmarks;
+                  console.log(
+                    timeMark - this.timeMarked,
+                    "================================================================成功调用：",
+                    gesture
+                  );
+                  this.gestureMarked = 0;
+                  this.gestureMarked1 = 0;
+                  this.timeMarked = t;
+                  landmarksMarked = landmarks;
+                  // window.eventBus.$emit("rollbackFile", 101);
                 } else if (gesture == 1) {
                   console.log(
                     timeMark - this.timeMarked,
@@ -374,6 +417,7 @@ export default {
                   this.gestureMarked = 0;
                   this.gestureMarked1 = 0;
                   this.timeMarked = t;
+                  landmarksMarked = landmarks;
                   // yourFunction();
                 }
               }
@@ -387,6 +431,7 @@ export default {
               //刷新时间
               this.gestureMarked = gesture;
               this.timeMarked = t;
+              
               console.log("刷新时间");
             }
           }
@@ -458,6 +503,8 @@ export default {
       console.log("last");
     },
     isFistGesture(landmarks) {
+      console.log();
+
       // 获取食指关键点信息
       const indexFigure1 = landmarks[8];
       const indexFigure2 = landmarks[7];
@@ -605,7 +652,7 @@ export default {
         //拇指弯曲
         (this.angle(thumb1, thumb2, thumb3) > -0.9 ||
           this.angle(thumb2, thumb3, thumb4) > -0.9) &&
-        this.angle(indexFigure1, middleFinger4, middleFinger1) > 0.99
+        this.angle(indexFigure1, middleFinger4, middleFinger1) > 0.995
       ) {
         //伸出食指中指，并拢
         console.log("伸出食指中指，并拢");
@@ -621,7 +668,8 @@ export default {
         //无名指 小指 第二三指节 弯曲
         //无名指
         this.angle(ringFinger2, ringFinger3, ringFinger4) > -0.8 &&
-        this.angle(pinky2, pinky3, pinky4) > -0.8
+        this.angle(pinky2, pinky3, pinky4) > -0.8 &&
+        this.angle(landmarks[6], landmarks[0], landmarks[10]) < 0.99
       ) {
         console.log("手势二识别成功");
         return 2;
