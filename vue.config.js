@@ -1,18 +1,69 @@
 module.exports = {
+  // 生产环境不生成sourceMap
+  productionSourceMap: false,
+  // 配置webpack以处理node_modules中的MediaPipe文件
+  chainWebpack: config => {
+    // 添加一个新的规则来处理MediaPipe文件
+    config.module
+      .rule('mediapipe-assets')
+      .test(/\.(tflite|binarypb|data|wasm)$/)
+      .use('file-loader')
+      .loader('file-loader')
+      .options({
+        name: 'mediapipe/[name].[hash:8].[ext]'
+      });
+  },
   devServer: {
     port: 5000,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8888', // 要请求的后台地址
+        target: 'http://172.21.3.107:8888', // 要请求的后台地址
         ws: true, // 启用websockets
         changeOrigin: true, // 是否跨域
         pathRewrite: {
-          '^/api': '' // 这里理解成用‘/api’代替target里面的地址，后面组件中我们掉接口时直接用api代替
-
+          '^/api': '' // 这里理解成用'/api'代替target里面的地址，后面组件中我们掉接口时直接用api代替
         }
       }
     },
+    // 使用数组形式配置allowedHosts
+    allowedHosts: ['all'],
+    // 禁用主机检查，允许任何主机访问
     disableHostCheck: true,
+    // 开发时自动打开浏览器
+    open: true,
+    static: {
+      directory: path.join(__dirname, 'node_modules/@mediapipe/hands'),
+      publicPath: '/node_modules/@mediapipe/hands'
+    }
   },
-  lintOnSave: false
+
+  // 关闭ESLint提示
+  lintOnSave: false,
+
+  // 打包优化
+  configureWebpack: {
+    // 生产环境优化
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        // 将第三方库(如vue、element-ui等)提取到vendor中
+        cacheGroups: {
+          vendor: {
+            name: 'chunk-vendor',
+            test: /[\\/]node_modules[\\/]/,
+            priority: 10,
+            chunks: 'initial'
+          },
+          // 提取公共组件
+          common: {
+            name: 'chunk-common',
+            minChunks: 2,
+            priority: 5,
+            chunks: 'initial',
+            reuseExistingChunk: true
+          }
+        }
+      }
+    }
+  }
 }

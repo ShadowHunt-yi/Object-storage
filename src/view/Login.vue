@@ -295,7 +295,7 @@ export default {
     this.typing();
     this.config = {
       locateFile: (file) => {
-        return `http://127.0.0.1:10000/${file}`;
+        return `http://172.21.3.107:10000/${file}`;
       },
     };
   },
@@ -382,7 +382,7 @@ export default {
         console.log(fromData);
 
         const { data: res2 } = await axios.post(
-          "http://127.0.0.1:7000/uploadImage",
+          "http://172.21.3.107:7000/uploadImage",
           fromData
         );
         if (res.status == 200 && res2.status == 200) {
@@ -437,7 +437,7 @@ export default {
       });
       formData.append("file", bolbfile);
       const { data: res } = await axios.post(
-        "http://127.0.0.1:7000/recognize",
+        "http://172.21.3.107:7000/recognize",
         formData
       );
       if (res.person_names[0] === this.loginForm.username) {
