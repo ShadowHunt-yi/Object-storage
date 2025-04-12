@@ -745,14 +745,35 @@ export default {
   z-index: 2;
   width: 400px;
   margin: 0 auto;
-  border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 30px;
   transition: all 0.5s ease;
+  &:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 }
-
+.el-input {
+  /deep/ .el-input__inner {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    height: 45px;
+    color: #333;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+  }
+}
 .slide-in {
   animation: slide-in 0.6s forwards;
 }
