@@ -916,23 +916,186 @@ export default {
 // 注册对话框
 .register-dialog {
   /deep/ .el-dialog {
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
   }
   
   /deep/ .el-dialog__header {
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 15px 20px;
     
     .el-dialog__title {
       font-weight: 600;
-      color: #333;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .el-dialog__headerbtn {
+      .el-dialog__close {
+        color: rgba(255, 255, 255, 0.8);
+        
+        &:hover {
+          color: #fff;
+        }
+      }
     }
   }
   
   /deep/ .el-dialog__body {
     padding: 30px;
+    color: rgba(255, 255, 255, 0.9);
+    
+    .el-form-item__label {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .el-input {
+      .el-input__inner {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+        
+        &:focus {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+      }
+      
+      .el-input__icon {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
+  
+  /deep/ .el-dialog__footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+    
+    .el-button {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+      
+      &.el-button--primary {
+        background: linear-gradient(135deg, #43e97b, #38f9d7);
+        border: none;
+        color: white;
+        
+        &:hover {
+          background: linear-gradient(135deg, #38f9d7, #43e97b);
+          box-shadow: 0 5px 15px rgba(56, 249, 215, 0.3);
+        }
+      }
+      
+      &.el-button--default {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+  }
+  
+  // 人脸采集区域优化
+  .face-capture-box {
+    width: 100%;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    i {
+      font-size: 40px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 15px;
+    }
+    
+    p {
+      color: white;
+      margin: 0 0 5px;
+      font-size: 16px;
+    }
+    
+    .face-hint {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+    }
+    
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .face-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      
+      i {
+        font-size: 30px;
+        margin-bottom: 8px;
+      }
+      
+      span {
+        color: white;
+        font-size: 14px;
+      }
+    }
+    
+    &:hover .face-overlay {
+      opacity: 1;
+    }
   }
 }
 
@@ -977,7 +1140,7 @@ export default {
 .face-placeholder {
   width: 98%;
   height: 98%;
-  background: #f5f7fa;
+  background: #4b5d61;
   border: 2px dashed #dcdfe6;
   border-radius: 8px;
   display: flex;
@@ -990,6 +1153,10 @@ export default {
   &:hover {
     background: #e6f1fc;
     border-color: #409EFF;
+    color: #409EFF;
+    div{
+      color: #000000;
+    }
   }
   
   i {
@@ -999,7 +1166,7 @@ export default {
   }
   
   div {
-    color: #606266;
+    color: white;
     font-size: 16px;
   }
   
@@ -1063,76 +1230,113 @@ export default {
 // 人脸拍摄对话框
 .face-dialog {
   /deep/ .el-dialog {
-    border-radius: 12px;
+    background: rgba(20, 30, 48, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     overflow: hidden;
   }
-}
-
-.face-capture-container {
-  text-align: center;
-  padding: 0 0 20px;
-}
-
-.face-title {
-  font-size: 20px;
-  color: #333;
-  margin-bottom: 20px;
-  font-weight: 500;
-}
-
-.video-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  overflow: hidden;
   
-  video {
-    width: 100%;
-    border-radius: 8px;
-    background: #000;
+  .face-title {
+    color: white;
+    font-size: 24px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
   }
-}
-
-.face-guide-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.face-outline {
-  width: 220px;
-  height: 220px;
-  border: 3px dashed rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  margin-bottom: 20px;
-}
-
-.face-guide-text {
-  color: white;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 8px 15px;
-  border-radius: 20px;
-  font-size: 14px;
-}
-
-.capture-controls {
-  margin-top: 20px;
-}
-
-.capture-btn {
-  padding: 12px 30px;
-  font-size: 16px;
-  border-radius: 8px;
-  background: #409EFF;
-  border: none;
+  
+  .video-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    
+    video {
+      width: 100%;
+      display: block;
+      background: #000;
+    }
+    
+    .face-guide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      
+      .face-circle {
+        width: 200px;
+        height: 200px;
+        border: 3px dashed rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        animation: rotate 30s linear infinite;
+      }
+      
+      .guide-text {
+        position: absolute;
+        bottom: 20px;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .capture-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    
+    .capture-btn {
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      border: none;
+      color: white;
+      
+      &:hover {
+        background: linear-gradient(135deg, #38f9d7, #43e97b);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(56, 249, 215, 0.3);
+      }
+      
+      i {
+        margin-right: 5px;
+      }
+    }
+    
+    .cancel-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+      }
+      
+      i {
+        margin-right: 5px;
+      }
+    }
+  }
+  
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 </style>
