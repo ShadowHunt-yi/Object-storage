@@ -1,18 +1,6 @@
 module.exports = {
   // 生产环境不生成sourceMap
   productionSourceMap: false,
-  // 配置webpack以处理node_modules中的MediaPipe文件
-  chainWebpack: config => {
-    // 添加一个新的规则来处理MediaPipe文件
-    config.module
-      .rule('mediapipe-assets')
-      .test(/\.(tflite|binarypb|data|wasm)$/)
-      .use('file-loader')
-      .loader('file-loader')
-      .options({
-        name: 'mediapipe/[name].[hash:8].[ext]'
-      });
-  },
   devServer: {
     port: 5000,
     proxy: {
@@ -31,10 +19,7 @@ module.exports = {
     disableHostCheck: true,
     // 开发时自动打开浏览器
     open: true,
-    static: {
-      directory: path.join(__dirname, 'node_modules/@mediapipe/hands'),
-      publicPath: '/node_modules/@mediapipe/hands'
-    }
+    hot: true,
   },
 
   // 关闭ESLint提示

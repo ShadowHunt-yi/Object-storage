@@ -1,168 +1,196 @@
 <template>
   <div class="login-container">
-    <div style="text-align: center; padding-top: 250px" v-show="!isShown">
-      <h1>{{ str2 }}</h1>
-      <el-button round class="btn" @click="changeShown()">Click Here</el-button>
+    <div class="welcome-section" v-show="!isShown">
+      <h1 class="typing-text">{{ str2 }}</h1>
+      <el-button round class="welcome-btn pulse-animation" @click="changeShown()">
+        <i class="el-icon-right"></i> 开始使用
+      </el-button>
     </div>
-    <el-card class="login-form" shadow="always" v-show="isShown">
-      <div style="text-align: center">
-        <i class="el-icon-cloudy" style="color: #409eff; font-size: 50px"></i>
-      </div>
-      <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules">
+    
+    <el-card class="login-form" :class="{'slide-in': isShown}" shadow="always" v-show="isShown">
+      <div class="logo-container">
+        <i class="el-icon-cloudy logo-icon"></i>
         <h2 class="login-title">智域云图</h2>
+        <div class="subtitle">对象存储平台</div>
+      </div>
+      
+      <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules">
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
             prefix-icon="iconfont icon-iconuser"
             placeholder="用户名"
+            class="custom-input"
           ></el-input>
         </el-form-item>
+        
         <el-form-item prop="password">
           <el-input
             v-model="loginForm.password"
             prefix-icon="iconfont icon-mima"
             placeholder="密码"
             show-password
+            class="custom-input"
           ></el-input>
         </el-form-item>
-        <el-form-item prop="code">
-          <el-input
-            v-model="loginForm.code"
-            prefix-icon="el-icon-key"
-            placeholder="点击图片更换验证码"
-            type="text"
-            @keydown.enter.native="login()"
-            style="width: 65%; margin-right: 10px"
+        
+        <el-form-item prop="code" class="verify-code-item">
+          <div class="verify-code-item-container">
+            <el-input
+              v-model="loginForm.code"
+              prefix-icon="el-icon-key"
+              placeholder="验证码"
+              type="text"
+              @keydown.enter.native="login()"
+            class="verify-input custom-input"
           ></el-input>
-          <img
-            :src="vcUrl"
-            alt="验证码"
-            @click="updateVerifyCode()"
-            style="width: 30%; position: relative; top: 10px"
-          />
+          <div class="verify-img-container" @click="updateVerifyCode()">
+            <img :src="vcUrl" alt="验证码" class="verify-img" />
+            <div class="refresh-overlay">
+              <i class="el-icon-refresh"></i>
+            </div>
+          </div>
+          </div>
         </el-form-item>
-        <!-- <el-form-item style="margin-bottom: 5px; text-align: center">
-          <el-button
-            class="user-btn"
-            style="width: 30%"
-            type="primary"
-            @click="faceApprove()"
-            >人脸认证</el-button
-          >
-        </el-form-item> -->
-        <el-form-item style="margin-bottom: 5px; text-align: center">
-          <el-button
-            class="user-btn"
-            style="width: 45%"
-            type="primary"
-            @click="login()"
-            >登录</el-button
-          >
-
-          <el-button
-            class="user-btn"
-            style="width: 45%"
-            type="primary"
+        
+        <el-form-item class="action-buttons">
+          <el-button class="login-btn" type="primary" @click="login()">
+            <i class="el-icon-key"></i> 登录
+          </el-button>
+          
+          <el-button 
+            class="register-btn" 
+            type="primary" 
             @click="(dialogFormRegister = true), updateVerifyCode()"
-            >注册</el-button
           >
+            <i class="el-icon-user-solid"></i> 注册
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
+    
+    <!-- 注册对话框 -->
     <el-dialog
-      title="注册"
+      title="用户注册"
       :visible.sync="dialogFormRegister"
-      style="width: 60%; margin: auto; position: relative; top: -50px"
+      width="500px"
+      center
+      class="register-dialog"
+      :close-on-click-modal="false"
     >
+      <div class="register-header">
+        <i class="el-icon-user-solid register-icon"></i>
+        <span>创建新账户</span>
+      </div>
+      
       <el-form
         :model="newuser"
-        :rules="loginFormRules"
+        :rules="registerRules"
         ref="newuser"
-        :inline="false"
+        label-position="top"
+        class="register-form"
       >
-        <el-form-item
-          label="用户名"
-          :label-width="formLabelWidth"
-          label-position="left"
-          prop="newUsername"
-        >
+        <el-form-item label="用户名" prop="newUsername">
           <el-input
             v-model="newuser.newUsername"
-            autocomplete="off"
+            prefix-icon="iconfont icon-iconuser"
             placeholder="长度在 2 到 13 个字符"
+            class="custom-input"
           ></el-input>
         </el-form-item>
-        <el-form-item
-          label="密码"
-          :label-width="formLabelWidth"
-          label-position="left"
-          prop="newPassword"
-        >
+        
+        <el-form-item label="密码" prop="newPassword">
           <el-input
-            width="auto"
             v-model="newuser.newPassword"
-            autocomplete="off"
+            prefix-icon="iconfont icon-mima"
+            type="password"
             placeholder="长度在 6 到 15 个字符"
+            class="custom-input"
+            show-password
           ></el-input>
         </el-form-item>
-        <el-form-item
-          label="邮箱"
-          :label-width="formLabelWidth"
-          label-position="left"
-          prop="newEmail"
-        >
+        
+        <el-form-item label="邮箱" prop="newEmail">
           <el-input
             v-model="newuser.newEmail"
-            autocomplete="off"
+            prefix-icon="el-icon-message"
             placeholder="请输入规范邮箱"
+            class="custom-input"
           ></el-input>
         </el-form-item>
-        <el-form-item
-          label="手机号"
-          label-position="left"
-          :label-width="formLabelWidth"
-          prop="newMobile"
-        >
+        
+        <el-form-item label="手机号" prop="newMobile">
           <el-input
             v-model="newuser.newMobile"
-            autocomplete="off"
+            prefix-icon="el-icon-mobile-phone"
             placeholder="请输入规范手机号"
+            class="custom-input"
           ></el-input>
         </el-form-item>
-        <el-form-item
-          label="请选择拍摄正脸照片以用于后续登录认证（点击图片重新拍摄）"
-          label-position="left"
-          :label-width="formLabelWidth"
-          prop="newMobile"
-        >
-          <el-button v-if="!capturedImage" type="primary" @click="faceApprove()"
-            >开始拍摄</el-button
-          >
-          <img
-            v-if="capturedImage"
-            :src="capturedImage"
-            alt="Captured Image"
-            width="90%"
-            @click="faceApprove()"
-          />
+        
+        <el-form-item label="人脸照片" class="face-photo-item">
+          <div class="face-photo-container">
+            <div 
+              v-if="!capturedImage" 
+              class="face-placeholder"
+              @click="faceApprove()"
+            >
+              <i class="el-icon-camera"></i>
+              <div>点击拍摄照片</div>
+              <div class="photo-desc">用于后续登录验证</div>
+            </div>
+            
+            <div v-else class="face-preview">
+              <img
+                :src="capturedImage"
+                alt="Captured Image"
+                @click="faceApprove()"
+              />
+              <div class="face-overlay">
+                <i class="el-icon-refresh"></i>
+                <div>重新拍摄</div>
+              </div>
+            </div>
+          </div>
         </el-form-item>
       </el-form>
+      
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormRegister = false" style="float: left"
-          >取 消</el-button
-        >
-        <el-button type="primary" @click="submitForm()">注 册</el-button>
+        <el-button @click="dialogFormRegister = false" plain>
+          <i class="el-icon-close"></i> 取消
+        </el-button>
+        <el-button type="primary" @click="submitForm()" :disabled="!capturedImage">
+          <i class="el-icon-check"></i> 提交注册
+        </el-button>
       </div>
     </el-dialog>
-    <el-dialog :visible.sync="dialogface">
-      <h1>{{ facetitle }}</h1>
-      <video ref="video" autoplay width="100%"></video>
-      <br />
-      <el-button v-if="this.facetitle == '拍摄'" @click="capture"
-        >拍摄</el-button
-      >
-      <canvas ref="canvas" style="width: 300px; display: none"></canvas>
-      <!-- <img :src="capturedImage" alt="Captured Image" /> -->
+    
+    <!-- 人脸拍摄对话框 -->
+    <el-dialog 
+      :visible.sync="dialogface"
+      title="人脸拍摄"
+      width="550px"
+      center
+      class="face-dialog"
+    >
+      <div class="face-capture-container">
+        <h3 class="face-title">{{ facetitle }}</h3>
+        <div class="video-container">
+          <video ref="video" autoplay width="100%"></video>
+          <div class="face-guide-overlay">
+            <div class="face-outline"></div>
+            <div class="face-guide-text">请将面部置于框内</div>
+          </div>
+        </div>
+        
+        <div class="capture-controls" v-if="facetitle == '拍摄'">
+          <el-button type="primary" @click="capture" class="capture-btn">
+            <i class="el-icon-camera"></i> 拍照
+          </el-button>
+        </div>
+        
+        <canvas ref="canvas" style="display: none"></canvas>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -382,7 +410,7 @@ export default {
         console.log(fromData);
 
         const { data: res2 } = await axios.post(
-          "http://172.21.3.107:7000/uploadImage",
+          "https://172.21.3.107:7000/uploadImage",
           fromData
         );
         if (res.status == 200 && res2.status == 200) {
@@ -437,7 +465,7 @@ export default {
       });
       formData.append("file", bolbfile);
       const { data: res } = await axios.post(
-        "http://172.21.3.107:7000/recognize",
+        "https://172.21.3.107:7000/recognize",
         formData
       );
       if (res.person_names[0] === this.loginForm.username) {
@@ -637,82 +665,453 @@ export default {
 </script>
 
 <style lang="less" scoped>
-， h1 {
-  color: black;
-  text-align: center;
-  font-size: 50px;
-}
-
 .login-container {
   background: url("../assets/image/background.jpg");
-  background-size: 100% 100%;
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
 }
 
-.btn {
-  height: 50px;
-  width: 150px;
-  font-size: 20px;
+// 欢迎部分
+.welcome-section {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  transform: translateY(-50px);
 }
 
+.typing-text {
+  color: white;
+  text-align: center;
+  font-size: 50px;
+  margin-bottom: 40px;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.welcome-btn {
+  height: 60px;
+  width: 180px;
+  font-size: 22px;
+  color: #fff;
+  background: linear-gradient(135deg, #409EFF, #007bff);
+  border: none;
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 123, 255, 0.5);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// 登录表单
 .login-form {
-  // background-color: aliceblue;
-  position: absolute;
-  left: 0;
-  right: 0;
-  width: 360px;
-  margin: 140px auto;
-  border-radius: 20px;
-  background-color: #9b989860;
+  position: relative;
+  z-index: 2;
+  width: 400px;
+  margin: 0 auto;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  padding: 30px;
+  transition: all 0.5s ease;
+}
+
+.slide-in {
+  animation: slide-in 0.6s forwards;
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo-icon {
+  font-size: 60px;
+  color: #409EFF;
+  margin-bottom: 10px;
 }
 
 .login-title {
   text-align: center;
-  color: #000000;
+  color: #333;
+  font-size: 28px;
+  margin: 5px 0;
+  font-weight: 600;
 }
 
-.el-form-item__content {
+.subtitle {
+  color: #666;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+.custom-input {
+  /deep/ .el-input__inner {
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #dcdfe6;
+    
+    &:focus {
+      border-color: #409EFF;
+      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+    }
+  }
+}
+
+.verify-code-item {
   display: flex;
   align-items: center;
-  // 垂直居中
+}
+.verify-code-item-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.verify-input {
+  flex: 1;
 }
 
-.user-btn {
-  color: #fff;
-  background-color: #00000059;
-  border-color: #00000057;
-}
-.face-btn {
-  color: #fff;
-  background-color: #00000059;
-  border-color: #00000057;
-}
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
+.verify-img-container {
+  border: 1px solid #dcdfe6;
+  width: 100px;
+  height: 45px;
+  margin-left: 10px;
+  border-radius: 8px;
+  overflow: hidden;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  
+  &:hover .refresh-overlay {
+    opacity: 1;
+  }
 }
-.avatar-uploader .el-upload:hover {
-  border-color: #409eff;
+
+.verify-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.avatar-uploader-icon {
-  border: 1px dashed #d9d9d9;
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
+
+.refresh-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  i {
+    color: white;
+    font-size: 24px;
+  }
+}
+
+.action-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.login-btn, .register-btn {
+  flex: 1;
+  height: 45px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, #409EFF, #007bff);
+  border: none;
+  margin-right: 10px;
+  
+  &:hover {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+  }
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #67C23A, #409EFF);
+  border: none;
+  
+  &:hover {
+    background: linear-gradient(135deg, #409EFF, #0056b3);
+  }
+}
+
+// 注册对话框
+.register-dialog {
+  /deep/ .el-dialog {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  /deep/ .el-dialog__header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    
+    .el-dialog__title {
+      font-weight: 600;
+      color: #333;
+    }
+  }
+  
+  /deep/ .el-dialog__body {
+    padding: 30px;
+  }
+}
+
+.register-header {
   text-align: center;
+  margin-bottom: 25px;
+  
+  .register-icon {
+    font-size: 50px;
+    color: #409EFF;
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  span {
+    font-size: 20px;
+    color: #333;
+    font-weight: 500;
+  }
 }
-.avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
+
+.register-form {
+  /deep/ .el-form-item__label {
+    font-size: 15px;
+    color: #606266;
+    padding-bottom: 8px;
+  }
 }
-/deep/.el-form-item__label {
-  text-align: left;
+
+.face-photo-item {
+  margin-bottom: 0;
+}
+
+.face-photo-container {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.face-placeholder {
+  width: 98%;
+  height: 98%;
+  background: #f5f7fa;
+  border: 2px dashed #dcdfe6;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e6f1fc;
+    border-color: #409EFF;
+  }
+  
+  i {
+    font-size: 40px;
+    color: #909399;
+    margin-bottom: 10px;
+  }
+  
+  div {
+    color: #606266;
+    font-size: 16px;
+  }
+  
+  .photo-desc {
+    font-size: 13px;
+    color: #909399;
+    margin-top: 5px;
+  }
+}
+
+.face-preview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  &:hover .face-overlay {
+    opacity: 1;
+  }
+}
+
+.face-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+  
+  i {
+    font-size: 30px;
+    margin-bottom: 10px;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  
+  .el-button {
+    padding: 12px 25px;
+    font-size: 16px;
+  }
+}
+
+// 人脸拍摄对话框
+.face-dialog {
+  /deep/ .el-dialog {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+}
+
+.face-capture-container {
+  text-align: center;
+  padding: 0 0 20px;
+}
+
+.face-title {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.video-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  video {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+  }
+}
+
+.face-guide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.face-outline {
+  width: 220px;
+  height: 220px;
+  border: 3px dashed rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.face-guide-text {
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.capture-controls {
+  margin-top: 20px;
+}
+
+.capture-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: 8px;
+  background: #409EFF;
+  border: none;
 }
 </style>
