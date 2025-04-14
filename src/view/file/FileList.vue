@@ -13,7 +13,7 @@
           </el-breadcrumb>
         </div>
         <div>
-          <el-button type="primary" @click="dialogTableVisible = true" style="margin: 10px"
+          <!-- <el-button type="primary" @click="dialogTableVisible = true" style="margin: 10px"
             >选择桶</el-button
           >
           <el-dialog title="选择桶" :visible.sync="dialogTableVisible" width="500px">
@@ -36,7 +36,8 @@
                 </template>
               </el-table-column>
             </el-table>
-          </el-dialog>
+          </el-dialog> -->
+          <chooseBucket type="primary"  @bucket-selected="getFlieList"/>
           <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
         </div>
       </div>
@@ -160,7 +161,11 @@ var timezone = require('dayjs/plugin/timezone')
 import * as fileUtil from '@/utils/fileUtil'
 import { fileAPI, bucketAPI } from '@/api'
 import { formatFileSize } from '@/utils/format'
+import chooseBucket from '@/components/chooseBucket.vue'
 export default {
+  components: {
+    chooseBucket
+  },
   data() {
     return {
       // 前一个文件夹
@@ -177,7 +182,6 @@ export default {
       buckets: '',
       dialogTableVisible: false,
       selectionName: '',
-      bucketName: sessionStorage.getItem('bucketName') || '',
       dialogUrl: false,
       url: '',
       currentPage: 1, // 当前页码

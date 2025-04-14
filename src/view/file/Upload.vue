@@ -14,7 +14,8 @@
                 v-model="bucketNameShow"
                 style="width: 80%; margin: 0 20px"
               ></el-input>
-              <el-button type="primary" plain @click="dialogTableVisible = true">选择桶</el-button>
+              <chooseBucket type="edit"  @bucket-selected="select"/>
+              <!-- <el-button type="primary" plain @click="dialogTableVisible = true">选择桶</el-button>
               <el-dialog title="选择桶" :visible.sync="dialogTableVisible">
                 <el-table :data="buckets" width="1600px">
                   <el-table-column label="桶名" width="200">
@@ -62,7 +63,7 @@
                     </template>
                   </el-table-column>
                 </el-table>
-              </el-dialog>
+              </el-dialog> -->
               <el-button
                 type="primary"
                 plain
@@ -189,6 +190,7 @@ import { ref } from 'vue'
 import Queue from 'promise-queue-plus'
 import { HTTP_SUCCESS_CODE } from '@/lib/api.code.js'
 import { bucketAPI } from '@/api'
+import chooseBucket from '@/components/chooseBucket.vue'
 //压缩上传
 const handleHttpRequestzip = async function (options) {
   console.log(this.bucketNameShow)
@@ -417,6 +419,9 @@ const handleRemoveFile = (uploadFile, uploadFiles) => {
 }
 
 export default {
+  components: {
+    chooseBucket
+  },
   data() {
     return {
       /*  headers: {
@@ -497,27 +502,6 @@ export default {
     select(bucketName) {
       this.bucketNameShow = bucketName
       sessionStorage.setItem('bucketName', bucketName)
-    },
-    async removeBucket(bucketName) {
-      console.log(bucketName)
-      const { data: res } = await bucketAPI.deleteBucket(bucketName)
-      if (res.status !== 200) {
-        return this.$message.error('删除桶失败')
-      } else this.$message.success('删除成功')
-      this.getBuckets()
-    },
-    rebucketName() {},
-    async getBuckets() {
-      const { data: res } = await bucketAPI.getBuckets()
-      if (res.status !== 200) {
-        return this.$message.error('获取桶列表失败')
-      } else this.$message.success('获取桶列表成功')
-      for (const key in res.data) {
-        if (res.data[key].name == 'base') {
-          res.data.splice(key, 1)
-        }
-      }
-      this.buckets = res.data
     },
     async createBusket(name) {
       if (this.newbucket != '') {

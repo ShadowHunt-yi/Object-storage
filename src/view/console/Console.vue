@@ -148,7 +148,8 @@
     </el-row>
     <el-row>
       <el-card>
-        <el-button type="primary" @click="dialogTable = true" style="margin: 10px"
+        <chooseBucket type="primary"  @bucket-selected="Select"/>
+        <!-- <el-button type="primary" @click="dialogTable = true" style="margin: 10px"
           >选择桶</el-button
         >
         <div>当前桶：{{ bucketName }}</div>
@@ -172,7 +173,7 @@
               </template>
             </el-table-column>
           </el-table>
-        </el-dialog>
+        </el-dialog> -->
         <div slot="header" style="fontsize: 18; text-align: center">文件统计(30天)</div>
         <div id="main" style="height: 400px"></div>
       </el-card>
@@ -184,7 +185,11 @@
 import echarts from 'echarts'
 import { fileAPI, bucketAPI, archiveAPI } from '@/api'
 import { formatFileSize } from '@/utils/format'
+import chooseBucket from '@/components/chooseBucket.vue'
 export default {
+  components: {
+    chooseBucket
+  },
   data() {
     return {
       consoleParam: {

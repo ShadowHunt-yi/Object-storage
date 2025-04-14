@@ -173,6 +173,7 @@ export default {
   created() {
     this.getMenuList()
     this.acvtivePath = window.sessionStorage.getItem('acvtivePath')
+    this.isCollapse = this.$store.state.isCollapse
   },
   mounted() {
     window.onresize = () => {
@@ -215,6 +216,7 @@ export default {
     },
     toggleChange() {
       this.isCollapse = !this.isCollapse
+      this.$store.commit('updateIsCollapse', this.isCollapse)
     },
     saveNavState(acvtivePath) {
       window.sessionStorage.setItem('acvtivePath', acvtivePath)
