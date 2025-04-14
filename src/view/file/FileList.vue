@@ -189,6 +189,11 @@ export default {
       totalItems: 0 // 总条目数
     }
   },
+  computed: {
+    bucketName() {
+      return this.$store.state.selectedBucket
+    }
+  },
   created() {
     this.getBuckets()
     if (this.bucketName != '') {
@@ -255,8 +260,6 @@ export default {
     },
     // 获取一级目录
     async getFlieList(name) {
-      this.bucketName = name
-      sessionStorage.setItem('bucketName', name)
       const { data: res } = await fileAPI.getFileList(name, {
         params: { prefix: '' }
       })

@@ -14,7 +14,7 @@
                 v-model="bucketNameShow"
                 style="width: 80%; margin: 0 20px"
               ></el-input>
-              <chooseBucket type="edit"  @bucket-selected="select"/>
+              <chooseBucket type="edit" />
               <!-- <el-button type="primary" plain @click="dialogTableVisible = true">选择桶</el-button>
               <el-dialog title="选择桶" :visible.sync="dialogTableVisible">
                 <el-table :data="buckets" width="1600px">
@@ -193,13 +193,11 @@ import { bucketAPI } from '@/api'
 import chooseBucket from '@/components/chooseBucket.vue'
 //压缩上传
 const handleHttpRequestzip = async function (options) {
-  console.log(this.bucketNameShow)
   if (this.bucketNameShow == '') {
     return this.$message('未选择桶')
   }
   const file = options.file
   const identifier = await md5(file)
-  console.log(identifier)
   const totalSize = file.size
   const chunkSize = 5 * 1024 * 1024
   const fileName = file.name
@@ -375,7 +373,6 @@ const handleHttpRequest = async function (options) {
   const selectbucket = this.bucketNameShow
   const task = await getTaskInfo(file, selectbucket)
   console.log(task)
-
   if (task) {
     const { finished, path, taskRecord } = task
     const { fileIdentifier: identifier } = taskRecord
@@ -422,6 +419,11 @@ export default {
   components: {
     chooseBucket
   },
+  computed: {
+    bucketNameShow() {
+      return this.$store.state.selectedBucket
+    }
+  },
   data() {
     return {
       /*  headers: {
@@ -433,7 +435,6 @@ export default {
       dialogTableVisible: false,
       dialogFormVisible: false,
       buckets: [],
-      bucketNameShow: sessionStorage.getItem('bucketName') || '',
       newbucket: '',
       disabled: false,
       imgFileList: [],
@@ -442,7 +443,6 @@ export default {
       cropperImg: '',
       cropperedImg: '',
       editImgs: [],
-
       isPreview: false,
       dialogVisible: false,
       previewImg: '', // 预览图片地址
@@ -498,10 +498,6 @@ export default {
         .catch((err) => {
           this.$message.warning('上传失败，请重新上传!')
         })
-    },
-    select(bucketName) {
-      this.bucketNameShow = bucketName
-      sessionStorage.setItem('bucketName', bucketName)
     },
     async createBusket(name) {
       if (this.newbucket != '') {

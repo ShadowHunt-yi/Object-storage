@@ -148,7 +148,7 @@
     </el-row>
     <el-row>
       <el-card>
-        <chooseBucket type="primary"  @bucket-selected="Select"/>
+        <chooseBucket type="primary"  @bucket-selected="getTable"/>
         <!-- <el-button type="primary" @click="dialogTable = true" style="margin: 10px"
           >选择桶</el-button
         >
@@ -379,14 +379,8 @@ export default {
         sessionStorage.getItem('authority') == '0' || sessionStorage.getItem('authority') == '1'
       )
     },
-    Select(e) {
-      sessionStorage.setItem('bucketName', e), (this.bucketName = e)
-      this.getTable()
-      this.dialogTable = false
-    },
     async getTable() {
-      console.log(this.bucketName)
-      const { data: res } = await fileAPI.getTable(this.bucketName)
+      const { data: res } = await fileAPI.getTable(this.$store.state.selectedBucket)
       if (res.status !== 200) {
         return this.$message.error(res.msg)
       }
