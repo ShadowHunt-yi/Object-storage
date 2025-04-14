@@ -3,28 +3,28 @@ import axiosExtra from 'axios-extra'
 const baseUrl = '/api'
 
 const http = axios.create({
-    baseURL: baseUrl,
+  baseURL: baseUrl
 })
 
 const httpExtra = axiosExtra.create({
-    maxConcurrent: 5, //并发为1
-    queueOptions: {
-        retry: 3, //请求失败时,最多会重试3次
-        retryIsJump: false //是否立即重试, 否则将在请求队列尾部插入重试请求
-    }
+  maxConcurrent: 5, //并发为1
+  queueOptions: {
+    retry: 3, //请求失败时,最多会重试3次
+    retryIsJump: false //是否立即重试, 否则将在请求队列尾部插入重试请求
+  }
 })
 
-http.interceptors.response.use(response => {
-        return response.data
-    })
-    /**
-     * 添加 WWW-Authenticate
-     * */
+http.interceptors.response.use((response) => {
+  return response.data
+})
+/**
+ * 添加 WWW-Authenticate
+ * */
 
 function addHeaders(config) {
-    const token = window.sessionStorage.getItem('token') || '';
-    /* config.headers['Authorization'] = `Bearer ${token}` */
-    return config
+  const token = window.sessionStorage.getItem('token') || ''
+  /* config.headers['Authorization'] = `Bearer ${token}` */
+  return config
 }
 http.interceptors.request.use(addHeaders)
 
@@ -34,7 +34,7 @@ http.interceptors.request.use(addHeaders)
  * @returns {Promise<AxiosResponse<any>>}
  */
 const taskInfo = (identifier, bucketName) => {
-    return http.get(`/v1/minio/tasks/${identifier}/${bucketName}`);
+  return http.get(`/v1/minio/tasks/${identifier}/${bucketName}`)
 }
 
 /**
@@ -46,7 +46,11 @@ const taskInfo = (identifier, bucketName) => {
  * @returns {Promise<AxiosResponse<any>>}
  */
 const initTask = ({ identifier, fileName, totalSize, chunkSize, bucketName }) => {
-    return http.post('/v1/minio/tasks', { identifier, fileName, totalSize, chunkSize }, { params: { bucketName } })
+  return http.post(
+    '/v1/minio/tasks',
+    { identifier, fileName, totalSize, chunkSize },
+    { params: { bucketName } }
+  )
 }
 
 /**
@@ -56,8 +60,8 @@ const initTask = ({ identifier, fileName, totalSize, chunkSize, bucketName }) =>
  * @returns {Promise<AxiosResponse<any>>}
  */
 const preSignUrl = ({ identifier, partNumber, bucketName }) => {
-    console.log(identifier, 'id');
-    return http.get(`/v1/minio/tasks/pre/${identifier}/${partNumber}`, { params: { bucketName } })
+  console.log(identifier, 'id')
+  return http.get(`/v1/minio/tasks/pre/${identifier}/${partNumber}`, { params: { bucketName } })
 }
 
 /**
@@ -66,14 +70,7 @@ const preSignUrl = ({ identifier, partNumber, bucketName }) => {
  * @returns {Promise<AxiosResponse<any>>}
  */
 const merge = (identifier, bucketName) => {
-    return http.post(`/v1/minio/tasks/merge/${identifier}/${bucketName}`)
+  return http.post(`/v1/minio/tasks/merge/${identifier}/${bucketName}`)
 }
 
-export {
-    taskInfo,
-    initTask,
-    preSignUrl,
-    merge,
-    addHeaders,
-    httpExtra
-}
+export { taskInfo, initTask, preSignUrl, merge, addHeaders, httpExtra }

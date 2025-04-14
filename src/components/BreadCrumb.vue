@@ -1,30 +1,32 @@
 <template>
   <el-breadcrumb separator-class="el-icon-arrow-right">
     <el-breadcrumb-item :to="{ path: '/welcome' }">首页</el-breadcrumb-item>
-    <el-breadcrumb-item v-if='parentTitle'> <a href="javascript:;"> {{parentTitle}} </a> </el-breadcrumb-item>
-    <el-breadcrumb-item v-if='title'>{{title}}</el-breadcrumb-item>
+    <el-breadcrumb-item v-if="parentTitle">
+      <a href="javascript:;"> {{ parentTitle }} </a>
+    </el-breadcrumb-item>
+    <el-breadcrumb-item v-if="title">{{ title }}</el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script>
 export default {
   name: 'BreadCrumb',
-  data () {
+  data() {
     return {
       parentTitle: '',
       title: ''
     }
   },
-  created () {
+  created() {
     this.setIndex()
   },
   watch: {
-    $route () {
+    $route() {
       this.setIndex()
     }
   },
   methods: {
-    setIndex () {
+    setIndex() {
       this.parentTitle = this.$route.meta.parentTitle
       this.title = this.$route.meta.title
     }
@@ -32,5 +34,4 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

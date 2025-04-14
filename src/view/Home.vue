@@ -41,12 +41,7 @@
         :default-active="acvtivePath"
       >
         <!-- 一级菜单 -->
-        <el-submenu
-          ref="subMenu"
-          :index="item.id + ''"
-          v-for="item in menuList"
-          :key="item.id"
-        >
+        <el-submenu ref="subMenu" :index="item.id + ''" v-for="item in menuList" :key="item.id">
           <!-- 模板区域 -->
           <template slot="title">
             <!-- 图标 -->
@@ -101,26 +96,12 @@
           </svg>
         </div>
         <div>
-          <el-button type="primary" @click="handControl" style="margin: 0 10px"
-            >手势模式</el-button
-          >
+          <el-button type="primary" @click="handControl" style="margin: 0 10px">手势模式</el-button>
           <div style="position: absolute; right: 0">
-            <video
-              ref="videoElement"
-              autoplay
-              muted
-              width="200px"
-              style="display: none"
-            ></video>
+            <video ref="videoElement" autoplay muted width="200px" style="display: none"></video>
             <canvas
               ref="canvasElement"
-              style="
-                width: 192px;
-                height: 108px;
-                position: relative;
-                right: 20px;
-                z-index: 9999;
-              "
+              style="width: 192px; height: 108px; position: relative; right: 20px; z-index: 9999"
             ></canvas>
           </div>
           <el-button type="info" @click="logout">退出</el-button>
@@ -138,33 +119,33 @@
 </template>
 
 <script>
-import * as drawingUtils from "@mediapipe/drawing_utils";
-import * as mpHands from "@mediapipe/hands";
-import screenfull from "screenfull";
-import Hamburger from "../components/Hamburger";
-import BreadCrumb from "../components/BreadCrumb";
+import * as drawingUtils from '@mediapipe/drawing_utils'
+import * as mpHands from '@mediapipe/hands'
+import screenfull from 'screenfull'
+import Hamburger from '../components/Hamburger'
+import BreadCrumb from '../components/BreadCrumb'
 import { menuAPI } from '@/api'
 export default {
   components: {
     Hamburger,
-    BreadCrumb,
+    BreadCrumb
   },
   data() {
     return {
       // 左侧菜单数据
-      menuList: "",
+      menuList: '',
       iconObj: {
-        100: "iconfont icon-mn_baobiao_fill",
-        102: "iconfont icon-users",
-        109: "iconfont icon-tijikongjian",
-        121: "iconfont icon-wenjian",
-        126: "iconfont icon-setting",
+        100: 'iconfont icon-mn_baobiao_fill',
+        102: 'iconfont icon-users',
+        109: 'iconfont icon-tijikongjian',
+        121: 'iconfont icon-wenjian',
+        126: 'iconfont icon-setting'
       },
       isFullscreen: false,
       isCollapse: false,
       // 被激活的连接地址
-      acvtivePath: "",
-      transitionName: "",
+      acvtivePath: '',
+      transitionName: '',
       dialogVisible: false,
       camera: null,
       hands: null,
@@ -177,85 +158,85 @@ export default {
       timeMarked: new Date().getTime(),
       handvideo: 0,
       camera: null,
-      subID: window.sessionStorage.getItem("subID"),
+      subID: window.sessionStorage.getItem('subID'),
       enumSub: {
         100: 0,
         102: 1,
         109: 2,
         126: 3,
-        121: 4,
+        121: 4
       },
       handGestureWorker: null,
-      wasmModule: null,
-    };
+      wasmModule: null
+    }
   },
   created() {
-    this.getMenuList();
-    this.acvtivePath = window.sessionStorage.getItem("acvtivePath");
+    this.getMenuList()
+    this.acvtivePath = window.sessionStorage.getItem('acvtivePath')
   },
   mounted() {
     window.onresize = () => {
       // 全屏下监控是否按键了ESC
       if (!this.checkFull()) {
         // 全屏下按键esc后要执行的动作
-        this.isFullscreen = false;
+        this.isFullscreen = false
       }
-    };
+    }
     this.config = {
       locateFile: (file) => {
-        console.log("请求加载模型文件:", file);
-        return `/mediapipe/hands/${file}`;
+        console.log('请求加载模型文件:', file)
+        return `/mediapipe/hands/${file}`
       }
-    };
-    
+    }
+
     // 初始化手势识别Worker
     if (window.Worker) {
       try {
-        this.initHandGestureWorker();
+        this.initHandGestureWorker()
       } catch (error) {
-        console.error('初始化手势识别Worker失败:', error);
+        console.error('初始化手势识别Worker失败:', error)
       }
     } else {
-      console.warn('此浏览器不支持Web Workers');
+      console.warn('此浏览器不支持Web Workers')
     }
   },
   watch: {
     $route(to, from) {
-      const toDepth = to.path.split("/").length;
-      const fromDepth = from.path.split("/").length;
-      this.transitionName = toDepth < fromDepth ? "slide-right" : "slide-left";
-    },
+      const toDepth = to.path.split('/').length
+      const fromDepth = from.path.split('/').length
+      this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
+    }
   },
   methods: {
     logout() {
-      window.sessionStorage.clear();
-      this.$router.push("login");
+      window.sessionStorage.clear()
+      this.$router.push('login')
     },
     async getMenuList() {
       // 将data去处 重定向为res
-      const { data: res } = await menuAPI.getMenuList();
+      const { data: res } = await menuAPI.getMenuList()
       if (res.status !== 200) {
-        return this.$message.error(res.msg);
+        return this.$message.error(res.msg)
       }
-      this.menuList = res.data;
+      this.menuList = res.data
     },
     toggleChange() {
-      this.isCollapse = !this.isCollapse;
+      this.isCollapse = !this.isCollapse
     },
     saveNavState(acvtivePath) {
-      window.sessionStorage.setItem("acvtivePath", acvtivePath);
-      this.acvtivePath = acvtivePath;
+      window.sessionStorage.setItem('acvtivePath', acvtivePath)
+      this.acvtivePath = acvtivePath
     },
     saveNavsub(id) {
-      window.sessionStorage.setItem("subID", id);
-      this.subID = id;
+      window.sessionStorage.setItem('subID', id)
+      this.subID = id
     },
     /**
      * 全屏事件
      */
     screenfull() {
-      screenfull.toggle();
-      this.isFullscreen = true;
+      screenfull.toggle()
+      this.isFullscreen = true
     },
     /**
      * 是否全屏并按键ESC键的方法
@@ -265,135 +246,128 @@ export default {
         document.fullscreenEnabled ||
         window.fullScreen ||
         document.webkitIsFullScreen ||
-        document.msFullscreenEnabled;
+        document.msFullscreenEnabled
       // to fix : false || undefined == undefined
       if (isFull === undefined) {
-        isFull = false;
+        isFull = false
       }
-      return isFull;
+      return isFull
     },
     async handControl() {
-      this.handvideo = !this.handvideo;
+      this.handvideo = !this.handvideo
       if (this.handvideo) {
         try {
           // 确保MediaPipe组件已加载
           if (!window.Camera) {
             // 如果Camera未定义，可能需要动态加载
-            this.$message.warning('正在加载摄像头组件，请稍候...');
-            
+            this.$message.warning('正在加载摄像头组件，请稍候...')
+
             // 可以考虑动态导入
-            const { Camera } = await import("@mediapipe/camera_utils");
-            window.Camera = Camera;
+            const { Camera } = await import('@mediapipe/camera_utils')
+            window.Camera = Camera
           }
-          
-          this.initCamera();
+
+          this.initCamera()
         } catch (error) {
-          console.error('初始化摄像头失败:', error);
-          this.$message.error(`无法初始化摄像头: ${error.message}`);
-          this.handvideo = false;
+          console.error('初始化摄像头失败:', error)
+          this.$message.error(`无法初始化摄像头: ${error.message}`)
+          this.handvideo = false
         }
       } else {
-        this.stopCamera();
+        this.stopCamera()
       }
     },
     initCamera() {
-      this.$refs.canvasElement.style.display = "block";
-      this.videoElement = this.$refs.videoElement;
-      this.canvasElement = this.$refs.canvasElement;
-      this.canvasCtx = this.canvasElement.getContext("2d");
-      
-      console.log("初始化手势识别组件...");
-      
+      this.$refs.canvasElement.style.display = 'block'
+      this.videoElement = this.$refs.videoElement
+      this.canvasElement = this.$refs.canvasElement
+      this.canvasCtx = this.canvasElement.getContext('2d')
+
+      console.log('初始化手势识别组件...')
+
       // 关键修改：使用本地模型文件
       this.config = {
         locateFile: (file) => {
-          console.log("请求加载模型文件:", file);
-          return `/mediapipe/hands/${file}`;
+          console.log('请求加载模型文件:', file)
+          return `/mediapipe/hands/${file}`
         }
-      };
-      
+      }
+
       try {
         // 创建Hands实例
-        this.hands = new mpHands.Hands(this.config);
-        console.log("成功创建Hands实例");
-        
-        this.hands.onResults(this.onResults.bind(this));
+        this.hands = new mpHands.Hands(this.config)
+        console.log('成功创建Hands实例')
+
+        this.hands.onResults(this.onResults.bind(this))
         this.hands.setOptions({
           selfieMode: true,
           maxNumHands: 2,
           modelComplexity: 1,
           minDetectionConfidence: 0.5,
-          minTrackingConfidence: 0.5,
-        });
-        
+          minTrackingConfidence: 0.5
+        })
+
         // 初始化摄像头
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia({
-            video: {
-              width: 1280,
-              height: 720
-            }
-          })
-          .then((stream) => {
-            console.log("摄像头访问成功");
-            this.videoElement.srcObject = stream;
-            this.videoElement.onloadedmetadata = () => {
-              this.videoElement.play();
-              this.startFrameProcessing();
-            };
-          })
-          .catch((error) => {
-            console.error("摄像头访问失败:", error);
-            this.$message.error("无法访问摄像头，请确保已授予权限");
-          });
+          navigator.mediaDevices
+            .getUserMedia({
+              video: {
+                width: 1280,
+                height: 720
+              }
+            })
+            .then((stream) => {
+              console.log('摄像头访问成功')
+              this.videoElement.srcObject = stream
+              this.videoElement.onloadedmetadata = () => {
+                this.videoElement.play()
+                this.startFrameProcessing()
+              }
+            })
+            .catch((error) => {
+              console.error('摄像头访问失败:', error)
+              this.$message.error('无法访问摄像头，请确保已授予权限')
+            })
         } else {
-          console.error("浏览器不支持getUserMedia API");
-          this.$message.error("您的浏览器不支持摄像头功能");
+          console.error('浏览器不支持getUserMedia API')
+          this.$message.error('您的浏览器不支持摄像头功能')
         }
       } catch (error) {
-        console.error("初始化手势识别失败:", error);
-        this.$message.error(`初始化失败: ${error.message}`);
+        console.error('初始化手势识别失败:', error)
+        this.$message.error(`初始化失败: ${error.message}`)
       }
     },
     onResults(results) {
       // 保存原始绘图逻辑
-      this.canvasCtx.save();
-      this.canvasCtx.clearRect(
-        0,
-        0,
-        this.canvasElement.width,
-        this.canvasElement.height
-      );
+      this.canvasCtx.save()
+      this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height)
       this.canvasCtx.drawImage(
         results.image,
         0,
         0,
         this.canvasElement.width,
         this.canvasElement.height
-      );
-      
+      )
+
       // 处理手部标记绘制
       if (results.multiHandLandmarks && results.multiHandedness) {
         for (let index = 0; index < results.multiHandLandmarks.length; index++) {
-          const classification = results.multiHandedness[index];
-          const isRightHand = classification.label === "Right";
-          const landmarks = results.multiHandLandmarks[index];
-          
+          const classification = results.multiHandedness[index]
+          const isRightHand = classification.label === 'Right'
+          const landmarks = results.multiHandLandmarks[index]
+
           // 绘制手部连接线和关键点
-          drawingUtils.drawConnectors(
-            this.canvasCtx,
-            landmarks,
-            mpHands.HAND_CONNECTIONS,
-            { color: isRightHand ? "#00FF00" : "#FF0000" }
-          );
+          drawingUtils.drawConnectors(this.canvasCtx, landmarks, mpHands.HAND_CONNECTIONS, {
+            color: isRightHand ? '#00FF00' : '#FF0000'
+          })
           drawingUtils.drawLandmarks(this.canvasCtx, landmarks, {
-            color: isRightHand ? "#00FF00" : "#FF0000",
-            fillColor: isRightHand ? "#FF0000" : "#00FF00",
+            color: isRightHand ? '#00FF00' : '#FF0000',
+            fillColor: isRightHand ? '#FF0000' : '#00FF00',
             radius: (data) => {
-              return drawingUtils.lerp(data.from.z, -0.15, 0.1, 8, 1);
-            },
-          });
-          
+              return drawingUtils.lerp(data.from.z, -0.15, 0.1, 8, 1)
+            }
+          })
+
           // 将手部关键点数据发送到Worker处理
           if (this.handGestureWorker) {
             this.handGestureWorker.postMessage({
@@ -402,213 +376,213 @@ export default {
                 landmarks: landmarks,
                 handedness: classification.label
               }
-            });
+            })
           } else {
             // 如果Worker不可用，回退到原始处理逻辑
-            this.processHandGestureInMainThread(landmarks, classification.label);
+            this.processHandGestureInMainThread(landmarks, classification.label)
           }
         }
       }
-      
-      this.canvasCtx.restore();
+
+      this.canvasCtx.restore()
     },
     handleGestureDetection(data) {
-      const { hand, gesture, landmarks } = data;
-      const t = new Date().getTime();
-      
+      const { hand, gesture, landmarks } = data
+      const t = new Date().getTime()
+
       if (hand === 'Right') {
         // 处理右手手势
         if (this.timeMarked <= t - 1000) {
           if (gesture === this.gestureMarked) {
-            this.processRightHandGesture(gesture);
-            this.gestureMarked = 0;
-            this.gestureMarked1 = 0;
-            this.timeMarked = t;
+            this.processRightHandGesture(gesture)
+            this.gestureMarked = 0
+            this.gestureMarked1 = 0
+            this.timeMarked = t
           }
         }
-        
+
         if (gesture !== this.gestureMarked1 || gesture === false) {
-          this.gestureMarked1 = gesture;
-          this.gestureMarked = gesture;
-          this.timeMarked = t;
+          this.gestureMarked1 = gesture
+          this.gestureMarked = gesture
+          this.timeMarked = t
         }
       } else if (hand === 'Left') {
         // 处理左手手势
         if (this.timeMarked <= t - 1000) {
           if (gesture === this.gestureMarked) {
-            this.processLeftHandGesture(gesture);
-            this.gestureMarked = 0;
-            this.gestureMarked1 = 0;
-            this.timeMarked = t;
+            this.processLeftHandGesture(gesture)
+            this.gestureMarked = 0
+            this.gestureMarked1 = 0
+            this.timeMarked = t
           }
         }
-        
+
         if (gesture !== this.gestureMarked1 || gesture === false) {
-          this.gestureMarked1 = gesture;
-          this.gestureMarked = gesture;
-          this.timeMarked = t;
+          this.gestureMarked1 = gesture
+          this.gestureMarked = gesture
+          this.timeMarked = t
         }
       }
     },
     processRightHandGesture(gesture) {
       switch (gesture) {
         case 1:
-          window.eventBus.$emit("getDirFileInfo");
-          window.eventBus.$emit("getDirFileByIndex", 1);
-          break;
+          window.eventBus.$emit('getDirFileInfo')
+          window.eventBus.$emit('getDirFileByIndex', 1)
+          break
         case 2:
-          window.eventBus.$emit("getDirFileByIndex", 2);
-          break;
+          window.eventBus.$emit('getDirFileByIndex', 2)
+          break
         case 3:
-          window.eventBus.$emit("getDirFileByIndex", 3);
-          break;
+          window.eventBus.$emit('getDirFileByIndex', 3)
+          break
         case 4:
-          window.eventBus.$emit("getDirFileByIndex", 4);
-          break;
+          window.eventBus.$emit('getDirFileByIndex', 4)
+          break
         case 5:
-          window.eventBus.$emit("getDirFileByIndex", 5);
-          break;
+          window.eventBus.$emit('getDirFileByIndex', 5)
+          break
         case 101:
-          window.eventBus.$emit("rollbackFile", 101);
-          break;
+          window.eventBus.$emit('rollbackFile', 101)
+          break
         // 其他手势处理...
       }
     },
     processLeftHandGesture(gesture) {
       switch (gesture) {
         case 1:
-          this.upSubMenu();
-          break;
+          this.upSubMenu()
+          break
         case 101:
-          this.chooseMenu1();
-          break;
+          this.chooseMenu1()
+          break
         case 102:
-          this.chooseMenu2();
-          break;
+          this.chooseMenu2()
+          break
         case 201:
-          this.downSubMenu();
-          break;
+          this.downSubMenu()
+          break
       }
     },
     stopCamera() {
       if (this.camera) {
-        this.camera.stop();
-        this.camera = null;
+        this.camera.stop()
+        this.camera = null
       }
-      
+
       if (this.hands) {
-        this.hands.reset();
-        this.hands = null;
+        this.hands.reset()
+        this.hands = null
       }
-      
+
       if (this.handGestureWorker) {
-        this.handGestureWorker.terminate();
-        this.handGestureWorker = null;
+        this.handGestureWorker.terminate()
+        this.handGestureWorker = null
       }
-      
-      this.$refs.canvasElement.style.display = "none";
+
+      this.$refs.canvasElement.style.display = 'none'
     },
     openMenu(index, num) {
-      console.log(this.menuList);
+      console.log(this.menuList)
       switch (index) {
         case 1:
           if (this.$refs.menu.openedMenus[0] == 100) {
             // console.log(this.$refs.subMenu);
-            this.$refs.subMenu[0].$children[0].handleClick();
+            this.$refs.subMenu[0].$children[0].handleClick()
           } else {
-            this.$refs.subMenu[0].handleClick();
+            this.$refs.subMenu[0].handleClick()
           }
-          console.log(this.$refs.subMenu, this.$refs.menu);
-          break;
+          console.log(this.$refs.subMenu, this.$refs.menu)
+          break
         case 2:
           if (this.$refs.menu.openedMenus[0] == 102) {
             // console.log(this.$refs.subMenu);
-            this.$refs.subMenu[0].$children[0].handleClick();
+            this.$refs.subMenu[0].$children[0].handleClick()
           } else {
-            this.$refs.subMenu[1].handleClick();
+            this.$refs.subMenu[1].handleClick()
           }
-          break;
+          break
         case 3:
           if (this.$refs.menu.openedMenus[0] == 109) {
             if (num == 1) {
-              this.$refs.subMenu[0].$children[0].handleClick();
+              this.$refs.subMenu[0].$children[0].handleClick()
             } else {
-              this.$refs.subMenu[0].$children[1].handleClick();
+              this.$refs.subMenu[0].$children[1].handleClick()
             }
           } else {
-            this.$refs.subMenu[2].handleClick();
+            this.$refs.subMenu[2].handleClick()
           }
-          break;
+          break
         case 4:
           if (this.$refs.menu.openedMenus[0] == 126) {
             // console.log(this.$refs.subMenu);
-            this.$refs.subMenu[0].$children[0].handleClick();
+            this.$refs.subMenu[0].$children[0].handleClick()
           } else {
-            this.$refs.subMenu[3].handleClick();
+            this.$refs.subMenu[3].handleClick()
           }
         case 5:
           if (this.$refs.menu.openedMenus[0] == 121) {
             if (num == 1) {
-              this.$refs.subMenu[0].$children[0].handleClick();
+              this.$refs.subMenu[0].$children[0].handleClick()
             } else {
-              this.$refs.subMenu[0].$children[1].handleClick();
+              this.$refs.subMenu[0].$children[1].handleClick()
             }
           } else {
-            this.$refs.subMenu[4].handleClick();
+            this.$refs.subMenu[4].handleClick()
           }
       }
     },
     upSubMenu() {
       if (this.enumSub[this.subID] > 0) {
-        this.$refs.subMenu[this.enumSub[this.subID] - 1].handleClick();
-        this.subID = this.$refs.menu.openedMenus[0];
-        window.sessionStorage.setItem("subID", this.subID);
-        console.log(this.subID, this.$refs.menu.openedMenus[0]);
+        this.$refs.subMenu[this.enumSub[this.subID] - 1].handleClick()
+        this.subID = this.$refs.menu.openedMenus[0]
+        window.sessionStorage.setItem('subID', this.subID)
+        console.log(this.subID, this.$refs.menu.openedMenus[0])
       } else {
-        this.$refs.subMenu[4].handleClick();
-        console.log(this.$refs.menu);
-        this.subID = 121;
-        window.sessionStorage.setItem("subID", this.subID);
-        console.log(this.subID, this.$refs.menu.openedMenus[0]);
+        this.$refs.subMenu[4].handleClick()
+        console.log(this.$refs.menu)
+        this.subID = 121
+        window.sessionStorage.setItem('subID', this.subID)
+        console.log(this.subID, this.$refs.menu.openedMenus[0])
       }
     },
     downSubMenu() {
       if (this.enumSub[this.subID] < 3) {
-        this.$refs.subMenu[this.enumSub[this.subID] + 1].handleClick();
-        this.subID = this.$refs.menu.openedMenus[0];
-        window.sessionStorage.setItem("subID", this.subID);
+        this.$refs.subMenu[this.enumSub[this.subID] + 1].handleClick()
+        this.subID = this.$refs.menu.openedMenus[0]
+        window.sessionStorage.setItem('subID', this.subID)
       } else {
-        this.$refs.subMenu[0].handleClick();
-        this.subID = 100;
-        window.sessionStorage.setItem("subID", this.subID);
+        this.$refs.subMenu[0].handleClick()
+        this.subID = 100
+        window.sessionStorage.setItem('subID', this.subID)
       }
     },
     chooseMenu1() {
-      this.$refs.subMenu[this.enumSub[this.subID]].$children[0].handleClick();
+      this.$refs.subMenu[this.enumSub[this.subID]].$children[0].handleClick()
     },
     chooseMenu2() {
       if (this.$refs.subMenu[this.enumSub[this.subID]].$children[1]) {
-        this.$refs.subMenu[this.enumSub[this.subID]].$children[1].handleClick();
+        this.$refs.subMenu[this.enumSub[this.subID]].$children[1].handleClick()
       }
     },
     initHandGestureWorker() {
       try {
         // 使用文件路径创建Worker
-        this.handGestureWorker = new Worker('/src/workers/handGestureWorker.js');
-        
+        this.handGestureWorker = new Worker('/src/workers/handGestureWorker.js')
+
         // 设置消息处理
         this.handGestureWorker.onmessage = (e) => {
-          const { type, data } = e.data;
-          
+          const { type, data } = e.data
+
           if (type === 'gestureDetected') {
-            this.handleGestureDetection(data);
+            this.handleGestureDetection(data)
           }
-        };
-        
-        console.log('手势识别Worker初始化成功');
+        }
+
+        console.log('手势识别Worker初始化成功')
       } catch (error) {
-        console.error('初始化手势识别Worker失败:', error);
-        this.$message.warning('手势识别初始化失败，将使用备选方案');
+        console.error('初始化手势识别Worker失败:', error)
+        this.$message.warning('手势识别初始化失败，将使用备选方案')
       }
     },
     processHandGestureInMainThread(landmarks, handLabel) {
@@ -622,21 +596,21 @@ export default {
       const processFrame = async () => {
         if (this.handvideo && this.videoElement && this.hands) {
           try {
-            await this.hands.send({image: this.videoElement});
+            await this.hands.send({ image: this.videoElement })
           } catch (error) {
-            console.error("处理视频帧失败:", error);
+            console.error('处理视频帧失败:', error)
           }
         }
-        
+
         if (this.handvideo) {
-          this.animationFrameId = requestAnimationFrame(processFrame);
+          this.animationFrameId = requestAnimationFrame(processFrame)
         }
-      };
-      
-      this.animationFrameId = requestAnimationFrame(processFrame);
-    },
-  },
-};
+      }
+
+      this.animationFrameId = requestAnimationFrame(processFrame)
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>

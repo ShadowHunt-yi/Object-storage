@@ -66,9 +66,7 @@ export const loginRules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
   ],
-  code: [
-    { required: true, message: '请输入验证码', trigger: 'blur' }
-  ]
+  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
 }
 
 export const registerRules = {
@@ -88,4 +86,4 @@ export const registerRules = {
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码格式', trigger: 'blur' }
   ]
-} 
+}

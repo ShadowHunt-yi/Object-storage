@@ -12,87 +12,87 @@ import UserInfo from '../view/user/UserInfo.vue'
 
 Vue.use(VueRouter)
 
-const routes = [{
-  path: '/',
-  redirect: '/home'
-},
-{
-  path: '/login',
-  component: Login
-},
-{
-  path: '/home',
-  component: Home,
-  redirect: '/welcome',
-  children: [{
-    path: '/welcome',
-    component: () =>
-      import('../view/Welcome.vue')
+const routes = [
+  {
+    path: '/',
+    redirect: '/home'
   },
   {
-    path: '/users',
-    meta: {
-      parentTitle: '用户管理',
-      title: '用户列表'
-    },
-    component: User
+    path: '/login',
+    component: Login
   },
   {
-    path: '/console',
-    meta: {
-      parentTitle: '控制台',
-      title: '控制台数据'
-    },
-    component: Console
+    path: '/home',
+    component: Home,
+    redirect: '/welcome',
+    children: [
+      {
+        path: '/welcome',
+        component: () => import('../view/Welcome.vue')
+      },
+      {
+        path: '/users',
+        meta: {
+          parentTitle: '用户管理',
+          title: '用户列表'
+        },
+        component: User
+      },
+      {
+        path: '/console',
+        meta: {
+          parentTitle: '控制台',
+          title: '控制台数据'
+        },
+        component: Console
+      },
+      {
+        path: '/rights',
+        meta: {
+          parentTitle: '权限管理',
+          title: '权限列表'
+        },
+        component: Rights
+      },
+      {
+        path: '/roles',
+        meta: {
+          parentTitle: '权限管理',
+          title: '角色列表'
+        },
+        component: Roles
+      },
+      {
+        path: '/upload',
+        meta: {
+          parentTitle: '文件管理',
+          title: '文件上传'
+        },
+        component: Upload
+      },
+      {
+        path: '/filelist',
+        meta: {
+          parentTitle: '文件管理',
+          title: '文件列表'
+        },
+        component: FileList
+      },
+      {
+        path: '/userinfo',
+        meta: {
+          parentTitle: '个人中心',
+          title: '修改个人信息'
+        },
+        component: UserInfo
+      }
+    ]
   },
   {
-    path: '/rights',
-    meta: {
-      parentTitle: '权限管理',
-      title: '权限列表'
-    },
-    component: Rights
-  },
-  {
-    path: '/roles',
-    meta: {
-      parentTitle: '权限管理',
-      title: '角色列表'
-    },
-    component: Roles
-  },
-  {
-    path: '/upload',
-    meta: {
-      parentTitle: '文件管理',
-      title: '文件上传'
-    },
-    component: Upload
-  },
-  {
-    path: '/filelist',
-    meta: {
-      parentTitle: '文件管理',
-      title: '文件列表'
-    },
-    component: FileList
-  },
-  {
-    path: '/userinfo',
-    meta: {
-      parentTitle: '个人中心',
-      title: '修改个人信息'
-    },
-    component: UserInfo
+    path: '/*',
+    name: '404',
+    component: () => import('../view/error/404.vue')
   }
-  ]
-},
-{
-  path: '/*',
-  name: '404',
-  component: () =>
-    import('../view/error/404.vue')
-}
 ]
 
 const router = new VueRouter({

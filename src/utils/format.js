@@ -5,12 +5,12 @@
  */
 export function formatFileSize(byte) {
   if (byte > 1024 * 1024) {
-    return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB";
+    return parseFloat(byte / 1024 / 1024).toFixed(2) + ' MB'
   }
   if (byte > 1024) {
-    return parseFloat(byte / 1024).toFixed(2) + " KB";
+    return parseFloat(byte / 1024).toFixed(2) + ' KB'
   }
-  return parseFloat(byte).toFixed(2) + " B";
+  return parseFloat(byte).toFixed(2) + ' B'
 }
 
 /**
@@ -19,11 +19,11 @@ export function formatFileSize(byte) {
  * @returns {String} 格式化后的时间
  */
 export function formatTime(time) {
-  const dayjs = require("dayjs");
-  const utc = require("dayjs/plugin/utc");
-  const timezone = require("dayjs/plugin/timezone");
-  
-  dayjs.extend(utc);
-  dayjs.extend(timezone);
-  return dayjs(time).tz("Asia/Shanghai").format();
-} 
+  const dayjs = require('dayjs')
+  const utc = require('dayjs/plugin/utc')
+  const timezone = require('dayjs/plugin/timezone')
+
+  dayjs.extend(utc)
+  dayjs.extend(timezone)
+  return dayjs(time).tz('Asia/Shanghai').format()
+}

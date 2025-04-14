@@ -120,7 +120,7 @@ export const fileAPI = {
   },
   // 下载文件
   downloadFile(params) {
-    return request.get('/download', { 
+    return request.get('/download', {
       params,
       responseType: 'blob'
     })
@@ -179,4 +179,4 @@ export default {
   fileAPI,
   bucketAPI,
   archiveAPI
-} 
+}

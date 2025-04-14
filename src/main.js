@@ -12,21 +12,21 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import VueCropper from 'vue-cropper'
 Vue.use(VueCropper)
-axios.interceptors.request.use(config => {
+axios.interceptors.request.use((config) => {
   NProgress.start()
   config.headers.Authorization = 'Bearer ' + window.sessionStorage.getItem('token')
   return config
 })
 
-axios.interceptors.response.use(config => {
+axios.interceptors.response.use((config) => {
   NProgress.done()
   return config
 })
-window.eventBus = new Vue();
+window.eventBus = new Vue()
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
 
 new Vue({
   router,
-  render: h => h(App),
+  render: (h) => h(App)
 }).$mount('#app')
