@@ -27,18 +27,18 @@ cd Object-storage
 
 2. 安装依赖
 ```bash
-npm install
+pnpm install
 ```
 
 3. 本地开发运行
 ```bash
-npm run serve
+pnpm run serve
 ```
 应用将在 http://localhost:5000 启动
 
 4. 构建生产版本
 ```bash
-npm run build
+pnpm run build
 ```
 
 ## 项目结构
