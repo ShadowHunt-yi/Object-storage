@@ -57,7 +57,7 @@ pnpm run build
 ├── vue.config.js        # Vue配置
 └── package.json         # 依赖管理
 ```
-
+- 使用prettier进行格式化
 ## 功能说明
 
 - **文件管理**：上传、下载、删除、重命名文件
@@ -73,3 +73,4 @@ pnpm run build
 
 - 文件上传使用分片上传技术，支持大文件和断点续传
 - 使用Spark-MD5进行文件完整性校验
+
