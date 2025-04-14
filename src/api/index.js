@@ -41,6 +41,10 @@ export const userAPI = {
   // 更新用户密码
   updatePassword(data) {
     return request.post('/users/updatePassword', data)
+  },
+  // 登录
+  login(data) {
+    return request.post('/login', data)
   }
 }
 
@@ -107,8 +111,8 @@ export const fileAPI = {
     return request.get(`/getLists/${bucketName}`, { params })
   },
   // 文件重命名
-  renameFile(oldName, newName) {
-    return request.post(`/rename/${oldName}/${newName}`)
+  renameFile(oldName, newName, type) {
+    return request.post(`/rename/${oldName}/${newName}.${type}`)
   },
   // 删除文件
   deleteFile(bucketName, md5) {
@@ -132,6 +136,18 @@ export const bucketAPI = {
   // 获取桶列表
   getBuckets() {
     return request.get('/buckets')
+  },
+  // 创建桶
+  createBucket(name) {
+    return request.post(`/createBuckets/${name}`)
+  },
+  // 删除桶
+  deleteBucket(name) {
+    return request.delete(`/deleteBuckets/${name}`)
+  },
+  // 获取桶信息
+  getBucketInfo(name) {
+    return request.get(`/getBucketInfo/${name}`)
   }
 }
 

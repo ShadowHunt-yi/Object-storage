@@ -293,7 +293,7 @@ export default {
     async getFlieList(name) {
       this.bucketName = name;
       sessionStorage.setItem("bucketName", name);
-      const { data: res } = await fileAPI.getLists(name, {
+      const { data: res } = await fileAPI.getFileList(name, {
         params: { prefix: "" },
       });
       if (res.status !== 200) {
@@ -335,7 +335,7 @@ export default {
         url += this.pathlist[i] + "/";
       }
       url += this.pathlist[index];
-      const { data: res } = await fileAPI.getLists(this.selectionName, {
+      const { data: res } = await fileAPI.getFileList(this.selectionName, {
         params: { prefix: url },
       });
       if (res.status !== 200) {
@@ -347,7 +347,7 @@ export default {
     async rename(_old, _new, _type) {
       console.log(_type);
       if (_new != "") {
-        const { data: res } = await fileAPI.rename(_old, _new, _type);
+        const { data: res } = await fileAPI.renameFile(_old, _new, _type);
 
         if (res.status !== 200) {
           return this.$message.error(res.msg);
@@ -373,7 +373,7 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已经取消删除");
       }
-      const { data: res } = await fileAPI.remove(this.bucketName, fileInfo.md5);
+      const { data: res } = await fileAPI.deleteFile(this.bucketName, fileInfo.md5);
       if (res.status !== 200) {
         return this.$message.error("删除失败");
       }
