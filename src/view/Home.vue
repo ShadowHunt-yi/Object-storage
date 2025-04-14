@@ -74,7 +74,7 @@
           @toggleClick="toggleChange()"
         />
         <div style="display: flex; align-items: center">
-          <span style="margin-left: 15px">智域云图-对象存储平台</span>
+          <span style="margin-left: 15px; color: #000000">智域云图-对象存储平台</span>
         </div>
         <div @click="screenfull()" class="fullscreen">
           <svg
@@ -182,13 +182,6 @@ export default {
         this.isFullscreen = false
       }
     }
-    this.config = {
-      locateFile: (file) => {
-        console.log('请求加载模型文件:', file)
-        return `/mediapipe/hands/${file}`
-      }
-    }
-
     // 初始化手势识别Worker
     if (window.Worker) {
       try {

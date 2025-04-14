@@ -234,7 +234,8 @@ export default {
     this.config = {
       locateFile: (file) => {
         // return `http://172.0.0.1:10000/${file}`;
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+        // return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+        return `/mediapipe/faces/${file}`
       }
     }
   },
@@ -268,11 +269,11 @@ export default {
       this.vcUrl = '/api/verifyCode?time=' + new Date()
     },
     login() {
-      this.$router.push('welcome')
-      // this.dialogface = true
-      // this.$nextTick(() => {
-      //   this.initCamera()
-      // })
+      // this.$router.push('welcome')
+       this.dialogface = true
+       this.$nextTick(()=>{
+        this.initCamera()
+       })
       this.$refs.loginFormRef.validate(async (valid) => {
         // valid是一个布尔值，这是一个回调函数
         if (!valid) return 0
@@ -284,10 +285,10 @@ export default {
           window.sessionStorage.setItem('authority', res.data.id)
           window.sessionStorage.setItem('token', res.data.token)
           this.facetitle = '人脸认证'
-          // this.dialogface = true
-          // setTimeout(() => {
-          //   this.initCamera()
-          // }, 0)
+          this.dialogface = true
+          setTimeout(() => {
+            this.initCamera()
+          }, 0)
         }
       })
     },
