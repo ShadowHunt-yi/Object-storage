@@ -65,7 +65,7 @@
             ></span>
             <span>文件列表</span>
           </a>
-          <a class="shortcut-button" @click="toDisplay" v-if="admin()">
+          <a class="shortcut-button" @click="toDisplay" v-if="admin">
             <span class="shortcut-button-icon"
               ><i class="el-icon-takeaway-box" style="font-size: 25px"></i
             ></span>
@@ -95,7 +95,7 @@
                 <template slot-scope="scope">
                   <div>
                     <span style="font-size: 16px">
-                      {{ norm(scope.row.totalSize) }}
+                      {{ formatFileSize(scope.row.totalSize) }}
                     </span>
                   </div>
                 </template>
@@ -204,6 +204,7 @@
 <script>
 import echarts from "echarts";
 import { fileAPI, bucketAPI, archiveAPI } from '@/api'
+import { formatFileSize } from '@/utils/format'
 export default {
   data() {
     return {
@@ -227,6 +228,11 @@ export default {
       bucketName: sessionStorage.getItem("bucketName") || "",
       consoleData: {},
     };
+  },
+  computed: {
+    admin() {
+      return sessionStorage.getItem("authority") == "0";
+    },
   },
   created() {
     this.getConsoleState();
@@ -376,15 +382,6 @@ export default {
     formatTime(e) {
       return e.split("/")[0];
     },
-    norm(byte) {
-      if (byte > 1024 * 1024) {
-        return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB";
-      }
-      if (byte > 1024) {
-        return parseFloat(byte / 1024).toFixed(2) + " KB";
-      }
-      return parseFloat(byte).toFixed(2) + " B";
-    },
     async toRestore() {
       const { data: res } = await archiveAPI.executeSql({
         params: { objectName: "base/backups/mytable/mytable_test.sql.gz" },
@@ -411,9 +408,6 @@ export default {
         return this.$message.error(res.msg);
       }
       this.consoleParam = res.data;
-    },
-    admin() {
-      return sessionStorage.getItem("authority") == "0";
     },
   },
 };

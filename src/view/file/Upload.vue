@@ -529,8 +529,8 @@ export default {
     },
     finish() {
       if(this.bucketNameShow==''){
-    return this.$message('未选择桶')
-  }
+        return this.$message('未选择桶')
+       }
       this.$refs.cropper.getCropBlob(async (data) => {
 
         let file = new window.File([data], this.fileName, { type: 'image/jpg' })

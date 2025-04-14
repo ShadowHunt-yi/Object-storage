@@ -132,9 +132,6 @@ export default {
       },
       treeProps: {
         label: 'name',
-        // function (data, node) {
-        //   return data.name
-        // },
         children: 'children'
       },
       // 默认选中的节点ID值

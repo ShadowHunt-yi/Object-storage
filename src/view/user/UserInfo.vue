@@ -59,31 +59,9 @@
 <script>
 import qs from 'qs'
 import { userAPI } from '@/api'
+import { validateEmail, validateMobile, validatePasswordConfirm } from '@/utils/validate'
 export default {
   data () {
-    var checkEmail = (rule, value, callback) => {
-      const regEmail = /^([a-zA-Z0-9._-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/
-
-      if (regEmail.test(value)) {
-        // 合法的邮箱
-        return callback()
-      }
-      callback(new Error('请输入合法的邮箱'))
-    }
-
-    var checkMobile = (rule, value, callback) => {
-      const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/
-      if (regMobile.test(value)) {
-        return callback()
-      }
-      callback(new Error('请输入合法的手机号'))
-    }
-    var validatePass = (rule, value, callback) => {
-      if (value === this.ruleForm.new) {
-        return callback()
-      }
-      callback(new Error('两次输入密码不一致!'))
-    }
     return {
       userinfo: {
         id: '',
@@ -100,11 +78,11 @@ export default {
       editFormRules: {
         email: [
           { required: true, message: '请输入邮箱', trigger: 'blur' },
-          { validator: checkEmail, trigger: 'blur' }
+          { validator: validateEmail, trigger: 'blur' }
         ],
         mobile: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: checkMobile, trigger: 'blur' }
+          { validator: validateMobile, trigger: 'blur' }
         ]
       },
       editDialogVisible: false,
@@ -125,7 +103,7 @@ export default {
         ],
         checkpassword: [
           { required: true, message: '请再次输入新密码', trigger: 'blur' },
-          { validator: validatePass, trigger: 'blur' }
+          { validator: validatePasswordConfirm, trigger: 'blur' }
         ]
       }
     }

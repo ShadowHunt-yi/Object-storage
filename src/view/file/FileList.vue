@@ -191,6 +191,7 @@ var utc = require("dayjs/plugin/utc");
 var timezone = require("dayjs/plugin/timezone");
 import * as fileUtil from "@/utils/fileUtil";
 import { fileAPI, bucketAPI } from '@/api'
+import { formatFileSize } from '@/utils/format'
 export default {
   data() {
     return {
@@ -260,24 +261,15 @@ export default {
       }
       this.buckets = res.data;
     },
-    formatSize(byte) {
-      if (byte > 1024 * 1024) {
-        return parseFloat(byte / 1024 / 1024).toFixed(2) + " MB";
-      }
-      if (byte > 1024) {
-        return parseFloat(byte / 1024).toFixed(2) + " KB";
-      }
-      return parseFloat(byte).toFixed(2) + " B";
-    },
     totalSize(e) {
       if (e.type != "directory") {
-        return this.formatSize(e.Size);
+        return formatFileSize(e.Size);
       } else {
         let sumSize = 0;
         for (let item of e.children.data) {
           sumSize += parseFloat(item.Size);
         }
-        return this.formatSize(sumSize);
+        return formatFileSize(sumSize);
       }
     },
     formatTime(e) {

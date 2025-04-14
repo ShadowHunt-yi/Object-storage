@@ -201,6 +201,8 @@ import { Camera } from "@mediapipe/camera_utils";
 import * as drawingUtils from "@mediapipe/drawing_utils";
 import * as mpFaceMesh from "@mediapipe/face_mesh";
 import { userAPI } from '@/api'
+import { loginRules, registerRules } from '@/utils/validate'
+
 export default {
   data() {
     return {
@@ -215,87 +217,8 @@ export default {
         password: "",
         code: "",
       },
-      // 这是表单的验证规则对象
-      loginFormRules: {
-        // 验证用户名是否合法
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          {
-            min: 2,
-            max: 13,
-            message: "长度在 2 到 13 个字符",
-            trigger: "blur",
-          },
-        ],
-        // 验证密码是否合法
-        password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          {
-            min: 6,
-            max: 15,
-            message: "长度在 6 到 15 个字符",
-            trigger: "blur",
-          },
-        ],
-        code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
-        email: [
-          {
-            required: true,
-            message: "请输入邮箱",
-            trigger: "blur",
-          },
-          {
-            validator: function (rule, value, callback) {
-              if (
-                /^\w{1,64}@[a-z0-9\-]{1,256}(\.[a-z]{2,6}){1,2}$/i.test(
-                  value
-                ) == false
-              ) {
-                callback(new Error("邮箱格式错误"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-      },
-      registerRules: {
-        newUsername: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          {
-            min: 3,
-            max: 15,
-            message: "用户名长度在 3 到 15 个字符",
-            trigger: "blur",
-          },
-        ],
-        newPassword: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          {
-            min: 6,
-            max: 20,
-            message: "密码长度在 6 到 20 个字符",
-            trigger: "blur",
-          },
-        ],
-        newEmail: [
-          { required: true, message: "请输入邮箱地址", trigger: "blur" },
-          {
-            type: "email",
-            message: "请输入正确的邮箱地址格式",
-            trigger: "blur,change",
-          },
-        ],
-        newMobile: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
-          {
-            pattern: /^1[3-9]\d{9}$/,
-            message: "请输入正确的手机号码格式",
-            trigger: "blur",
-          },
-        ],
-      },
+      loginFormRules: loginRules,
+      registerRules: registerRules,
       newuser: {
         newUsername: "",
         newPassword: "",
