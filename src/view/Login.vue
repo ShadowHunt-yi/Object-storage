@@ -200,6 +200,7 @@ import axios from "axios";
 import { Camera } from "@mediapipe/camera_utils";
 import * as drawingUtils from "@mediapipe/drawing_utils";
 import * as mpFaceMesh from "@mediapipe/face_mesh";
+import { userAPI } from '@/api'
 export default {
   data() {
     return {
@@ -323,7 +324,8 @@ export default {
     this.typing();
     this.config = {
       locateFile: (file) => {
-        return `http://172.0.0.1:10000/${file}`;
+        // return `http://172.0.0.1:10000/${file}`;
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
       },
     };
   },
@@ -358,22 +360,23 @@ export default {
     },
     login() {
       /*  this.$router.push('console') */
+      this.dialogface = true;
+      this.$nextTick(() => {
+        this.initCamera();
+      })
       this.$refs.loginFormRef.validate(async (valid) => {
         // valid是一个布尔值，这是一个回调函数
         if (!valid) return 0;
         // await只能用在被async修饰的方法中，只有当返回的数据是promise时才能使用
-        const { data: res } = await this.$http.post(
-          "/api/login",
-          this.loginForm
-        );
+        const { data: res } = await userAPI.login(this.loginForm);
         if (res.status !== 200) {
           return this.$message.error(res.msg);
         } else {
           window.sessionStorage.setItem("authority", res.data.id);
           window.sessionStorage.setItem("token", res.data.token);
-          this.$router.push("home");
+          // this.$router.push("home");
           this.facetitle = "人脸认证";
-          // this.dialogface = true;
+          this.dialogface = true;
           setTimeout(() => {
             this.initCamera();
           }, 0);
@@ -385,7 +388,7 @@ export default {
       this.$refs.newuser.validate(async (valid) => {
         if (!valid) return;
         console.log(this.newuser);
-        const { data: res } = await this.$http.post("/api/addUser", {
+        const { data: res } = await userAPI.addUser({
           username: this.newuser.newUsername,
           password: this.newuser.newPassword,
           email: this.newuser.newEmail,
@@ -501,7 +504,6 @@ export default {
       this.videoElement = this.$refs.video;
       this.canvasElement = this.$refs.canvas;
       console.log(this.videoElement, this.canvasElement);
-
       this.canvasCtx = this.canvasElement.getContext("2d");
       this.solutionOptions = {
         selfieMode: true,

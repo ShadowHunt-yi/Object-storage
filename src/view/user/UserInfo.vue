@@ -58,6 +58,7 @@
 
 <script>
 import qs from 'qs'
+import { userAPI } from '@/api'
 export default {
   data () {
     var checkEmail = (rule, value, callback) => {
@@ -134,7 +135,7 @@ export default {
   },
   methods: {
     async initUserInfo () {
-      const { data: res } = await this.$http.get('/api/users/info')
+      const { data: res } = await userAPI.getUserInfo()
       if (res.status !== 200) {
         return this.$message.error('获取用户信息失败')
       }
@@ -156,7 +157,7 @@ export default {
     editUser () {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put('/api/users/' + this.editForm.id, { email: this.editForm.email, mobile: this.editForm.mobile })
+        const { data: res } = await userAPI.updateUser(this.editForm.id, { email: this.editForm.email, mobile: this.editForm.mobile })
         if (res.status !== 200) {
           return this.$message.error('修改信息失败！')
         }
@@ -168,11 +169,11 @@ export default {
     editPassword () {
       this.$refs.ruleFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post('/api/users/checkPass', qs.stringify({ password: this.ruleForm.old }))
+        const { data: res } = await userAPI.checkPassword(qs.stringify({ password: this.ruleForm.old }))
         if (res.status !== 200) {
           return this.$message.error('原密码错误')
         }
-        const { data: response } = await this.$http.post('/api/users/updatePassword', qs.stringify({ password: this.ruleForm.checkpassword }))
+        const { data: response } = await userAPI.updatePassword(qs.stringify({ password: this.ruleForm.checkpassword }))
         if (response.code !== 200) {
           return this.$message.error('更新失败')
         }

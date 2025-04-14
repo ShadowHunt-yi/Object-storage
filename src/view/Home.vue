@@ -143,6 +143,7 @@ import * as mpHands from "@mediapipe/hands";
 import screenfull from "screenfull";
 import Hamburger from "../components/Hamburger";
 import BreadCrumb from "../components/BreadCrumb";
+import { menuAPI } from '@/api'
 export default {
   components: {
     Hamburger,
@@ -232,7 +233,7 @@ export default {
     },
     async getMenuList() {
       // 将data去处 重定向为res
-      const { data: res } = await this.$http.get("/api/menus");
+      const { data: res } = await menuAPI.getMenuList();
       if (res.status !== 200) {
         return this.$message.error(res.msg);
       }

@@ -122,14 +122,13 @@
 </template>
 
 <script>
-import { VueCropper } from 'vue-cropper';
 import md5 from "../../lib/md5";
 import { taskInfo, initTask, preSignUrl, merge } from "../../lib/api";
 import axios from "axios";
 import { ref } from "vue";
 import Queue from "promise-queue-plus";
 import { HTTP_SUCCESS_CODE } from '@/lib/api.code.js'
-
+import { bucketAPI } from '@/api'
 //压缩上传
 const handleHttpRequestzip = async function (options) {
   console.log(this.bucketNameShow);
@@ -440,7 +439,7 @@ export default {
     },
     async removeBucket(bucketName) {
       console.log(bucketName);
-      const { data: res } = await this.$http.delete(`/api/deleteBuckets/${bucketName}`)
+      const { data: res } = await bucketAPI.deleteBucket(bucketName)
       if (res.status !== 200) {
         return this.$message.error("删除桶失败")
       } else this.$message.success('删除成功')
@@ -450,7 +449,7 @@ export default {
 
     },
     async getBuckets() {
-      const { data: res } = await this.$http.get('/api/buckets')
+      const { data: res } = await bucketAPI.getBuckets()
       if (res.status !== 200) {
         return this.$message.error('获取桶列表失败')
       } else this.$message.success('获取桶列表成功')
@@ -465,7 +464,7 @@ export default {
     },
     async createBusket(name) {
       if (this.newbucket != '') {
-        const { data: res } = await this.$http.post('/api/createBuckets' + '/' + name)
+        const { data: res } = await bucketAPI.createBucket(name)
         if (res.status !== 200) {
           return this.$message.error('创建桶失败' + res.msg)
           this.newbucket = ''

@@ -203,6 +203,7 @@
 
 <script>
 import echarts from "echarts";
+import { fileAPI, bucketAPI, archiveAPI } from '@/api'
 export default {
   data() {
     return {
@@ -245,7 +246,7 @@ export default {
   },
   methods: {
     async getConsoleState() {
-      const { data: res } = await this.$http.get("/api/getCountAndSize");
+      const { data: res } = await fileAPI.getCountAndSize();
       if (res.status !== 200) {
         return this.$message.error(res.msg);
       }
@@ -352,7 +353,7 @@ export default {
       this.$router.push("filelist");
     },
     async getBuckets() {
-      const { data: res } = await this.$http.get("/api/buckets");
+      const { data: res } = await bucketAPI.getBuckets();
       if (res.status !== 200) {
         return this.$message.error("获取桶列表失败");
       } else this.$message.success("获取桶列表成功");
@@ -364,9 +365,7 @@ export default {
       this.buckets = res.data;
     },
     async toDisplay() {
-      const { data: res } = await this.$http.get(
-        "/api/v1/minio/tasks/getArchving"
-      );
+      const { data: res } = await archiveAPI.getArchiving();
       if (res.status !== 200) {
         return this.$message.error(res.msg);
       }
@@ -387,7 +386,7 @@ export default {
       return parseFloat(byte).toFixed(2) + " B";
     },
     async toRestore() {
-      const { data: res } = await this.$http.post("/api/sql/execute", {
+      const { data: res } = await archiveAPI.executeSql({
         params: { objectName: "base/backups/mytable/mytable_test.sql.gz" },
       });
       if (res.status !== 200) {
@@ -407,9 +406,7 @@ export default {
     },
     async getTable() {
       console.log(this.bucketName);
-      const { data: res } = await this.$http.get(
-        "/api/getTable/" + this.bucketName
-      );
+      const { data: res } = await fileAPI.getTable(this.bucketName);
       if (res.status !== 200) {
         return this.$message.error(res.msg);
       }

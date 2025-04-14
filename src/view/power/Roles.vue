@@ -104,6 +104,7 @@
 
 <script>
 import qs from 'qs'
+import { roleAPI } from '@/api'
 export default {
   data () {
     return {
@@ -148,7 +149,7 @@ export default {
   methods: {
   // 获取所有角色列表
     async getRolesList () {
-      const { data: res } = await this.$http.get('/api/roles/tree')
+      const { data: res } = await roleAPI.getRolesTree()
       if (res.status !== 200) {
         return this.$message.error('获取角色列表失败')
       }
@@ -157,7 +158,7 @@ export default {
     addRole () {
       this.$refs.roleFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post('/api/roles/addRole', this.roleForm)
+        const { data: res } = await roleAPI.addRole(this.roleForm)
         if (res.status !== 200) {
           return this.$message.error('添加角色失败！')
         }
@@ -170,7 +171,7 @@ export default {
       this.$refs.roleFormRef.resetFields()
     },
     async showEditDialog (id) {
-      const { data: res } = await this.$http.get('/api/roles/' + id)
+      const { data: res } = await roleAPI.getRole(id)
       if (res.status !== 200) {
         return this.$message.error('查询数据失败')
       }
@@ -180,7 +181,7 @@ export default {
     editRole () {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put('/api/roles/' + this.editForm.id, { name: this.editForm.name, description: this.editForm.description })
+        const { data: res } = await roleAPI.updateRole(this.editForm.id, { name: this.editForm.name, description: this.editForm.description })
         if (res.status !== 200) {
           return this.$message.error('修改角色失败！')
         }
@@ -201,7 +202,7 @@ export default {
       if (confirmResult !== 'confirm') {
         this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete('/api/roles/' + id)
+      const { data: res } = await roleAPI.deleteRole(id)
       if (res.status !== 200) {
         this.$message.error('删除失败')
       }
@@ -217,7 +218,7 @@ export default {
       if (confirmResult !== 'confirm') {
         this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete(`/api/roles/${role.id}/rights/${rightId}`)
+      const { data: res } = await roleAPI.deleteRoleRight(role.id, rightId)
       if (res.status !== 200) {
         this.$message.error(res.msg)
       }
@@ -227,7 +228,7 @@ export default {
     async  showSetRightDialog (role) {
       this.roleId = role.id
       // 获取所有权限的设置
-      const { data: res } = await this.$http.get('/api/rights/tree')
+      const { data: res } = await rightAPI.getRightsTree()
       if (res.status !== 200) {
         return this.$message.error('获取权限数据失败')
       }
@@ -252,7 +253,7 @@ export default {
       const keys = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
       // 用逗号来拼接
       const idStr = keys.join(',')
-      const { data: res } = await this.$http.post('/api/roles/rights', qs.stringify({ id: this.roleId, rids: idStr }))
+      const { data: res } = await roleAPI.assignRights(qs.stringify({ id: this.roleId, rids: idStr }))
       if (res.status !== 200) {
         return this.$message.error('分配权限失败')
       }

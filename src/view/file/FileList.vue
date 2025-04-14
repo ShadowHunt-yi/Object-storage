@@ -190,7 +190,7 @@ var dayjs = require("dayjs");
 var utc = require("dayjs/plugin/utc");
 var timezone = require("dayjs/plugin/timezone");
 import * as fileUtil from "@/utils/fileUtil";
-
+import { fileAPI, bucketAPI } from '@/api'
 export default {
   data() {
     return {
@@ -249,7 +249,7 @@ export default {
   },
   methods: {
     async getBuckets() {
-      const { data: res } = await this.$http.get("/api/buckets");
+      const { data: res } = await bucketAPI.getBuckets();
       if (res.status !== 200) {
         return this.$message.error("获取桶列表失败");
       } else this.$message.success("获取桶列表成功");
@@ -293,7 +293,7 @@ export default {
     async getFlieList(name) {
       this.bucketName = name;
       sessionStorage.setItem("bucketName", name);
-      const { data: res } = await this.$http.get("/api/getLists/" + name, {
+      const { data: res } = await fileAPI.getLists(name, {
         params: { prefix: "" },
       });
       if (res.status !== 200) {
@@ -335,10 +335,9 @@ export default {
         url += this.pathlist[i] + "/";
       }
       url += this.pathlist[index];
-      const { data: res } = await this.$http.get(
-        "/api/getLists/" + this.selectionName,
-        { params: { prefix: url } }
-      );
+      const { data: res } = await fileAPI.getLists(this.selectionName, {
+        params: { prefix: url },
+      });
       if (res.status !== 200) {
         return this.$message.error("获取文件列表失败");
       }
@@ -348,12 +347,10 @@ export default {
     async rename(_old, _new, _type) {
       console.log(_type);
       if (_new != "") {
-        const { data: res } = await this.$http.post(
-          "/api/rename/" + _old + "/" + _new + "." + _type
-        );
+        const { data: res } = await fileAPI.rename(_old, _new, _type);
 
         if (res.status !== 200) {
-          return this.$message.error(msg);
+          return this.$message.error(res.msg);
         }
         this.fileName = res.data;
         this.dialogNewname = false;
@@ -376,9 +373,7 @@ export default {
       if (confirmResult !== "confirm") {
         return this.$message.info("已经取消删除");
       }
-      const { data: res } = await this.$http.delete(
-        `/api/remove/${this.bucketName}/${fileInfo.md5}`
-      );
+      const { data: res } = await fileAPI.remove(this.bucketName, fileInfo.md5);
       if (res.status !== 200) {
         return this.$message.error("删除失败");
       }
@@ -396,13 +391,14 @@ export default {
       _this.$message("正在进行文件校验");
       setTimeout(function () {
         _this.$message.success("文件校验成功");
-        _this
-          .$http({
-            url: "/api/download",
-            method: "get",
-            params: params,
-            responseType: "blob", // 接收类型设置，否者返回字符型
-          })
+        // _this
+        //   .$http({
+        //     url: "/api/download",
+        //     method: "get",
+        //     params: params,
+        //     responseType: "blob", // 接收类型设置，否者返回字符型
+        //   })
+        fileAPI.downloadFile({params})
           .then((res) => {
             // 定义文件名等相关信息
             const blob = res.data;
@@ -421,16 +417,13 @@ export default {
       }, 2000);
     },
     async shareFile(key) {
-      const { data: res } = await this.$http.get("/api/getUrl", {
+      const { data: res } = await fileAPI.getFileUrl({
         params: { bucketName: this.bucketName, fileName: key },
       });
       if (res.status != 200) {
         this.$message.error(res.msg);
       }
       this.url = res.data;
-
-      /*  console.log(navigator);
-      navigator.clipboard.writeText(res.data).then(function log(){this.$message.success("成功写入剪贴板")}); */
     },
     async preview(key) {
       await this.shareFile(key);

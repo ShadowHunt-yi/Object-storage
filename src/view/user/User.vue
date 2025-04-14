@@ -108,6 +108,7 @@
 </template>
 
 <script>
+import { userAPI, roleAPI } from '@/api'
 export default {
   data () {
     var checkEmail = (rule, value, callback) => {
@@ -196,7 +197,7 @@ export default {
   },
   methods: {
     async getUserList () {
-      const { data: res } = await this.$http.get('/api/users', { params: this.queryInfo })
+      const { data: res } = await userAPI.getUsers(this.queryInfo)
       if (res.status !== 200) {
         return this.$message.error('获取用户列表失败')
       }
@@ -216,7 +217,7 @@ export default {
     },
     // 监听switch开关的改变
     async userStateChange (userinfo) {
-      const { data: res } = await this.$http.put(`/api/users/${userinfo.id}/state/${userinfo.state}`)
+      const { data: res } = await userAPI.updateUserState(userinfo.id, userinfo.state)
       if (res.status !== 200) {
         userinfo.state = !userinfo.state
         return this.$message.error('更新用户状态失败')
@@ -226,7 +227,7 @@ export default {
     addUser () {
       this.$refs.addFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.post('/api/addUser', this.addForm)
+        const { data: res } = await userAPI.addUser(this.addForm)
         if (res.status !== 200) {
           return this.$message.error(res.msg)
         }
@@ -239,7 +240,7 @@ export default {
       this.$refs.addFormRef.resetFields()
     },
     async showEditDialog (id) {
-      const { data: res } = await this.$http.get('/api/users/' + id)
+      const { data: res } = await userAPI.getUser(id)
       if (res.status !== 200) {
         return this.$message.error('查询数据失败')
       }
@@ -252,7 +253,7 @@ export default {
     editUser () {
       this.$refs.editFormRef.validate(async valid => {
         if (!valid) return
-        const { data: res } = await this.$http.put('/api/users/' + this.editForm.id, { email: this.editForm.email, mobile: this.editForm.mobile })
+        const { data: res } = await userAPI.updateUser(this.editForm.id, { email: this.editForm.email, mobile: this.editForm.mobile })
         if (res.status !== 200) {
           return this.$message.error('修改用户失败！')
         }
@@ -270,7 +271,7 @@ export default {
       if (confirmResult !== 'confirm') {
         return this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete('/api/users/' + id)
+      const { data: res } = await userAPI.deleteUser(id)
       if (res.status !== 200) {
         return this.$message.error('删除失败')
       }
@@ -279,7 +280,7 @@ export default {
     },
     async setRole (userInfo) {
       this.userInfo = userInfo
-      const { data: res } = await this.$http.get('/api/roles')
+      const { data: res } = await roleAPI.getRoles()
       if (res.status !== 200) {
         this.rolesList = res.data
         return this.$message.error('获取角色列表失败')
@@ -292,7 +293,7 @@ export default {
       if (this.selectedRoleId === '') {
         return this.$message.error('请选择要分配的角色')
       }
-      const { data: res } = await this.$http.put(`/api/users/${this.userInfo.id}/role`, { id: this.selectedRoleId })
+      const { data: res } = await userAPI.updateUserRole(this.userInfo.id, { id: this.selectedRoleId })
       if (res.status !== 200) {
         return this.$message.error('更新角色失败')
       }
