@@ -1,21 +1,24 @@
 <template>
   <div>
     <el-card class="box-card">
-      <div slot="header" align="center">
-        {{ userinfo.username }}
+      <div slot="header" align="center" class="card-header">
+        <i class="el-icon-user"></i>
+        <span>{{ userinfo.username }}</span>
       </div>
       <div class="card-body" align="center">
-        <div>
-          邮箱：
-          <el-tag>{{ userinfo.email }}</el-tag>
+        <div class="info-item">
+          <i class="el-icon-message"></i>
+          <span>邮箱：</span>
+          <el-tag type="info">{{ userinfo.email }}</el-tag>
         </div>
-        <div>
-          手机号：
-          <el-tag>{{ userinfo.mobile }}</el-tag>
+        <div class="info-item">
+          <i class="el-icon-mobile-phone"></i>
+          <span>手机号：</span>
+          <el-tag type="info">{{ userinfo.mobile }}</el-tag>
         </div>
-        <div style="display: flex; justify-content: space-around; margin-top: 10px">
-          <el-button type="primary" @click="showEditDialog()">修改信息</el-button>
-          <el-button type="danger" @click="showEditPassword()">修改密码</el-button>
+        <div class="button-group">
+          <el-button type="primary" icon="el-icon-edit" @click="showEditDialog()">修改信息</el-button>
+          <el-button type="danger" icon="el-icon-lock" @click="showEditPassword()">修改密码</el-button>
         </div>
       </div>
     </el-card>
@@ -23,10 +26,13 @@
     <el-dialog
       title="修改用户"
       :visible.sync="editDialogVisible"
-      width="50%"
+      width="30%"
       @close="editDialogClose()"
+      :modal="false"
+      :append-to-body="false"
+      custom-class="custom-dialog"
     >
-      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
         <el-form-item label="用户名">
           <el-input v-model="editForm.username" disabled></el-input>
         </el-form-item>
@@ -43,9 +49,16 @@
       </span>
     </el-dialog>
     <!-- 修改密码 -->
-    <el-dialog :visible.sync="editPasswordVisible" width="50%" @close="editPasswordClose">
-      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleFormRef">
-        <el-form-item prop="old">
+    <el-dialog
+      :visible.sync="editPasswordVisible"
+      width="30%"
+      @close="editPasswordClose"
+      :modal="false"
+      :append-to-body="false"
+      custom-class="custom-dialog"
+    >
+      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleFormRef" label-width="80px">
+        <el-form-item label="旧密码" prop="old">
           <el-input
             placeholder="请输入旧密码"
             type="password"
@@ -53,7 +66,7 @@
             show-password
           ></el-input>
         </el-form-item>
-        <el-form-item prop="new">
+        <el-form-item label="新密码" prop="new">
           <el-input
             placeholder="请输入新密码"
             type="password"
@@ -61,9 +74,9 @@
             show-password
           ></el-input>
         </el-form-item>
-        <el-form-item prop="checkpassword">
+        <el-form-item label="确认密码" prop="checkpassword">
           <el-input
-            placeholder="新确认密码"
+            placeholder="请再次输入新密码"
             type="password"
             v-model="ruleForm.checkpassword"
             show-password
@@ -131,7 +144,13 @@ export default {
     }
   },
   created() {
-    this.initUserInfo()
+    // this.initUserInfo()
+    this.userinfo = {
+      id: 1,
+      username: 'admin',
+      mobile: '18888888888',
+      email: 'admin@163.com'
+    }
   },
   methods: {
     async initUserInfo() {
@@ -194,21 +213,46 @@ export default {
 
 <style lang="less" scoped>
 .box-card {
-  width: 1000px;
+  width: 600px;
   margin: 0 auto;
+  padding: 20px;
 }
+
+.card-header {
+  font-size: 20px;
+  font-weight: bold;
+  i {
+    margin-right: 10px;
+  }
+}
+
 .card-body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-content: space-between;
-  div {
-    margin-bottom: 5px;
-  }
+  align-items: center;
 }
-.el-form-item__content {
+
+.info-item {
   display: flex;
   align-items: center;
-  // 垂直居中
+  margin-bottom: 15px;
+  i {
+    margin-right: 10px;
+    font-size: 18px;
+  }
+  span {
+    margin-right: 10px;
+    font-size: 16px;
+  }
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 20px;
+  .el-button {
+    width: 45%;
+  }
 }
 </style>
