@@ -5,7 +5,7 @@ module.exports = {
     port: 5000,
     proxy: {
       '/api': {
-        target: 'http://172.21.3.107:8888', // 要请求的后台地址
+        target: 'http://172.0.0.1:8888', // 要请求的后台地址
         ws: true, // 启用websockets
         changeOrigin: true, // 是否跨域
         pathRewrite: {
@@ -49,6 +49,25 @@ module.exports = {
           }
         }
       }
+    },
+    module: {
+      rules: [
+        {
+          test: /\.worker\.js$/,
+          use: { loader: 'worker-loader' }
+        }
+      ]
     }
+  },
+  // 确保worker文件被正确复制到dist目录
+  chainWebpack: config => {
+    config.plugin('copy')
+      .tap(args => {
+        args[0].push({
+          from: 'src/workers',
+          to: 'workers'
+        });
+        return args;
+      });
   }
 }

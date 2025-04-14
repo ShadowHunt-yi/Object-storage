@@ -67,7 +67,7 @@ pnpm run build
 
 ## API配置
 
-后端API默认配置为`http://172.21.3.107:8888`，可以在`vue.config.js`中修改代理配置。
+后端API默认配置为`http://172.0.0.1:8888`，可以在`vue.config.js`中修改代理配置。
 
 ## 开发注意事项
 

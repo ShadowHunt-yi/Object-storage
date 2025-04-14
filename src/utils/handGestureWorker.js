@@ -1,5 +1,5 @@
 // 手势识别Worker文件
-self.importScripts('http://172.21.3.107:10000/hands.js');
+self.importScripts('http://172.0.0.1:10000/hands.js');
 
 let hands = null;
 let gestureMarked = null;
@@ -15,7 +15,7 @@ self.addEventListener('message', function(e) {
     const mpHands = self.Hands;
     hands = new mpHands.Hands({
       locateFile: (file) => {
-        return `http://172.21.3.107:10000/${file}`;
+        return `http://172.0.0.1:10000/${file}`;
       }
     });
     
