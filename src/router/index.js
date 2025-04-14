@@ -110,25 +110,25 @@ const router = new VueRouter({
   routes
 })
 
-// 全局前置守卫 - 开始进度条
-router.beforeEach((to, from, next) => {
-  // 开始显示进度条
-  NProgress.start()
+// // 全局前置守卫 - 开始进度条
+// router.beforeEach((to, from, next) => {
+//   // 开始显示进度条
+//   NProgress.start()
   
-  // to 将要访问的路径
-  // from 代表从哪个路径跳转而来
-  // next是一个函数，表示放行 next() next('/login')
-  if (to.path === '/login') {
-    return next()
-  }
-  // 获取session
-  const tokenStr = window.sessionStorage.getItem('token')
-  if (!tokenStr) {
-    return next('/login')
-  } else {
-    next()
-  }
-})
+//   // to 将要访问的路径
+//   // from 代表从哪个路径跳转而来
+//   // next是一个函数，表示放行 next() next('/login')
+//   if (to.path === '/login') {
+//     return next()
+//   }
+//   // 获取session
+//   const tokenStr = window.sessionStorage.getItem('token')
+//   if (!tokenStr) {
+//     return next('/login')
+//   } else {
+//     next()
+//   }
+// })
 
 // 全局后置钩子 - 结束进度条
 router.afterEach(() => {
