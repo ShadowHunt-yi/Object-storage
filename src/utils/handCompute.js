@@ -1,36 +1,10 @@
-// 手势识别Worker
-// 负责处理手部关键点数据并识别手势
-
-// 接收消息
-self.onmessage = function (e) {
-  const { type, data } = e.data
-
-  if (type === 'processLandmarks') {
-    const { landmarks, handedness } = data
-
-    // 在Worker中处理手势识别
-    const gesture = isFistGesture(landmarks)
-
-    if (gesture) {
-      self.postMessage({
-        type: 'gestureDetected',
-        data: {
-          hand: handedness,
-          gesture: gesture,
-          landmarks: landmarks
-        }
-      })
-    }
-  }
-}
-
 // 计算两点间距离 (3D)
-function dist3D(x1, y1, z1, x2, y2, z2) {
+export function dist3D(x1, y1, z1, x2, y2, z2) {
   return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2))
 }
 
 // 计算角度
-function angle(p1, p2, p3) {
+export function angle(p1, p2, p3) {
   const a = dist3D(p1.x, p1.y, p1.z, p3.x, p3.y, p3.z)
   const b = dist3D(p1.x, p1.y, p2.z, p2.x, p2.y, p2.z)
   const c = dist3D(p3.x, p3.y, p3.z, p2.x, p2.y, p2.z)
@@ -40,7 +14,7 @@ function angle(p1, p2, p3) {
 }
 
 // 手势识别逻辑
-function isFistGesture(landmarks) {
+export function isFistGesture(landmarks) {
   // 获取食指关键点信息
   const indexFigure1 = landmarks[8]
   const indexFigure2 = landmarks[7]

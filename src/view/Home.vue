@@ -125,6 +125,8 @@ import screenfull from 'screenfull'
 import Hamburger from '../components/Hamburger'
 import BreadCrumb from '../components/BreadCrumb'
 import { menuAPI } from '@/api'
+import handGestureWorkerUrl from '@/workers/handGesture.worker.js'
+import { isFistGesture } from '@/utils/handCompute'
 export default {
   components: {
     Hamburger,
@@ -482,7 +484,6 @@ export default {
       switch (index) {
         case 1:
           if (this.$refs.menu.openedMenus[0] == 100) {
-            // console.log(this.$refs.subMenu);
             this.$refs.subMenu[0].$children[0].handleClick()
           } else {
             this.$refs.subMenu[0].handleClick()
@@ -491,7 +492,6 @@ export default {
           break
         case 2:
           if (this.$refs.menu.openedMenus[0] == 102) {
-            // console.log(this.$refs.subMenu);
             this.$refs.subMenu[0].$children[0].handleClick()
           } else {
             this.$refs.subMenu[1].handleClick()
@@ -510,7 +510,6 @@ export default {
           break
         case 4:
           if (this.$refs.menu.openedMenus[0] == 126) {
-            // console.log(this.$refs.subMenu);
             this.$refs.subMenu[0].$children[0].handleClick()
           } else {
             this.$refs.subMenu[3].handleClick()
@@ -562,28 +561,30 @@ export default {
     },
     initHandGestureWorker() {
       try {
-        // 使用文件路径创建Worker
-        this.handGestureWorker = new Worker('/src/workers/handGestureWorker.js')
-
+        this.handGestureWorker = new Worker(handGestureWorkerUrl);
         // 设置消息处理
         this.handGestureWorker.onmessage = (e) => {
-          const { type, data } = e.data
-
+          const { type, data } = e.data;
           if (type === 'gestureDetected') {
-            this.handleGestureDetection(data)
+            this.handleGestureDetection(data);
           }
-        }
-
-        console.log('手势识别Worker初始化成功')
+        };
+        console.log('手势识别Worker初始化成功');
       } catch (error) {
-        console.error('初始化手势识别Worker失败:', error)
-        this.$message.warning('手势识别初始化失败，将使用备选方案')
+        console.error('初始化手势识别Worker失败:', error);
+        this.$message.warning('手势识别初始化失败，将使用备选方案');
       }
     },
     processHandGestureInMainThread(landmarks, handLabel) {
-      // 这里复制原始isFistGesture函数的逻辑
-      // 原始处理逻辑保留，作为备选方案
-      // ...
+      const gesture = isFistGesture(landmarks)
+      if (gesture) {
+        console.log('手势识别成功')
+        this.handleGestureDetection({
+          hand: handLabel,
+          gesture: gesture,
+          landmarks: landmarks
+        })
+      }
     },
     // 添加帧处理函数
     startFrameProcessing() {
@@ -596,12 +597,10 @@ export default {
             console.error('处理视频帧失败:', error)
           }
         }
-
         if (this.handvideo) {
           this.animationFrameId = requestAnimationFrame(processFrame)
         }
       }
-
       this.animationFrameId = requestAnimationFrame(processFrame)
     }
   }

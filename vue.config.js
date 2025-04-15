@@ -19,7 +19,7 @@ module.exports = {
     disableHostCheck: true,
     // 开发时自动打开浏览器
     open: true,
-    hot: true,
+    hot: true
   },
 
   // 关闭ESLint提示
@@ -49,26 +49,17 @@ module.exports = {
           }
         }
       }
-    },
-    module: {
-      rules: [
-        {
-          test: /\.worker\.js$/,
-          use: { loader: 'worker-loader' }
-        }
-      ]
     }
   },
   // 确保worker文件被正确复制到dist目录
-  chainWebpack: config => {
-    config.plugin('copy')
-      .tap(args => {
-        args[0].push({
-          from: 'src/workers',
-          to: 'workers'
-        });
-        return args;
-      });
+  chainWebpack: (config) => {
+    config.plugin('copy').tap((args) => {
+      args[0].push({
+        from: 'src/workers',
+        to: 'workers'
+      })
+      return args
+    })
     // 仅在生产环境中启用图片压缩
     if (process.env.NODE_ENV === 'production') {
       config.module
@@ -81,20 +72,31 @@ module.exports = {
             quality: 65
           },
           optipng: {
-            enabled: false,
+            enabled: false
           },
           pngquant: {
-            quality: [0.65, 0.90],
+            quality: [0.65, 0.9],
             speed: 4
           },
           gifsicle: {
-            interlaced: false,
+            interlaced: false
           },
           webp: {
             quality: 75
           }
         })
-        .end();
+        .end()
     }
-  }
+    config.module
+      .rule('worker')
+      .test(/\.worker\.js$/)
+      .use('worker-loader')
+      .loader('worker-loader')
+      .options({
+        inline: 'fallback', // 内联模式（兼容性更好）
+        filename: '[name].[hash:8].worker.js' // 自定义输出文件名
+      })
+      .end()
+  },
+  parallel: false // 禁用多线程，避免与 Worker 冲突
 }
