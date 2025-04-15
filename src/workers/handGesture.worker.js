@@ -23,4 +23,3 @@ self.onmessage = function (e) {
     }
   }
 }
-

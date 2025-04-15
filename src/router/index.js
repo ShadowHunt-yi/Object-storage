@@ -15,12 +15,12 @@ import 'nprogress/nprogress.css'
 Vue.use(VueRouter)
 
 // 配置NProgress选项
-NProgress.configure({ 
-  easing: 'ease',  // 动画方式
-  speed: 500,      // 速度
+NProgress.configure({
+  easing: 'ease', // 动画方式
+  speed: 500, // 速度
   showSpinner: false, // 是否显示加载微调器
-  trickleSpeed: 200,  // 自动递增间隔
-  minimum: 0.1        // 初始化时的最小百分比
+  trickleSpeed: 200, // 自动递增间隔
+  minimum: 0.1 // 初始化时的最小百分比
 })
 
 const routes = [
@@ -114,7 +114,7 @@ const router = new VueRouter({
 // router.beforeEach((to, from, next) => {
 //   // 开始显示进度条
 //   NProgress.start()
-  
+
 //   // to 将要访问的路径
 //   // from 代表从哪个路径跳转而来
 //   // next是一个函数，表示放行 next() next('/login')

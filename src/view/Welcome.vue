@@ -4,12 +4,12 @@
       <h1>欢迎使用智域云图-对象存储平台</h1>
       <div class="welcome-subtitle">安全、高效、易用的云端存储解决方案</div>
     </div>
-    
+
     <div class="feature-section">
       <div class="section-title">功能介绍</div>
       <div class="feature-grid">
-        <div 
-          v-for="(item, index) in functionList" 
+        <div
+          v-for="(item, index) in functionList"
           :key="index"
           class="feature-card"
           :class="{ 'feature-card-highlight': index === hoveredCard }"
@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="welcome-footer">
       <p>立即开始使用，体验云存储的便捷与高效</p>
       <el-button type="primary" @click="goToConsole" size="medium" round>
@@ -104,7 +104,7 @@ export default {
   color: #333;
   margin-bottom: 15px;
   font-weight: 600;
-  background: linear-gradient(135deg, #3494E6, #1D7CE0);
+  background: linear-gradient(135deg, #3494e6, #1d7ce0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -130,14 +130,14 @@ export default {
 }
 
 .section-title:after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
   width: 60px;
   height: 4px;
-  background: linear-gradient(90deg, #3494E6, #1D7CE0);
+  background: linear-gradient(90deg, #3494e6, #1d7ce0);
   border-radius: 2px;
 }
 
@@ -164,7 +164,7 @@ export default {
 }
 
 .feature-card:before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -250,15 +250,15 @@ export default {
   .feature-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .welcome-header h1 {
     font-size: 28px;
   }
-  
+
   .welcome-subtitle {
     font-size: 16px;
   }
-  
+
   .section-title {
     font-size: 24px;
   }
@@ -268,7 +268,7 @@ export default {
 <style>
 /* 修改背景伪元素的z-index，使其不遮挡内容 */
 main::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;

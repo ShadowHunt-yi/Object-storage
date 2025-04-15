@@ -37,7 +37,7 @@
               </el-table-column>
             </el-table>
           </el-dialog> -->
-          <chooseBucket type="primary"  @bucket-selected="getFlieList"/>
+          <chooseBucket type="primary" @bucket-selected="getFlieList" />
           <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
         </div>
       </div>

@@ -561,18 +561,18 @@ export default {
     },
     initHandGestureWorker() {
       try {
-        this.handGestureWorker = new Worker(handGestureWorkerUrl);
+        this.handGestureWorker = new Worker(handGestureWorkerUrl)
         // 设置消息处理
         this.handGestureWorker.onmessage = (e) => {
-          const { type, data } = e.data;
+          const { type, data } = e.data
           if (type === 'gestureDetected') {
-            this.handleGestureDetection(data);
+            this.handleGestureDetection(data)
           }
-        };
-        console.log('手势识别Worker初始化成功');
+        }
+        console.log('手势识别Worker初始化成功')
       } catch (error) {
-        console.error('初始化手势识别Worker失败:', error);
-        this.$message.warning('手势识别初始化失败，将使用备选方案');
+        console.error('初始化手势识别Worker失败:', error)
+        this.$message.warning('手势识别初始化失败，将使用备选方案')
       }
     },
     processHandGestureInMainThread(landmarks, handLabel) {

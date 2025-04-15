@@ -241,12 +241,12 @@ export default {
   },
   beforeDestroy() {
     if (this.camera) {
-      this.camera.stop();
-      this.camera = null;
+      this.camera.stop()
+      this.camera = null
     }
     if (this.faceMesh) {
-      this.faceMesh.reset();
-      this.faceMesh = null;
+      this.faceMesh.reset()
+      this.faceMesh = null
     }
   },
   methods: {
@@ -270,10 +270,10 @@ export default {
     },
     login() {
       // this.$router.push('welcome')
-       this.dialogface = true
-       this.$nextTick(()=>{
+      this.dialogface = true
+      this.$nextTick(() => {
         this.initCamera()
-       })
+      })
       this.$refs.loginFormRef.validate(async (valid) => {
         // valid是一个布尔值，这是一个回调函数
         if (!valid) return 0

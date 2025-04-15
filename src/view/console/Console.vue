@@ -148,7 +148,7 @@
     </el-row>
     <el-row>
       <el-card>
-        <chooseBucket type="primary"  @bucket-selected="getTable"/>
+        <chooseBucket type="primary" @bucket-selected="getTable" />
         <!-- <el-button type="primary" @click="dialogTable = true" style="margin: 10px"
           >选择桶</el-button
         >

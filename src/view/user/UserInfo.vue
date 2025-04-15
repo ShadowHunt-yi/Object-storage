@@ -17,8 +17,12 @@
           <el-tag type="info">{{ userinfo.mobile }}</el-tag>
         </div>
         <div class="button-group">
-          <el-button type="primary" icon="el-icon-edit" @click="showEditDialog()">修改信息</el-button>
-          <el-button type="danger" icon="el-icon-lock" @click="showEditPassword()">修改密码</el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="showEditDialog()"
+            >修改信息</el-button
+          >
+          <el-button type="danger" icon="el-icon-lock" @click="showEditPassword()"
+            >修改密码</el-button
+          >
         </div>
       </div>
     </el-card>
