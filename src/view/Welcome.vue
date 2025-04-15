@@ -37,38 +37,44 @@
 </template>
 
 <script>
+import storePicture from '@/assets/home/function/store.png'
+import shardPicture from '@/assets/home/function/shard.png'
+import editPicture from '@/assets/home/function/edit.png'
+import typePicture from '@/assets/home/function/type.png'
+import operationPicture from '@/assets/home/function/operation.png'
+import previewPicture from '@/assets/home/function/preview.png'
 export default {
   data() {
     return {
       hoveredCard: null,
       functionList: [
         {
-          icon: require('../assets/home/function/store.png'),
+          icon: storePicture,
           title: '多种存储方式',
           desc: 'OSS 对象存储、MinIO 存储，满足不同场景需求'
         },
         {
-          icon: require('../assets/home/function/shard.png'),
+          icon: shardPicture,
           title: '分片、断点续传及极速秒传',
           desc: '实现文件分片上传；准确识别已上传文件，达到秒传效果，以分片为维度，可实现断点续传'
         },
         {
-          icon: require('../assets/home/function/edit.png'),
+          icon: editPicture,
           title: '图片裁剪上传',
           desc: '提供图片裁剪后上传,可即时预览裁剪后的图片，满足多样化需求'
         },
         {
-          icon: require('../assets/home/function/type.png'),
+          icon: typePicture,
           title: '控制台数据展示',
           desc: '展示存储桶的相关数据，并以图表可视化形式展现最近上传信息，直观了解使用情况'
         },
         {
-          icon: require('../assets/home/function/preview.png'),
+          icon: previewPicture,
           title: '权限管理',
           desc: '支持通过权限控制个性化设置角色，再为相应用户设置特定角色，保障数据安全'
         },
         {
-          icon: require('../assets/home/function/operation.png'),
+          icon: operationPicture,
           title: '基本操作',
           desc: '支持拖拽上传文件，支持文件重命名、压缩上传、下载、删除、分享，操作简单高效'
         }
