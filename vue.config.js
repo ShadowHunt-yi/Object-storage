@@ -69,29 +69,32 @@ module.exports = {
         });
         return args;
       });
-    config.module
-      .rule('images')
-      .use('image-webpack-loader')
-      .loader('image-webpack-loader')
-      .options({
-        mozjpeg: {
-          progressive: true,
-          quality: 65
-        },
-        optipng: {
-          enabled: false,
-        },
-        pngquant: {
-          quality: [0.65, 0.90],
-          speed: 4
-        },
-        gifsicle: {
-          interlaced: false,
-        },
-        webp: {
-          quality: 75
-        }
-      })
-      .end();
+    // 仅在生产环境中启用图片压缩
+    if (process.env.NODE_ENV === 'production') {
+      config.module
+        .rule('images')
+        .use('image-webpack-loader')
+        .loader('image-webpack-loader')
+        .options({
+          mozjpeg: {
+            progressive: true,
+            quality: 65
+          },
+          optipng: {
+            enabled: false,
+          },
+          pngquant: {
+            quality: [0.65, 0.90],
+            speed: 4
+          },
+          gifsicle: {
+            interlaced: false,
+          },
+          webp: {
+            quality: 75
+          }
+        })
+        .end();
+    }
   }
 }
