@@ -145,13 +145,19 @@
             </div>
           </div>
         </el-form-item>
+
+        <el-form-item >
+          <el-checkbox v-model="newuser.agreement"  class="agreement-checkbox">
+            我同意使用本次人脸数据仅用于该系统的注册登录
+          </el-checkbox>
+        </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormRegister = false" plain>
           <i class="el-icon-close"></i> 取消
         </el-button>
-        <el-button type="primary" @click="submitForm()" :disabled="!capturedImage">
+        <el-button type="primary" @click="submitForm()" :disabled="!capturedImage || !newuser.agreement">
           <i class="el-icon-check"></i> 提交注册
         </el-button>
       </div>
@@ -204,12 +210,27 @@ export default {
         code: ''
       },
       loginFormRules: loginRules,
-      registerRules: registerRules,
+      registerRules: {
+        ...registerRules,
+        agreement: [
+          { 
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback(new Error('请同意人脸数据使用协议'))
+              } else {
+                callback()
+              }
+            }, 
+            trigger: 'change'
+          }
+        ]
+      },
       newuser: {
         newUsername: '',
         newPassword: '',
         newEmail: '',
-        newMobile: ''
+        newMobile: '',
+        agreement: false
       },
       dialogFormRegister: false,
       formLabelWidth: '150px',
@@ -1218,6 +1239,28 @@ export default {
     to {
       transform: rotate(360deg);
     }
+  }
+}
+
+.agreement-checkbox {
+  margin-top: 10px;
+  
+  /deep/ .el-checkbox__label {
+    color: #606266;
+    font-size: 14px;
+  }
+
+  /deep/ .el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: #409eff;
+    border-color: #409eff;
+  }
+
+  /deep/ .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: #409eff;
+  }
+
+  /deep/ .el-checkbox__inner:hover {
+    border-color: #409eff;
   }
 }
 </style>
