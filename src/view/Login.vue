@@ -146,8 +146,8 @@
           </div>
         </el-form-item>
 
-        <el-form-item >
-          <el-checkbox v-model="newuser.agreement"  class="agreement-checkbox">
+        <el-form-item>
+          <el-checkbox v-model="newuser.agreement" class="agreement-checkbox">
             我同意使用本次人脸数据仅用于该系统的注册登录
           </el-checkbox>
         </el-form-item>
@@ -157,7 +157,11 @@
         <el-button @click="dialogFormRegister = false" plain>
           <i class="el-icon-close"></i> 取消
         </el-button>
-        <el-button type="primary" @click="submitForm()" :disabled="!capturedImage || !newuser.agreement">
+        <el-button
+          type="primary"
+          @click="submitForm()"
+          :disabled="!capturedImage || !newuser.agreement"
+        >
           <i class="el-icon-check"></i> 提交注册
         </el-button>
       </div>
@@ -213,14 +217,14 @@ export default {
       registerRules: {
         ...registerRules,
         agreement: [
-          { 
+          {
             validator: (rule, value, callback) => {
               if (!value) {
                 callback(new Error('请同意人脸数据使用协议'))
               } else {
                 callback()
               }
-            }, 
+            },
             trigger: 'change'
           }
         ]
@@ -254,7 +258,7 @@ export default {
     this.typing()
     this.config = {
       locateFile: (file) => {
-        // return `http://172.0.0.1:10000/${file}`;
+        // return `http://127.0.0.1:10000/${file}`;
         // return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
         return `/mediapipe/faces/${file}`
       }
@@ -342,7 +346,7 @@ export default {
         console.log(fromData.get('image'), fromData, this.capturedImage)
         console.log(fromData)
 
-        const { data: res2 } = await axios.post('https://172.0.0.1:7000/uploadImage', fromData)
+        const { data: res2 } = await axios.post('http://127.0.0.1:7000/uploadImage', fromData)
         if (res.status == 200 && res2.status == 200) {
           this.$message.success('注册用户成功！')
           this.dialogFormRegister = false
@@ -394,7 +398,7 @@ export default {
         return res.blob()
       })
       formData.append('file', bolbfile)
-      const { data: res } = await axios.post('https://172.0.0.1:7000/recognize', formData)
+      const { data: res } = await axios.post('http://127.0.0.1:7000/recognize', formData)
       if (res.person_names[0] === this.loginForm.username) {
         console.log(res.person_names[0])
         this.stopCamera()
@@ -1244,7 +1248,7 @@ export default {
 
 .agreement-checkbox {
   margin-top: 10px;
-  
+
   /deep/ .el-checkbox__label {
     color: #606266;
     font-size: 14px;
