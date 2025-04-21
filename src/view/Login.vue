@@ -168,7 +168,7 @@
     </el-dialog>
 
     <!-- 人脸拍摄对话框 -->
-    <el-dialog :visible.sync="dialogface" title="人脸拍摄" width="550px" center class="face-dialog">
+    <el-dialog :visible.sync="dialogface" title="人脸拍摄" width="550px" center class="face-dialog" append-to-body>
       <div class="face-capture-container">
         <h3 class="face-title">{{ facetitle }}</h3>
         <div class="video-container">

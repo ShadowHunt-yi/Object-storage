@@ -85,7 +85,7 @@
       </el-table>
     </el-card>
     <!-- 添加角色 -->
-    <el-dialog title="添加角色" :visible.sync="dialogVisible" width="50%" @close="roleFormClose()">
+    <el-dialog title="添加角色" :visible.sync="dialogVisible" width="50%" @close="roleFormClose()" append-to-body>
       <!-- 内容主体区域 -->
       <el-form ref="roleFormRef" :model="roleForm" :rules="roleFormRules" label-width="80px">
         <el-form-item label="角色名" prop="name">
@@ -108,6 +108,7 @@
       :visible.sync="editDialogVisible"
       width="50%"
       @close="editDialogClose()"
+      append-to-body
     >
       <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
         <el-form-item label="角色名称" prop="name">
@@ -129,6 +130,7 @@
       :visible.sync="setRightDialogVisible"
       width="50%"
       @close="setRightDialogClosed()"
+      append-to-body
     >
       <!-- 树形控件 -->
       <el-tree

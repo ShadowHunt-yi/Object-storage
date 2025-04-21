@@ -71,6 +71,7 @@
             :visible.sync="dialogDisplay"
             width="900px"
             style="margin: 0 auto"
+            append-to-body
           >
             <el-table :data="archiving">
               <el-table-column label="文件名" width="500px" style="text-align: center">

@@ -85,7 +85,7 @@
                 style="margin: 0 10px"
                 >分享</el-button
               >
-              <el-dialog :visible.sync="dialogUrl" title="分享链接" width="30%">
+              <el-dialog :visible.sync="dialogUrl" title="分享链接" width="30%" append-to-body>
                 <span>{{ url }}</span>
               </el-dialog>
               <el-button
@@ -144,7 +144,7 @@
         </el-pagination>
       </div>
     </el-card>
-    <el-dialog title="重命名" :visible.sync="dialogNewname" width="30%">
+    <el-dialog title="重命名" :visible.sync="dialogNewname" width="30%" append-to-body>
       <el-input placeholder="请输入新名字" v-model="newname" clearable> </el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click=";(dialogNewname = false), (newname = '')">取 消</el-button>

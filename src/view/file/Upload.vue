@@ -71,7 +71,7 @@
                 style="margin: 0 10px"
                 >创建桶</el-button
               >
-              <el-dialog title="创建桶" :visible.sync="dialogFormVisible" width="600px">
+              <el-dialog title="创建桶" :visible.sync="dialogFormVisible" width="600px" append-to-body>
                 <div>
                   <span>桶名：</span>
                   <el-input v-model="newbucket" placeholder="请输入英文名称"> </el-input>

@@ -32,8 +32,7 @@
       :visible.sync="editDialogVisible"
       width="30%"
       @close="editDialogClose()"
-      :modal="false"
-      :append-to-body="false"
+      append-to-body
       custom-class="custom-dialog"
     >
       <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
@@ -57,8 +56,7 @@
       :visible.sync="editPasswordVisible"
       width="30%"
       @close="editPasswordClose"
-      :modal="false"
-      :append-to-body="false"
+      append-to-body
       custom-class="custom-dialog"
     >
       <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleFormRef" label-width="80px">

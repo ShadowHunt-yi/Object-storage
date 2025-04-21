@@ -2,7 +2,7 @@
   <div>
     <el-button type="primary" @click="dialogTable = true" style="margin: 10px">选择桶</el-button>
     <div v-if="type === 'primary'">当前桶：{{ bucketName }}</div>
-    <el-dialog title="选择桶" :visible.sync="dialogTable" width="500px">
+    <el-dialog title="选择桶" :visible.sync="dialogTable" width="500px" append-to-body>
       <el-table :data="buckets" width="600px">
         <el-table-column label="桶名" width="200">
           <template slot-scope="scope">

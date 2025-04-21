@@ -72,7 +72,7 @@
     </el-card>
 
     <!-- 添加用户信息的对话框 -->
-    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="50%" @close="addFormClose()">
+    <el-dialog title="添加用户" :visible.sync="dialogVisible" width="50%" @close="addFormClose()" append-to-body>
       <!-- 内容主体区域 -->
       <el-form ref="addFormRef" :model="addForm" :rules="addFormRules" label-width="80px">
         <el-form-item label="用户名" prop="username">
@@ -100,6 +100,7 @@
       :visible.sync="editDialogVisible"
       width="50%"
       @close="editDialogClose()"
+      append-to-body
     >
       <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
         <el-form-item label="用户名">
@@ -123,6 +124,7 @@
       :visible.sync="setRoleDialogVisible"
       width="50%"
       @close="setRoleDialogClosed()"
+      append-to-body
     >
       <div>
         <p>当前的用户: {{ userInfo.username }}</p>
