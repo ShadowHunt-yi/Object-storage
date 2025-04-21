@@ -37,7 +37,7 @@
               </el-table-column>
             </el-table>
           </el-dialog> -->
-          <chooseBucket type="primary" @bucket-selected="getFlieList" />
+          <chooseBucket type="primary" @bucketSelected="getFlieList" />
           <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
         </div>
       </div>
@@ -151,6 +151,9 @@
         <el-button type="primary" @click="rename(oldname, newname, _subString)">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="预览" :visible.sync="dialogPreview" width="30%" append-to-body>
+      <iframe :src="'https://view.officeapps.live.com/op/view.aspx?src=' + url" width="100%" height="100%"></iframe>
+    </el-dialog>
   </div>
 </template>
 
@@ -186,7 +189,8 @@ export default {
       url: '',
       currentPage: 1, // 当前页码
       pageSize: 5, // 每页显示的条目数
-      totalItems: 0 // 总条目数
+      totalItems: 0, // 总条目数
+      dialogPreview: false
     }
   },
   computed: {
@@ -340,7 +344,6 @@ export default {
       if (res.status !== 200) {
         return this.$message.error('删除失败')
       }
-
       this.filelist.splice(this.filelist.indexOf(fileInfo), 1)
       return this.$message.success('删除成功')
     },
@@ -391,8 +394,7 @@ export default {
       await this.shareFile(key)
       const _url = this.url
       console.log(this.url)
-      this.$http.post('https://view.officeapps.live.com/op/view.aspx?src=' + _url)
-      console.log(1)
+      this.dialogPreview = true
     },
     handleSizeChange(newSize) {
       this.pageSize = newSize

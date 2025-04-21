@@ -100,13 +100,12 @@ export default {
     },
     selectBucket(bucketName) {
       this.$store.commit('updateSelectedBucket', bucketName)
-      this.$emit('bucket-selected', bucketName) // 触发事件，通知父组件桶已选择
+      this.$emit('bucketSelected', bucketName) // 触发事件，通知父组件桶已选择
     },
     rebucketName(bucketName) {
-      this.$emit('rebucket-name', bucketName) // 触发事件，通知父组件桶已选择
+      this.$emit('rebucketName', bucketName) // 触发事件，通知父组件桶已选择
     },
     async removeBucket(bucketName) {
-      console.log(bucketName)
       const { data: res } = await bucketAPI.deleteBucket(bucketName)
       if (res.status !== 200) {
         return this.$message.error('删除桶失败')
