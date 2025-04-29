@@ -41,7 +41,7 @@
           <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
         </div>
       </div>
-      <div class="bottom">
+      <div class="bottom" v-loading="isLoadingTable">
         <el-table :data="paginatedFilelist">
           <el-table-column label="文件名" width="500px">
             <!-- 模板区域 -->
@@ -190,7 +190,8 @@ export default {
       currentPage: 1, // 当前页码
       pageSize: 5, // 每页显示的条目数
       totalItems: 0, // 总条目数
-      dialogPreview: false
+      dialogPreview: false,
+      isLoadingTable: false // 表格加载状态变量
     }
   },
   computed: {
@@ -264,14 +265,25 @@ export default {
     },
     // 获取一级目录
     async getFlieList(name) {
-      const { data: res } = await fileAPI.getFileList(name, {
-        params: { prefix: '' }
-      })
-      if (res.status !== 200) {
-        return this.$message.error('获取文件列表失败')
-      } else this.$message.success('获取文件列表成功')
-      this.filelist = this.prevFileList = res.data
-      this.totalItems = this.filelist.length
+      this.isLoadingTable = true; // <-- 设置加载开始
+      try {
+        const { data: res } = await fileAPI.getFileList(name, {
+          params: { prefix: '' }
+        });
+        if (res.status !== 200) {
+          this.$message.error('获取文件列表失败');
+        } else {
+          // this.$message.success('获取文件列表成功'); // 通常列表加载成功无需提示
+          this.filelist = this.prevFileList = res.data;
+          this.totalItems = this.filelist.length;
+          this.currentPage = 1; // 每次获取新列表时重置到第一页
+        }
+      } catch (error) {
+          console.error("获取文件列表出错:", error);
+          this.$message.error('加载文件列表时遇到问题');
+      } finally {
+        this.isLoadingTable = false; // <-- 设置加载结束
+      }
     },
     rollbackFile() {
       this.filelist = this.prevFileList
@@ -300,19 +312,35 @@ export default {
       console.log(this.$refs.files, this.filelist)
     },
     async listChange(index) {
-      let url = ''
-      console.log(index)
-      for (let i = 0; i < index; i++) {
-        url += this.pathlist[i] + '/'
+      this.isLoadingTable = true; // <-- 设置加载开始
+      try {
+          let url = '';
+          console.log(index);
+          // 注意：这里构建 url 的逻辑可能需要调整，确保路径正确
+          // 同时 this.selectionName 似乎未在data中定义或赋值，需要确认
+          for (let i = 0; i <= index; i++) { // 应该包含当前点击的 index
+            url += this.pathlist[i] + '/';
+          }
+          url = url.slice(0, -1); // 移除末尾的 '/'
+
+          // 假设 bucketName 应该是当前激活的桶名
+          const { data: res } = await fileAPI.getFileList(this.bucketName, {
+            params: { prefix: url }
+          });
+          if (res.status !== 200) {
+            this.$message.error('获取文件列表失败');
+          } else {
+            this.filelist = res.data; // 更新列表
+            this.pathlist.splice(index + 1); // 移除当前点击层级之后的所有路径
+            this.currentPage = 1; // 重置分页
+            this.totalItems = this.filelist.length;
+          }
+      } catch (error) {
+          console.error("切换目录出错:", error);
+          this.$message.error('加载目录内容时遇到问题');
+      } finally {
+          this.isLoadingTable = false; // <-- 设置加载结束
       }
-      url += this.pathlist[index]
-      const { data: res } = await fileAPI.getFileList(this.selectionName, {
-        params: { prefix: url }
-      })
-      if (res.status !== 200) {
-        return this.$message.error('获取文件列表失败')
-      }
-      this.filelist = res.data
     },
     // 重命名文件
     async rename(_old, _new, _type) {
