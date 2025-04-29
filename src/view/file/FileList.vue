@@ -273,7 +273,6 @@ export default {
         if (res.status !== 200) {
           this.$message.error('获取文件列表失败');
         } else {
-          // this.$message.success('获取文件列表成功'); // 通常列表加载成功无需提示
           this.filelist = this.prevFileList = res.data;
           this.totalItems = this.filelist.length;
           this.currentPage = 1; // 每次获取新列表时重置到第一页
@@ -316,8 +315,6 @@ export default {
       try {
           let url = '';
           console.log(index);
-          // 注意：这里构建 url 的逻辑可能需要调整，确保路径正确
-          // 同时 this.selectionName 似乎未在data中定义或赋值，需要确认
           for (let i = 0; i <= index; i++) { // 应该包含当前点击的 index
             url += this.pathlist[i] + '/';
           }
