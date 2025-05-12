@@ -152,7 +152,11 @@
       </span>
     </el-dialog>
     <el-dialog title="预览" :visible.sync="dialogPreview" width="30%" append-to-body>
-      <iframe :src="'https://view.officeapps.live.com/op/view.aspx?src=' + url" width="100%" height="100%"></iframe>
+      <iframe
+        :src="'https://view.officeapps.live.com/op/view.aspx?src=' + url"
+        width="100%"
+        height="100%"
+      ></iframe>
     </el-dialog>
   </div>
 </template>
@@ -197,27 +201,7 @@ export default {
   computed: {
     bucketName() {
       return this.$store.state.selectedBucket
-    }
-  },
-  created() {
-    this.getBuckets()
-    if (this.bucketName != '') {
-      this.getFlieList(this.bucketName)
-    }
-  },
-  mounted() {
-    window.eventBus.$on('getDirFileInfo', () => {
-      // 不带参数
-      this.getDirFileInfo()
-    })
-    window.eventBus.$on('getDirFileByIndex', (a) => {
-      this.getDirFileByIndex(a)
-    })
-    window.eventBus.$on('rollbackFile', () => {
-      this.rollbackFile()
-    })
-  },
-  computed: {
+    },
     iconName() {
       return function (type) {
         const iconName = fileUtil.getIconName(type)
@@ -230,19 +214,22 @@ export default {
       return this.filelist.slice(start, end)
     }
   },
+  mounted() {
+    if (this.bucketName) {
+      this.getFlieList(this.bucketName)
+    }
+    window.eventBus.$on('getDirFileInfo', () => {
+      // 不带参数
+      this.getDirFileInfo()
+    })
+    window.eventBus.$on('getDirFileByIndex', (a) => {
+      this.getDirFileByIndex(a)
+    })
+    window.eventBus.$on('rollbackFile', () => {
+      this.rollbackFile()
+    })
+  },
   methods: {
-    async getBuckets() {
-      const { data: res } = await bucketAPI.getBuckets()
-      if (res.status !== 200) {
-        return this.$message.error('获取桶列表失败')
-      } else this.$message.success('获取桶列表成功')
-      for (const key in res.data) {
-        if (res.data[key].name == 'base') {
-          res.data.splice(key, 1)
-        }
-      }
-      this.buckets = res.data
-    },
     totalSize(e) {
       if (e.type != 'directory') {
         return formatFileSize(e.Size)
@@ -265,23 +252,23 @@ export default {
     },
     // 获取一级目录
     async getFlieList(name) {
-      this.isLoadingTable = true; // <-- 设置加载开始
+      this.isLoadingTable = true // <-- 设置加载开始
       try {
         const { data: res } = await fileAPI.getFileList(name, {
           params: { prefix: '' }
-        });
+        })
         if (res.status !== 200) {
-          this.$message.error('获取文件列表失败');
+          this.$message.error('获取文件列表失败')
         } else {
-          this.filelist = this.prevFileList = res.data;
-          this.totalItems = this.filelist.length;
-          this.currentPage = 1; // 每次获取新列表时重置到第一页
+          this.filelist = this.prevFileList = res.data
+          this.totalItems = this.filelist.length
+          this.currentPage = 1 // 每次获取新列表时重置到第一页
         }
       } catch (error) {
-          console.error("获取文件列表出错:", error);
-          this.$message.error('加载文件列表时遇到问题');
+        console.error('获取文件列表出错:', error)
+        this.$message.error('加载文件列表时遇到问题')
       } finally {
-        this.isLoadingTable = false; // <-- 设置加载结束
+        this.isLoadingTable = false // <-- 设置加载结束
       }
     },
     rollbackFile() {
@@ -311,32 +298,33 @@ export default {
       console.log(this.$refs.files, this.filelist)
     },
     async listChange(index) {
-      this.isLoadingTable = true; // <-- 设置加载开始
+      this.isLoadingTable = true // <-- 设置加载开始
       try {
-          let url = '';
-          console.log(index);
-          for (let i = 0; i <= index; i++) { // 应该包含当前点击的 index
-            url += this.pathlist[i] + '/';
-          }
-          url = url.slice(0, -1); // 移除末尾的 '/'
+        let url = ''
+        console.log(index)
+        for (let i = 0; i <= index; i++) {
+          // 应该包含当前点击的 index
+          url += this.pathlist[i] + '/'
+        }
+        url = url.slice(0, -1) // 移除末尾的 '/'
 
-          // 假设 bucketName 应该是当前激活的桶名
-          const { data: res } = await fileAPI.getFileList(this.bucketName, {
-            params: { prefix: url }
-          });
-          if (res.status !== 200) {
-            this.$message.error('获取文件列表失败');
-          } else {
-            this.filelist = res.data; // 更新列表
-            this.pathlist.splice(index + 1); // 移除当前点击层级之后的所有路径
-            this.currentPage = 1; // 重置分页
-            this.totalItems = this.filelist.length;
-          }
+        // 假设 bucketName 应该是当前激活的桶名
+        const { data: res } = await fileAPI.getFileList(this.bucketName, {
+          params: { prefix: url }
+        })
+        if (res.status !== 200) {
+          this.$message.error('获取文件列表失败')
+        } else {
+          this.filelist = res.data // 更新列表
+          this.pathlist.splice(index + 1) // 移除当前点击层级之后的所有路径
+          this.currentPage = 1 // 重置分页
+          this.totalItems = this.filelist.length
+        }
       } catch (error) {
-          console.error("切换目录出错:", error);
-          this.$message.error('加载目录内容时遇到问题');
+        console.error('切换目录出错:', error)
+        this.$message.error('加载目录内容时遇到问题')
       } finally {
-          this.isLoadingTable = false; // <-- 设置加载结束
+        this.isLoadingTable = false // <-- 设置加载结束
       }
     },
     // 重命名文件

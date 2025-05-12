@@ -108,7 +108,7 @@ export const fileAPI = {
   },
   // 获取文件列表
   getFileList(bucketName, params) {
-    return request.get(`/getLists/${bucketName}`, { params })
+    return request.get(`/getLists/${bucketName}`, params)
   },
   // 文件重命名
   renameFile(oldName, newName, type) {

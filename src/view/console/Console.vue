@@ -138,10 +138,6 @@
                 <td>操作系统</td>
                 <td>{{ consoleData.osName }}</td>
               </tr>
-              <tr>
-                <td>系统架构</td>
-                <td>{{ consoleData.osArch }}</td>
-              </tr>
             </tbody>
           </table>
         </el-card>
