@@ -205,8 +205,10 @@ export default {
   },
   methods: {
     logout() {
+      // 清除会话数据
       window.sessionStorage.clear()
-      this.$router.push('login')
+      // 触发自动登出停止（会在App.vue中通过路由监听自动处理）
+      this.$router.push('/login')
     },
     async getMenuList() {
       // 将data去处 重定向为res
