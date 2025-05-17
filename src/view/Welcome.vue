@@ -29,8 +29,8 @@
 
     <div class="welcome-footer">
       <p>立即开始使用，体验云存储的便捷与高效</p>
-      <el-button type="primary" @click="goToConsole" size="medium" round>
-        进入控制台 <i class="el-icon-arrow-right"></i>
+      <el-button type="primary" @click="goToUpload" size="medium" round>
+        进入文件列表 <i class="el-icon-arrow-right"></i>
       </el-button>
     </div>
   </div>
@@ -82,8 +82,8 @@ export default {
     }
   },
   methods: {
-    goToConsole() {
-      this.$router.push('/console')
+    goToUpload() {
+      this.$router.push('/upload')
     }
   }
 }
