@@ -5,7 +5,6 @@ import store from './store'
 import './plugins/element.js'
 import axios from 'axios'
 import resourceLoader from './utils/resourceLoader'
-import downloadManager from './utils/downloadManager'
 // 导入NProgress包对应的JS和CSS
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
