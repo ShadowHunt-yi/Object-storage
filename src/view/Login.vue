@@ -302,10 +302,6 @@ export default {
     },
     login() {
       // this.$router.push('welcome')
-      this.dialogface = true
-      this.$nextTick(() => {
-        this.initCamera()
-      })
       this.$refs.loginFormRef.validate(async (valid) => {
         // valid是一个布尔值，这是一个回调函数
         if (!valid) return 0
@@ -316,11 +312,12 @@ export default {
         } else {
           window.sessionStorage.setItem('authority', res.data.id)
           window.sessionStorage.setItem('token', res.data.token)
-          this.facetitle = '人脸认证'
-          this.dialogface = true
-          setTimeout(() => {
-            this.initCamera()
-          }, 0)
+          this.$router.push('welcome')
+          //   this.facetitle = '人脸认证'
+          //   this.dialogface = true
+          //   setTimeout(() => {
+          //     this.initCamera()
+          //   }, 0)
         }
       })
     },

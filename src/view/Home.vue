@@ -119,14 +119,31 @@
 </template>
 
 <script>
-import * as drawingUtils from '@mediapipe/drawing_utils'
-import * as mpHands from '@mediapipe/hands'
 import screenfull from 'screenfull'
 import Hamburger from '../components/Hamburger'
 import BreadCrumb from '../components/BreadCrumb'
 import { menuAPI } from '@/api'
-import handGestureWorkerUrl from '@/workers/handGesture.worker.js'
 import { isFistGesture } from '@/utils/handCompute'
+
+// MediaPipe相关模块改为按需加载
+let drawingUtils = null
+let mpHands = null
+let handGestureWorkerUrl = null
+
+const loadMediaPipeModules = async () => {
+  if (!drawingUtils || !mpHands) {
+    const [drawingUtilsModule, mpHandsModule, workerModule] = await Promise.all([
+      import('@mediapipe/drawing_utils'),
+      import('@mediapipe/hands'),
+      import('@/workers/handGesture.worker.js')
+    ])
+    drawingUtils = drawingUtilsModule
+    mpHands = mpHandsModule
+    handGestureWorkerUrl = workerModule.default
+  }
+  return { drawingUtils, mpHands, handGestureWorkerUrl }
+}
+
 export default {
   components: {
     Hamburger,
@@ -169,7 +186,8 @@ export default {
         121: 4
       },
       handGestureWorker: null,
-      wasmModule: null
+      wasmModule: null,
+      mediaPipeLoaded: false
     }
   },
   created() {
@@ -185,16 +203,12 @@ export default {
         this.isFullscreen = false
       }
     }
-    // 初始化手势识别Worker
-    if (window.Worker) {
-      try {
-        this.initHandGestureWorker()
-      } catch (error) {
-        console.error('初始化手势识别Worker失败:', error)
-      }
-    } else {
-      console.warn('此浏览器不支持Web Workers')
-    }
+    // 延迟初始化手势识别Worker，避免阻塞首屏渲染
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.initHandGestureWorkerLazy()
+      }, 2000)
+    })
   },
   watch: {
     $route(to, from) {
@@ -257,13 +271,10 @@ export default {
       if (this.handvideo) {
         try {
           // 确保MediaPipe组件已加载
-          if (!window.Camera) {
-            // 如果Camera未定义，可能需要动态加载
+          if (!this.mediaPipeLoaded) {
             this.$message.warning('正在加载摄像头组件，请稍候...')
-
-            // 可以考虑动态导入
-            const { Camera } = await import('@mediapipe/camera_utils')
-            window.Camera = Camera
+            await loadMediaPipeModules()
+            this.mediaPipeLoaded = true
           }
 
           this.initCamera()
@@ -276,13 +287,19 @@ export default {
         this.stopCamera()
       }
     },
-    initCamera() {
+    async initCamera() {
       this.$refs.canvasElement.style.display = 'block'
       this.videoElement = this.$refs.videoElement
       this.canvasElement = this.$refs.canvasElement
       this.canvasCtx = this.canvasElement.getContext('2d')
 
       console.log('初始化手势识别组件...')
+
+      // 确保MediaPipe模块已加载
+      if (!this.mediaPipeLoaded) {
+        await loadMediaPipeModules()
+        this.mediaPipeLoaded = true
+      }
 
       // 关键修改：使用本地模型文件
       this.config = {
@@ -356,16 +373,18 @@ export default {
           const landmarks = results.multiHandLandmarks[index]
 
           // 绘制手部连接线和关键点
-          drawingUtils.drawConnectors(this.canvasCtx, landmarks, mpHands.HAND_CONNECTIONS, {
-            color: isRightHand ? '#00FF00' : '#FF0000'
-          })
-          drawingUtils.drawLandmarks(this.canvasCtx, landmarks, {
-            color: isRightHand ? '#00FF00' : '#FF0000',
-            fillColor: isRightHand ? '#FF0000' : '#00FF00',
-            radius: (data) => {
-              return drawingUtils.lerp(data.from.z, -0.15, 0.1, 8, 1)
-            }
-          })
+          if (drawingUtils && mpHands) {
+            drawingUtils.drawConnectors(this.canvasCtx, landmarks, mpHands.HAND_CONNECTIONS, {
+              color: isRightHand ? '#00FF00' : '#FF0000'
+            })
+            drawingUtils.drawLandmarks(this.canvasCtx, landmarks, {
+              color: isRightHand ? '#00FF00' : '#FF0000',
+              fillColor: isRightHand ? '#FF0000' : '#00FF00',
+              radius: (data) => {
+                return drawingUtils.lerp(data.from.z, -0.15, 0.1, 8, 1)
+              }
+            })
+          }
 
           // 将手部关键点数据发送到Worker处理
           if (this.handGestureWorker) {
@@ -561,20 +580,21 @@ export default {
         this.$refs.subMenu[this.enumSub[this.subID]].$children[1].handleClick()
       }
     },
-    initHandGestureWorker() {
+    async initHandGestureWorkerLazy() {
       try {
+        const { drawingUtils, mpHands, handGestureWorkerUrl } = await loadMediaPipeModules()
         this.handGestureWorker = new Worker(handGestureWorkerUrl)
         // 设置消息处理
-        this.handGestureWorker.onmessage = (e) => {
-          const { type, data } = e.data
+        this.handGestureWorker.onmessage = (event) => {
+          const { type, data } = event.data
           if (type === 'gestureDetected') {
             this.handleGestureDetection(data)
           }
         }
         console.log('手势识别Worker初始化成功')
+        this.mediaPipeLoaded = true
       } catch (error) {
         console.error('初始化手势识别Worker失败:', error)
-        this.$message.warning('手势识别初始化失败，将使用备选方案')
       }
     },
     processHandGestureInMainThread(landmarks, handLabel) {
