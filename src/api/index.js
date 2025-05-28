@@ -122,7 +122,8 @@ export const fileAPI = {
   downloadFile(params) {
     return request.get('/download', {
       params,
-      responseType: 'blob'
+      responseType: 'blob',
+      timeout: 0 // 下载文件不设置超时限制
     })
   },
   // 获取文件URL
