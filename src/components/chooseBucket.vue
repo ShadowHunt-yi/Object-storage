@@ -101,6 +101,7 @@ export default {
     selectBucket(bucketName) {
       this.$store.commit('updateSelectedBucket', bucketName)
       this.$emit('bucketSelected', bucketName) // 触发事件，通知父组件桶已选择
+      this.dialogTable = false
     },
     rebucketName(bucketName) {
       this.$emit('rebucketName', bucketName) // 触发事件，通知父组件桶已选择

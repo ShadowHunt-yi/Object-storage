@@ -377,7 +377,7 @@ export default {
         //     params: params,
         //     responseType: "blob", // 接收类型设置，否者返回字符型
         //   })
-        fileAPI.downloadFile({ params }).then((res) => {
+        fileAPI.downloadFile(params).then((res) => {
           // 定义文件名等相关信息
           const blob = res.data
           const reader = new FileReader()
