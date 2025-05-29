@@ -128,20 +128,17 @@ import { isFistGesture } from '@/utils/handCompute'
 // MediaPipe相关模块改为按需加载
 let drawingUtils = null
 let mpHands = null
-let handGestureWorkerUrl = null
 
 const loadMediaPipeModules = async () => {
   if (!drawingUtils || !mpHands) {
-    const [drawingUtilsModule, mpHandsModule, workerModule] = await Promise.all([
+    const [drawingUtilsModule, mpHandsModule] = await Promise.all([
       import('@mediapipe/drawing_utils'),
-      import('@mediapipe/hands'),
-      import('@/workers/handGesture.worker.js')
+      import('@mediapipe/hands')
     ])
     drawingUtils = drawingUtilsModule
     mpHands = mpHandsModule
-    handGestureWorkerUrl = workerModule.default
   }
-  return { drawingUtils, mpHands, handGestureWorkerUrl }
+  return { drawingUtils, mpHands }
 }
 
 export default {
@@ -187,12 +184,7 @@ export default {
       },
       handGestureWorker: null,
       wasmModule: null,
-      mediaPipeLoaded: false,
-      // 手势识别帧率配置
-      handGestureConfig: {
-        targetFPS: 30, // 目标帧率，可调整为15, 30, 60等
-        frameInterval: 1000 / 30 // 自动计算帧间隔
-      }
+      mediaPipeLoaded: false
     }
   },
   created() {
@@ -284,7 +276,7 @@ export default {
 
           this.initCamera()
         } catch (error) {
-          console.error('初始化摄像头失败:', error)
+          console.error('❌ 初始化摄像头失败:', error)
           this.$message.error(`无法初始化摄像头: ${error.message}`)
           this.handvideo = false
         }
@@ -298,8 +290,6 @@ export default {
       this.canvasElement = this.$refs.canvasElement
       this.canvasCtx = this.canvasElement.getContext('2d')
 
-      console.log('初始化手势识别组件...')
-
       // 确保MediaPipe模块已加载
       if (!this.mediaPipeLoaded) {
         await loadMediaPipeModules()
@@ -309,7 +299,6 @@ export default {
       // 关键修改：使用本地模型文件
       this.config = {
         locateFile: (file) => {
-          console.log('请求加载模型文件:', file)
           return `/mediapipe/hands/${file}`
         }
       }
@@ -317,7 +306,6 @@ export default {
       try {
         // 创建Hands实例
         this.hands = new mpHands.Hands(this.config)
-        console.log('成功创建Hands实例')
 
         this.hands.onResults(this.onResults.bind(this))
         this.hands.setOptions({
@@ -338,7 +326,6 @@ export default {
               }
             })
             .then((stream) => {
-              console.log('摄像头访问成功')
               this.videoElement.srcObject = stream
               this.videoElement.onloadedmetadata = () => {
                 this.videoElement.play()
@@ -393,15 +380,24 @@ export default {
 
           // 将手部关键点数据发送到Worker处理
           if (this.handGestureWorker) {
-            this.handGestureWorker.postMessage({
-              type: 'processLandmarks',
-              data: {
-                landmarks: landmarks,
-                handedness: classification.label
-              }
-            })
+            console.log('📤 准备发送数据到Worker:', classification.label)
+            try {
+              this.handGestureWorker.postMessage({
+                type: 'processLandmarks',
+                data: {
+                  landmarks: landmarks,
+                  handedness: classification.label
+                }
+              })
+              console.log('✅ 数据已发送到Worker')
+            } catch (error) {
+              console.error('❌ 发送到Worker失败:', error)
+              console.log('🔄 回退到主线程处理')
+              this.processHandGestureInMainThread(landmarks, classification.label)
+            }
           } else {
             // 如果Worker不可用，回退到原始处理逻辑
+            console.log('🔄 Worker不可用，使用主线程处理:', classification.label)
             this.processHandGestureInMainThread(landmarks, classification.label)
           }
         }
@@ -417,6 +413,7 @@ export default {
         // 处理右手手势
         if (this.timeMarked <= t - 1000) {
           if (gesture === this.gestureMarked) {
+            console.log(`✅ 执行右手手势: ${gesture}`)
             this.processRightHandGesture(gesture)
             this.gestureMarked = 0
             this.gestureMarked1 = 0
@@ -433,6 +430,7 @@ export default {
         // 处理左手手势
         if (this.timeMarked <= t - 1000) {
           if (gesture === this.gestureMarked) {
+            console.log(`✅ 执行左手手势: ${gesture}`)
             this.processLeftHandGesture(gesture)
             this.gestureMarked = 0
             this.gestureMarked1 = 0
@@ -468,7 +466,6 @@ export default {
         case 101:
           window.eventBus.$emit('rollbackFile', 101)
           break
-        // 其他手势处理...
       }
     },
     processLeftHandGesture(gesture) {
@@ -586,26 +583,224 @@ export default {
       }
     },
     async initHandGestureWorkerLazy() {
+      console.log('🔧 开始初始化Worker...')
       try {
-        const { drawingUtils, mpHands, handGestureWorkerUrl } = await loadMediaPipeModules()
-        this.handGestureWorker = new Worker(handGestureWorkerUrl)
+        console.log('📦 加载MediaPipe模块...')
+        const { drawingUtils, mpHands } = await loadMediaPipeModules()
+        console.log('✅ MediaPipe模块加载成功')
+
+        console.log('👷 创建Worker实例...')
+
+        // 使用独立的Worker文件，优先尝试不同路径
+        let workerCreated = false
+
+        // 方式1: 从public目录加载
+        try {
+          this.handGestureWorker = new Worker('/workers/handGesture.worker.js')
+          workerCreated = true
+          console.log('✅ 成功从public/workers/目录加载Worker')
+        } catch (e) {
+          console.log('❌ 方式1失败，尝试其他路径...')
+        }
+
+        // 方式2: 回退到内联模式（如果文件加载失败）
+        if (!workerCreated) {
+          console.log('🔄 Worker文件加载失败，回退到内联模式')
+          const workerCode = `
+            // 计算两点间距离 (3D)
+            function dist3D(x1, y1, z1, x2, y2, z2) {
+              return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2))
+            }
+
+            // 计算角度
+            function angle(p1, p2, p3) {
+              const a = dist3D(p1.x, p1.y, p1.z, p3.x, p3.y, p3.z)
+              const b = dist3D(p1.x, p1.y, p2.z, p2.x, p2.y, p2.z)
+              const c = dist3D(p3.x, p3.y, p3.z, p2.x, p2.y, p2.z)
+              const cosA = (b * b + c * c - a * a) / (2 * c * b)
+              return cosA
+            }
+
+            // 手势识别逻辑
+            function isFistGesture(landmarks) {
+              const indexFigure2 = landmarks[7];
+              const indexFigure3 = landmarks[6];
+              const indexFigure4 = landmarks[5];
+              const thumb1 = landmarks[4];
+              const thumb2 = landmarks[3];
+              const thumb3 = landmarks[2];
+              const thumb4 = landmarks[1];
+              const middleFinger2 = landmarks[11];
+              const middleFinger3 = landmarks[10];
+              const middleFinger4 = landmarks[9];
+              const ringFinger2 = landmarks[15];
+              const ringFinger3 = landmarks[14];
+              const ringFinger4 = landmarks[13];
+              const pinky2 = landmarks[19];
+              const pinky3 = landmarks[18];
+              const pinky4 = landmarks[17];
+
+              // 判断手势一
+              if (
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                (angle(thumb1, thumb2, thumb3) > -0.9 || angle(thumb2, thumb3, thumb4) > -0.9) &&
+                angle(pinky2, pinky3, pinky4) > -0.8 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+                angle(pinky2, pinky3, pinky4) > -0.5 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) > -0.5
+              ) {
+                return 1;
+              } else if (
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) < -0.8 &&
+                (angle(thumb1, thumb2, thumb3) > -0.9 || angle(thumb2, thumb3, thumb4) > -0.9) &&
+                angle(pinky2, pinky3, pinky4) > -0.8
+              ) {
+                return 3;
+              } else if (
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) < -0.8 &&
+                angle(pinky2, pinky3, pinky4) < -0.8 &&
+                angle(thumb1, thumb2, thumb3) > -0.9
+              ) {
+                return 4;
+              } else if (
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) < -0.8 &&
+                angle(pinky2, pinky3, pinky4) < -0.8 &&
+                angle(thumb1, thumb2, thumb3) < -0.8
+              ) {
+                return 5;
+              } else if (
+                angle(indexFigure2, indexFigure3, indexFigure4) > -0.5 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+                angle(pinky2, pinky3, pinky4) > -0.5 &&
+                angle(thumb1, thumb2, thumb3) < -0.8
+              ) {
+                return 101;
+              } else if (
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) > -0.5 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+                angle(pinky2, pinky3, pinky4) > -0.5 &&
+                angle(thumb1, thumb2, thumb3) < -0.8
+              ) {
+                return 102;
+              } else if (
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+                angle(ringFinger2, ringFinger3, ringFinger4) > -0.5 &&
+                angle(pinky2, pinky3, pinky4) > -0.5 &&
+                (angle(thumb1, thumb2, thumb3) > -0.9 || angle(thumb2, thumb3, thumb4) > -0.9) &&
+                angle(landmarks[8], landmarks[9], landmarks[12]) > 0.995
+              ) {
+                return 201;
+              } else if (
+                angle(middleFinger2, middleFinger3, middleFinger4) < -0.8 &&
+                angle(indexFigure2, indexFigure3, indexFigure4) < -0.8 &&
+                (angle(thumb1, thumb2, thumb3) > -0.9 || angle(thumb2, thumb3, thumb4) > -0.9) &&
+                angle(ringFinger2, ringFinger3, ringFinger4) > -0.8 &&
+                angle(pinky2, pinky3, pinky4) > -0.8 &&
+                angle(landmarks[6], landmarks[0], landmarks[10]) < 0.99
+              ) {
+                return 2;
+              }
+              return false;
+            }
+            
+            console.log('👷 手势识别Worker已启动')
+            
+            self.onmessage = function (e) {
+              console.log('🔄 收到消息:', e.data)
+              const { type, data } = e.data
+            
+              if (type === 'test') {
+                console.log('🧪 收到测试消息:', data)
+                self.postMessage({ type: 'test', data: 'Worker响应正常' })
+                return
+              }
+            
+              if (type === 'processLandmarks') {
+                const { landmarks, handedness } = data
+                console.log('🤲 开始处理' + handedness + '手的关键点数据...')
+            
+                try {
+                  const gesture = isFistGesture(landmarks)
+                  console.log('🎯 手势识别结果: ' + handedness + '手 - ' + (gesture || '无手势'))
+            
+                  if (gesture) {
+                    console.log('✅ 识别到手势，发送回主线程: ' + handedness + '手 - 手势' + gesture)
+                    self.postMessage({
+                      type: 'gestureDetected',
+                      data: {
+                        hand: handedness,
+                        gesture: gesture,
+                        landmarks: landmarks
+                      }
+                    })
+                  }
+                } catch (error) {
+                  console.error('❌ Worker处理' + handedness + '手时发生错误:', error)
+                  self.postMessage({
+                    type: 'error',
+                    data: {
+                      hand: handedness,
+                      error: error.message
+                    }
+                  })
+                }
+              }
+            }
+            
+            self.onerror = function (error) {
+              console.error('❌ Worker全局错误:', error)
+            }
+          `
+
+          const blob = new Blob([workerCode], { type: 'application/javascript' })
+          this.handGestureWorker = new Worker(URL.createObjectURL(blob))
+          workerCreated = true
+          console.log('✅ 内联Worker创建成功')
+        }
+
+        console.log('✅ Worker实例创建成功:', this.handGestureWorker)
+
         // 设置消息处理
         this.handGestureWorker.onmessage = (event) => {
+          console.log('📨 主线程收到Worker消息:', event.data)
           const { type, data } = event.data
           if (type === 'gestureDetected') {
             this.handleGestureDetection(data)
+          } else if (type === 'error') {
+            console.error('❌ Worker错误:', data)
           }
         }
-        console.log('手势识别Worker初始化成功')
+
+        // 添加错误处理
+        this.handGestureWorker.onerror = (error) => {
+          console.error('❌ Worker运行错误:', error)
+        }
+
+        // 测试Worker是否正常工作
+        console.log('🧪 测试Worker连接...')
+        this.handGestureWorker.postMessage({ type: 'test', data: 'hello' })
+
         this.mediaPipeLoaded = true
+        console.log('✅ Worker初始化完成')
       } catch (error) {
-        console.error('初始化手势识别Worker失败:', error)
+        console.error('❌ Worker初始化失败:', error)
+        console.error('🔍 错误详情:', error.message, error.stack)
+        console.log('🔄 回退到主线程处理模式')
       }
     },
     processHandGestureInMainThread(landmarks, handLabel) {
+      console.log(landmarks, 'processHandGestureInMainThread,使用原生方法')
       const gesture = isFistGesture(landmarks)
       if (gesture) {
-        console.log('手势识别成功')
         this.handleGestureDetection({
           hand: handLabel,
           gesture: gesture,
@@ -615,21 +810,13 @@ export default {
     },
     // 添加帧处理函数
     startFrameProcessing() {
-      // 使用配置中的帧率设置
-      const frameInterval = this.handGestureConfig.frameInterval
-      let lastFrameTime = 0
-
-      // 使用requestAnimationFrame处理视频帧，但限制到指定fps
-      const processFrame = async (currentTime) => {
+      // 使用requestAnimationFrame处理视频帧
+      const processFrame = async () => {
         if (this.handvideo && this.videoElement && this.hands) {
-          // 检查是否达到了目标fps的时间间隔
-          if (currentTime - lastFrameTime >= frameInterval) {
-            try {
-              await this.hands.send({ image: this.videoElement })
-              lastFrameTime = currentTime
-            } catch (error) {
-              console.error('处理视频帧失败:', error)
-            }
+          try {
+            await this.hands.send({ image: this.videoElement })
+          } catch (error) {
+            console.error('❌ 处理视频帧失败:', error)
           }
         }
         if (this.handvideo) {
@@ -637,12 +824,6 @@ export default {
         }
       }
       this.animationFrameId = requestAnimationFrame(processFrame)
-    },
-    // 动态调整手势识别帧率
-    setHandGestureFPS(fps) {
-      this.handGestureConfig.targetFPS = fps
-      this.handGestureConfig.frameInterval = 1000 / fps
-      console.log(`手势识别帧率已调整为: ${fps} FPS`)
     }
   }
 }
@@ -737,3 +918,4 @@ span {
   transform: translate3d(-100%, 0, 0);
 }
 </style>
+

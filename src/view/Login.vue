@@ -147,9 +147,8 @@
         </el-form-item>
 
         <el-form-item>
-          <el-checkbox v-model="newuser.agreement" class="agreement-checkbox">
-            我同意使用本次人脸数据仅用于该系统的注册登录
-          </el-checkbox>
+          <el-checkbox v-model="newuser.agreement" class="agreement-checkbox"> </el-checkbox>
+          我同意使用本次人脸数据仅用于该系统的注册登录
         </el-form-item>
       </el-form>
 
@@ -241,7 +240,7 @@ export default {
         newPassword: '',
         newEmail: '',
         newMobile: '',
-        agreement: false
+        agreement: true
       },
       dialogFormRegister: false,
       formLabelWidth: '150px',
@@ -301,7 +300,6 @@ export default {
       this.vcUrl = '/api/verifyCode?time=' + new Date()
     },
     login() {
-      // this.$router.push('welcome')
       this.$refs.loginFormRef.validate(async (valid) => {
         // valid是一个布尔值，这是一个回调函数
         if (!valid) return 0
@@ -312,12 +310,11 @@ export default {
         } else {
           window.sessionStorage.setItem('authority', res.data.id)
           window.sessionStorage.setItem('token', res.data.token)
-          this.$router.push('welcome')
-          //   this.facetitle = '人脸认证'
-          //   this.dialogface = true
-          //   setTimeout(() => {
-          //     this.initCamera()
-          //   }, 0)
+          this.facetitle = '人脸认证'
+          this.dialogface = true
+          setTimeout(() => {
+            this.initCamera()
+          }, 0)
         }
       })
     },
@@ -414,21 +411,6 @@ export default {
         window.sessionStorage.clear()
         this.stopCamera()
       }
-    },
-    onUploadChange(file) {
-      const isJPG = file.raw.type === 'image/jpeg'
-      const isLt2M = file.size / 1024 / 1024 < 2
-      if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG 格式!')
-        return
-      }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!')
-        return
-      }
-      this.imageUrl = URL.createObjectURL(file.raw)
-
-      return isJPG && isLt2M
     },
     initCamera() {
       console.log(this.config)
@@ -1249,25 +1231,27 @@ export default {
   }
 }
 
-.agreement-checkbox {
-  margin-top: 10px;
+// .agreement-checkbox {
+//   margin-top: 10px;
+//   margin-left: 10px;
+//   width: 20px;
+//   height: 20px;
+//   /deep/ .el-checkbox__label {
+//     color: #606266;
+//     font-size: 14px;
+//   }
 
-  /deep/ .el-checkbox__label {
-    color: #606266;
-    font-size: 14px;
-  }
+//   /deep/ .el-checkbox__input.is-checked .el-checkbox__inner {
+//     background-color: #409eff;
+//     border-color: #409eff;
+//   }
 
-  /deep/ .el-checkbox__input.is-checked .el-checkbox__inner {
-    background-color: #409eff;
-    border-color: #409eff;
-  }
+//   /deep/ .el-checkbox__input.is-checked + .el-checkbox__label {
+//     color: #409eff;
+//   }
 
-  /deep/ .el-checkbox__input.is-checked + .el-checkbox__label {
-    color: #409eff;
-  }
-
-  /deep/ .el-checkbox__inner:hover {
-    border-color: #409eff;
-  }
-}
+//   /deep/ .el-checkbox__inner:hover {
+//     border-color: #409eff;
+//   }
+// }
 </style>

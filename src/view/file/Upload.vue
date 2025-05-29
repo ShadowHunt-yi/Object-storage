@@ -129,9 +129,6 @@
               >
             </div>
           </el-dialog>
-
-          <!-- <el-button type="primary" @click="handleHttpRequestPic()">确认上传<i
-              class="el-icon-upload el-icon--right"></i></el-button> -->
         </el-card>
       </el-col>
     </el-row>

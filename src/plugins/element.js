@@ -28,7 +28,8 @@ import {
   Tag,
   Tree,
   Select,
-  Option
+  Option,
+  Checkbox
 } from 'element-ui'
 
 // 核心组件 - 首屏必需
@@ -53,7 +54,7 @@ Vue.use(Dialog)
 Vue.use(Tag)
 Vue.use(Select)
 Vue.use(Option)
-
+Vue.use(Checkbox)
 // 表格相关组件 - 按需加载
 Vue.use(Table)
 Vue.use(TableColumn)
