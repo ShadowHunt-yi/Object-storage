@@ -187,7 +187,12 @@ export default {
       },
       handGestureWorker: null,
       wasmModule: null,
-      mediaPipeLoaded: false
+      mediaPipeLoaded: false,
+      // 手势识别帧率配置
+      handGestureConfig: {
+        targetFPS: 30, // 目标帧率，可调整为15, 30, 60等
+        frameInterval: 1000 / 30 // 自动计算帧间隔
+      }
     }
   },
   created() {
@@ -610,13 +615,21 @@ export default {
     },
     // 添加帧处理函数
     startFrameProcessing() {
-      // 使用requestAnimationFrame处理视频帧
-      const processFrame = async () => {
+      // 使用配置中的帧率设置
+      const frameInterval = this.handGestureConfig.frameInterval
+      let lastFrameTime = 0
+
+      // 使用requestAnimationFrame处理视频帧，但限制到指定fps
+      const processFrame = async (currentTime) => {
         if (this.handvideo && this.videoElement && this.hands) {
-          try {
-            await this.hands.send({ image: this.videoElement })
-          } catch (error) {
-            console.error('处理视频帧失败:', error)
+          // 检查是否达到了目标fps的时间间隔
+          if (currentTime - lastFrameTime >= frameInterval) {
+            try {
+              await this.hands.send({ image: this.videoElement })
+              lastFrameTime = currentTime
+            } catch (error) {
+              console.error('处理视频帧失败:', error)
+            }
           }
         }
         if (this.handvideo) {
@@ -624,6 +637,12 @@ export default {
         }
       }
       this.animationFrameId = requestAnimationFrame(processFrame)
+    },
+    // 动态调整手势识别帧率
+    setHandGestureFPS(fps) {
+      this.handGestureConfig.targetFPS = fps
+      this.handGestureConfig.frameInterval = 1000 / fps
+      console.log(`手势识别帧率已调整为: ${fps} FPS`)
     }
   }
 }

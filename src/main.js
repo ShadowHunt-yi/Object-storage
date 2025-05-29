@@ -44,7 +44,6 @@ const loadVueCropper = async () => {
 
 // 将工具函数挂载到Vue原型上
 Vue.prototype.$loadVueCropper = loadVueCropper
-Vue.prototype.$downloadManager = downloadManager
 
 axios.interceptors.request.use((config) => {
   NProgress.start()

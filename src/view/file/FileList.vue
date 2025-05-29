@@ -13,30 +13,6 @@
           </el-breadcrumb>
         </div>
         <div>
-          <!-- <el-button type="primary" @click="dialogTableVisible = true" style="margin: 10px"
-            >选择桶</el-button
-          >
-          <el-dialog title="选择桶" :visible.sync="dialogTableVisible" width="500px">
-            <el-table :data="buckets" width="600px">
-              <el-table-column label="桶名" width="300px">
-                <template slot-scope="scope">
-                  <div>
-                    <span>{{ scope.row.name }}</span>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="100px">
-                <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    type="success"
-                    @click="getFlieList(scope.row.name), (dialogTableVisible = false)"
-                    >选择</el-button
-                  >
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-dialog> -->
           <chooseBucket type="primary" @bucketSelected="getFlieList" />
           <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
         </div>

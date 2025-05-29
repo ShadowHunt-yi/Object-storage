@@ -15,55 +15,6 @@
                 style="width: 80%; margin: 0 20px"
               ></el-input>
               <chooseBucket type="edit" />
-              <!-- <el-button type="primary" plain @click="dialogTableVisible = true">选择桶</el-button>
-              <el-dialog title="选择桶" :visible.sync="dialogTableVisible">
-                <el-table :data="buckets" width="1600px">
-                  <el-table-column label="桶名" width="200">
-                    <template slot-scope="scope">
-                      <div>
-                        <span>{{ scope.row.name }}</span>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="备注" width="200">
-                    <template slot-scope="scope">
-                      <div>
-                        <span>{{ scope.row.creationDate }}</span>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="文件数量">
-                    <template slot-scope="scope">
-                      <div>
-                        <span>{{ scope.row.fileCount }}</span>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="文件总大小" width="150">
-                    <template slot-scope="scope">
-                      <div>
-                        <span>{{ scope.row.size }}</span>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="操作" width="250">
-                    <template slot-scope="scope" v-if="buckets !== [{}]">
-                      <el-button size="mini" type="primary" @click="rebucketName(scope.row.name)"
-                        >重命名</el-button
-                      >
-                      <el-button
-                        size="mini"
-                        type="success"
-                        @click="select(scope.row.name), (dialogTableVisible = false)"
-                        >选择</el-button
-                      >
-                      <el-button size="mini" type="danger" @click="removeBucket(scope.row.name)"
-                        >删除</el-button
-                      >
-                    </template>
-                  </el-table-column>
-                </el-table>
-              </el-dialog> -->
               <el-button
                 type="primary"
                 plain
@@ -71,7 +22,12 @@
                 style="margin: 0 10px"
                 >创建桶</el-button
               >
-              <el-dialog title="创建桶" :visible.sync="dialogFormVisible" width="600px" append-to-body>
+              <el-dialog
+                title="创建桶"
+                :visible.sync="dialogFormVisible"
+                width="600px"
+                append-to-body
+              >
                 <div>
                   <span>桶名：</span>
                   <el-input v-model="newbucket" placeholder="请输入英文名称"> </el-input>
