@@ -1,10 +1,42 @@
 // API请求统一封装
 import axios from 'axios'
+import { isElectron } from './electron-adapter.js'
+
+// 检测运行环境并设置基础URL
+const getBaseURL = () => {
+  if (isElectron()) {
+    // 检测是否为 Electron 开发模式
+    const isElectronDev = window.location.protocol === 'http:' && window.location.hostname === 'localhost'
+    
+    if (isElectronDev) {
+      // Electron 开发模式：使用内置代理服务器
+      return 'http://localhost:5174/api'
+    } else {
+      // Electron 预览/生产模式：直接访问后端 API
+      return 'http://127.0.0.1:8888'
+    }
+  } else {
+    // Web 环境下使用代理
+    return import.meta.env.VITE_APP_BASE_API || '/api'
+  }
+}
+
+// 获取并记录基础URL
+const baseURL = getBaseURL()
+console.log('🔗 API Base URL:', baseURL)
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API || '/api',
-  timeout: 10000 // 请求超时时间
+  baseURL: baseURL,
+  timeout: 10000, // 请求超时时间
+  // 在 Electron 环境下添加跨域配置
+  ...(isElectron() && {
+    withCredentials: false,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    }
+  })
 })
 
 // 请求拦截器

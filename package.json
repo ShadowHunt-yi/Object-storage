@@ -1,44 +1,144 @@
 {
-    "name": "oss-vue",
-    "version": "0.1.0",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "build:analyze": "vite build && start dist/stats.html",
-        "preview": "vite preview",
-        "serve": "vite --https"
+  "name": "oss-vue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:analyze": "vite build && start dist/stats.html",
+    "preview": "vite preview",
+    "serve": "vite --https",
+    "electron:dev": "vite --mode electron",
+    "electron:build": "vite build --mode electron && electron-builder",
+    "electron:preview": "vite build --mode electron && electron dist/main.js",
+    "electron:start": "electron dist/main.js"
+  },
+  "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
+    "@mediapipe/hands": "^0.4.1675469240",
+    "axios": "^0.21.1",
+    "axios-extra": "^0.0.8",
+    "core-js": "^3.6.4",
+    "dayjs": "^1.11.13",
+    "echarts": "^4.7.0",
+    "element-ui": "^2.15.13",
+    "nprogress": "^0.2.0",
+    "promise-queue-plus": "^1.2.2",
+    "qs": "^6.9.3",
+    "screenfull": "^5.0.2",
+    "spark-md5": "^3.0.2",
+    "vue": "^2.7.16",
+    "vue-cropper": "^0.5.11",
+    "vue-router": "^3.1.5",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue2": "^2.3.3",
+    "babel-plugin-import": "^1.13.8",
+    "electron": "^37.2.6",
+    "electron-builder": "^26.0.12",
+    "less": "^3.11.1",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "sass": "^1.32.13",
+    "vite": "^7.1.2",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.6",
+    "vite-plugin-imagemin": "^0.6.1",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "build": {
+    "appId": "com.zhiyuyuntu.object-storage",
+    "productName": "智域云图-对象存储平台",
+    "copyright": "Copyright © 2024 智域云图",
+    "directories": {
+      "output": "release"
     },
-    "dependencies": {
-        "@mediapipe/camera_utils": "^0.3.1675466862",
-        "@mediapipe/drawing_utils": "^0.3.1675466124",
-        "@mediapipe/face_mesh": "^0.4.1633559619",
-        "@mediapipe/hands": "^0.4.1675469240",
-        "axios": "^0.21.1",
-        "axios-extra": "^0.0.8",
-        "core-js": "^3.6.4",
-        "dayjs": "^1.11.13",
-        "echarts": "^4.7.0",
-        "element-ui": "^2.15.13",
-        "nprogress": "^0.2.0",
-        "promise-queue-plus": "^1.2.2",
-        "qs": "^6.9.3",
-        "screenfull": "^5.0.2",
-        "spark-md5": "^3.0.2",
-        "vue": "^2.6.11",
-        "vue-cropper": "^0.5.11",
-        "vue-router": "^3.1.5",
-        "vuex": "^3.6.2"
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "public/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "public",
+        "to": "public",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "icon": "public/favicon-electron.ico",
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
     },
-    "devDependencies": {
-        "@vitejs/plugin-vue2": "^2.3.3",
-        "babel-plugin-import": "^1.13.8",
-        "less": "^3.11.1",
-        "rollup-plugin-visualizer": "^6.0.3",
-        "sass": "^1.32.13",
-        "vite": "^7.1.2",
-        "vite-plugin-imagemin": "^0.6.1",
-        "vue-template-compiler": "^2.6.11"
+    "win": {
+      "icon": "public/favicon-electron.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "public/favicon-electron.ico",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "智域云图-对象存储平台"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    },
+    "dmg": {
+      "title": "${productName} ${version}",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "appImage": {
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "deb": {
+      "artifactName": "${productName}-${version}.${ext}"
     }
+  }
 }

@@ -4,6 +4,7 @@ node_modules
 # 打包输出
 /dist
 /build
+/release
 
 # 本地环境文件
 .env.local

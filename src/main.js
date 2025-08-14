@@ -13,7 +13,13 @@ import axios from 'axios'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import VueCropper from 'vue-cropper'
+// 导入 Electron 适配器
+import { initElectronAdapter, isElectron } from './utils/electron-adapter.js'
+
 Vue.use(VueCropper)
+
+// 初始化 Electron 适配器
+initElectronAdapter()
 axios.interceptors.request.use((config) => {
   NProgress.start()
   config.headers.Authorization = 'Bearer ' + window.sessionStorage.getItem('token')
