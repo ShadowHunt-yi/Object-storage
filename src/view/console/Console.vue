@@ -179,7 +179,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+// 动态导入echarts以减小初始包体积
 import { fileAPI, bucketAPI, archiveAPI } from '@/api'
 import { formatFileSize } from '@/utils/format'
 import chooseBucket from '@/components/chooseBucket.vue'
@@ -245,8 +245,9 @@ export default {
         dayFileCountList: this.consoleParam.dayFileCountList,
         dayFileSizeList: this.consoleParam.dayFileSizeList
       }
-      this.$nextTick(() => {
-        var myChart = echarts.init(document.getElementById('main'))
+      this.$nextTick(async () => {
+        const echarts = await import('echarts')
+        var myChart = echarts.default.init(document.getElementById('main'))
         myChart.setOption({
           color: ['#445e75', '#45a7ca', '#98d5ef'],
           tooltip: {

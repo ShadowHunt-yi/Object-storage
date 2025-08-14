@@ -1,17 +1,52 @@
-import { defineConfig } from 'vite'
+import {
+  defineConfig
+} from 'vite'
 import vue2 from '@vitejs/plugin-vue2'
-import legacy from '@vitejs/plugin-legacy'
-import { resolve } from 'path'
-import { fileURLToPath, URL } from 'node:url'
-
+import {
+  visualizer
+} from 'rollup-plugin-visualizer'
+import viteImagemin from 'vite-plugin-imagemin'
+import {
+  fileURLToPath,
+  URL
+} from 'node:url'
 export default defineConfig({
   plugins: [
     vue2(),
-    // 兼容旧浏览器
-    legacy({
-      targets: ['defaults', 'not IE 11']
+    // 图片优化
+    viteImagemin({
+      gifsicle: {
+        optimizationLevel: 7,
+        interlaced: false
+      },
+      mozjpeg: {
+        quality: 75,
+        progressive: true
+      },
+      pngquant: {
+        quality: [0.65, 0.8],
+        speed: 4
+      },
+      svgo: {
+        plugins: [
+          {
+            name: 'removeViewBox'
+          },
+          {
+            name: 'removeEmptyAttrs',
+            active: false
+          }
+        ]
+      }
+    }),
+    // 包分析工具
+    visualizer({
+      filename: 'dist/stats.html',
+      open: false,
+      gzipSize: true
     })
   ],
+
   // 开发服务器配置
   server: {
     port: 5000,
@@ -25,57 +60,83 @@ export default defineConfig({
       }
     }
   },
+
   // 路径别名
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
-    extensions: ['.js', '.vue', '.json']
+      '@': fileURLToPath(new URL('./src',
+        import.meta.url))
+    }
   },
 
   // 构建配置
   build: {
-    // 生产环境不生成sourcemap
     sourcemap: false,
-    // 构建输出目录
     outDir: 'dist',
-    // 静态资源目录
     assetsDir: 'static',
-    // 构建优化
     rollupOptions: {
       output: {
-        // 代码分割
-        manualChunks: {
-          // 将第三方库分离到vendor chunk
-          vendor: ['vue', 'vue-router', 'vuex'],
-          // Element UI单独打包
-          elementUI: ['element-ui']
-        },
-        // 自定义chunk文件名
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId
-          if (facadeModuleId) {
-            return 'js/[name]-[hash].js'
+        // 更精细的代码分割策略
+        manualChunks: (id) => {
+          // Vue 核心库（优先级最高，单独打包）
+          if (id.includes('vue/dist') || id.includes('vue-router') || id.includes('vuex')) {
+            return 'vue-vendor'
           }
-          return 'js/[name]-[hash].js'
+
+          // Element UI（体积较大，单独分包）
+          if (id.includes('element-ui')) {
+            return 'element-ui'
+          }
+
+          // ECharts（按模块细分）
+          if (id.includes('echarts')) {
+            if (id.includes('echarts/core') || id.includes('echarts/charts')) {
+              return 'echarts-core'
+            }
+            if (id.includes('echarts/components') || id.includes('echarts/renderers')) {
+              return 'echarts-components'
+            }
+            return 'echarts'
+          }
+
+          // MediaPipe（AI相关，使用频率不高）
+          if (id.includes('@mediapipe/')) {
+            return 'mediapipe'
+          }
+
+          // 工具库（高频使用，合并打包）
+          if (id.includes('axios') || id.includes('dayjs') || id.includes('nprogress') || id.includes('qs')) {
+            return 'utils'
+          }
+
+          // 文件处理相关
+          if (id.includes('spark-md5') || id.includes('vue-cropper')) {
+            return 'file-tools'
+          }
+
+          // 其他UI/交互工具
+          if (id.includes('screenfull') || id.includes('promise-queue-plus')) {
+            return 'ui-tools'
+          }
+
+          // 其他第三方库
+          if (id.includes('node_modules')) {
+            return 'vendors'
+          }
         },
+        // 资源文件命名
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.')
-          const ext = info[info.length - 1]
-          if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)) {
-            return `media/[name]-[hash].${ext}`
-          }
-          if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(assetInfo.name)) {
+          const ext = assetInfo.name.split('.').pop()
+          if (/\.(png|jpe?g|gif|svg)$/i.test(assetInfo.name)) {
             return `img/[name]-[hash].${ext}`
           }
-          if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
+          if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
             return `fonts/[name]-[hash].${ext}`
           }
           return `static/[name]-[hash].${ext}`
         }
       }
     },
-    // 设置打包大小警告阈值
     chunkSizeWarningLimit: 1000
   },
 
@@ -83,17 +144,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       less: {
-        lessOptions: {
-          modifyVars: {
-            // 可以在这里定义less变量
-          },
-          javascriptEnabled: true
-        }
-      },
-      sass: {
-        additionalData: `
-          // 可以在这里添加全局sass变量
-        `
+        javascriptEnabled: true
       }
     }
   },
@@ -102,16 +153,11 @@ export default defineConfig({
   define: {
     __VUE_OPTIONS_API__: true,
     __VUE_PROD_DEVTOOLS__: false,
-    // 为兼容性提供process.env
     'process.env': {}
   },
 
   // Worker配置
   worker: {
-    format: 'es',
-    plugins: () => []
-  },
-
-  // 静态资源处理
-  assetsInclude: ['**/*.worker.js']
+    format: 'es'
+  }
 })

@@ -1,16 +1,18 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Login from '../view/Login.vue'
-import Home from '../view/Home.vue'
-import User from '../view/user/User.vue'
-import Console from '../view/console/Console.vue'
-import Rights from '../view/power/Rights.vue'
-import Roles from '../view/power/Roles.vue'
-import Upload from '../view/file/Upload.vue'
-import FileList from '../view/file/FileList.vue'
-import UserInfo from '../view/user/UserInfo.vue'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+
+// 懒加载组件，提高初始加载性能
+const Login = () => import('../view/Login.vue')
+const Home = () => import('../view/Home.vue')
+const User = () => import('../view/user/User.vue')
+const Console = () => import('../view/console/Console.vue')
+const Rights = () => import('../view/power/Rights.vue')
+const Roles = () => import('../view/power/Roles.vue')
+const Upload = () => import('../view/file/Upload.vue')
+const FileList = () => import('../view/file/FileList.vue')
+const UserInfo = () => import('../view/user/UserInfo.vue')
 
 Vue.use(VueRouter)
 

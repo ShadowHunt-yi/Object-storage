@@ -2,9 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import './plugins/element.js'
 import './assets/css/global.css'
 import './assets/font/iconfont.css'
+import './plugins/element.js'
 // 动态加载iconfont.js
 import('./assets/font/iconfont.js')
 import './assets/font-awesome/css/font-awesome.min.css'

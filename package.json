@@ -6,9 +6,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
+        "build:analyze": "vite build && start dist/stats.html",
         "preview": "vite preview",
-        "lint": "eslint src --ext .vue,.js --fix",
-        "analyze": "vite build --mode analyze",
         "serve": "vite --https"
     },
     "dependencies": {
@@ -33,21 +32,13 @@
         "vuex": "^3.6.2"
     },
     "devDependencies": {
-        "@vitejs/plugin-legacy": "^7.2.1",
         "@vitejs/plugin-vue2": "^2.3.3",
-        "eslint": "^6.7.2",
-        "eslint-plugin-import": "^2.20.1",
-        "eslint-plugin-node": "^11.0.0",
-        "eslint-plugin-promise": "^4.2.1",
-        "eslint-plugin-standard": "^4.0.0",
-        "image-webpack-loader": "^8.1.0",
+        "babel-plugin-import": "^1.13.8",
         "less": "^3.11.1",
-        "less-loader": "^5.0.0",
+        "rollup-plugin-visualizer": "^6.0.3",
         "sass": "^1.32.13",
-        "sass-loader": "^10.4.1",
         "vite": "^7.1.2",
-        "vite-plugin-eslint": "^1.8.1",
-        "vue-template-compiler": "^2.6.11",
-        "worker-loader": "^3.0.8"
+        "vite-plugin-imagemin": "^0.6.1",
+        "vue-template-compiler": "^2.6.11"
     }
 }
