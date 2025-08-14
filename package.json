@@ -2,11 +2,14 @@
     "name": "oss-vue",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "scripts": {
-        "serve": "vue-cli-service serve --https",
-        "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint",
-        "analyze": "vue-cli-service build --report"
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "lint": "eslint src --ext .vue,.js --fix",
+        "analyze": "vite build --mode analyze",
+        "serve": "vite --https"
     },
     "dependencies": {
         "@mediapipe/camera_utils": "^0.3.1675466862",
@@ -30,6 +33,8 @@
         "vuex": "^3.6.2"
     },
     "devDependencies": {
+        "@vitejs/plugin-legacy": "^7.2.1",
+        "@vitejs/plugin-vue2": "^2.3.3",
         "@vue/cli-plugin-babel": "^4.2.0",
         "@vue/cli-plugin-eslint": "^4.2.0",
         "@vue/cli-plugin-router": "^4.2.0",
@@ -48,6 +53,8 @@
         "less-loader": "^5.0.0",
         "sass": "^1.32.13",
         "sass-loader": "^10.4.1",
+        "vite": "^7.1.2",
+        "vite-plugin-eslint": "^1.8.1",
         "vue-cli-plugin-element": "^1.0.1",
         "vue-template-compiler": "^2.6.11",
         "worker-loader": "^3.0.8"

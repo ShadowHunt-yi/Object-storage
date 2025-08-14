@@ -162,9 +162,9 @@
 </template>
 
 <script>
-var dayjs = require('dayjs')
-var utc = require('dayjs/plugin/utc')
-var timezone = require('dayjs/plugin/timezone')
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import * as fileUtil from '@/utils/fileUtil'
 import { fileAPI, bucketAPI } from '@/api'
 import { formatFileSize } from '@/utils/format'

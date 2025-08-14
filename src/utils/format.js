@@ -13,17 +13,18 @@ export function formatFileSize(byte) {
   return parseFloat(byte).toFixed(2) + ' B'
 }
 
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 /**
  * 格式化时间
  * @param {String} time 时间字符串
  * @returns {String} 格式化后的时间
  */
 export function formatTime(time) {
-  const dayjs = require('dayjs')
-  const utc = require('dayjs/plugin/utc')
-  const timezone = require('dayjs/plugin/timezone')
-
-  dayjs.extend(utc)
-  dayjs.extend(timezone)
   return dayjs(time).tz('Asia/Shanghai').format()
 }

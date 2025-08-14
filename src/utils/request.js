@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API || '',
+  baseURL: import.meta.env.VITE_APP_BASE_API || '/api',
   timeout: 10000 // 请求超时时间
 })
 

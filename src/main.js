@@ -5,7 +5,8 @@ import store from './store'
 import './plugins/element.js'
 import './assets/css/global.css'
 import './assets/font/iconfont.css'
-import './assets/font/iconfont.js'
+// 动态加载iconfont.js
+import('./assets/font/iconfont.js')
 import './assets/font-awesome/css/font-awesome.min.css'
 import axios from 'axios'
 // 导入NProgress包对应的JS和CSS

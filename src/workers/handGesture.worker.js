@@ -1,6 +1,6 @@
 // 手势识别Worker
 // 负责处理手部关键点数据并识别手势
-import { isFistGesture } from '@/utils/handCompute'
+import { isFistGesture } from '../utils/handCompute.js'
 // 接收消息
 self.onmessage = function (e) {
   const { type, data } = e.data

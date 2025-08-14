@@ -125,7 +125,7 @@ import screenfull from 'screenfull'
 import Hamburger from '../components/Hamburger'
 import BreadCrumb from '../components/BreadCrumb'
 import { menuAPI } from '@/api'
-import handGestureWorkerUrl from '@/workers/handGesture.worker.js'
+import handGestureWorkerUrl from '@/workers/handGesture.worker.js?worker&url'
 import { isFistGesture } from '@/utils/handCompute'
 export default {
   components: {
