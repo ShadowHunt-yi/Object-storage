@@ -51,6 +51,10 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vue-template-compiler": "^2.6.11"
   },
+  "volta": {
+    "node": "20.18.0",
+    "pnpm": "8.15.9"
+  },
   "build": {
     "appId": "com.zhiyuyuntu.object-storage",
     "productName": "智域云图-对象存储平台",
