@@ -1,6 +1,6 @@
 # 智域云图-对象存储平台
 
-[![Vue](https://img.shields.io/badge/Vue-2.6.11-4FC08D?style=flat&logo=vue.js)](https://vuejs.org/)
+[![Vue](https://img.shields.io/badge/Vue-2.7.16-4FC08D?style=flat&logo=vue.js)](https://vuejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.1.2-646CFF?style=flat&logo=vite)](https://vitejs.dev/)
 [![Electron](https://img.shields.io/badge/Electron-37.2.6-47848F?style=flat&logo=electron)](https://electronjs.org/)
 [![Element UI](https://img.shields.io/badge/Element%20UI-2.15.13-409EFF?style=flat)](https://element.eleme.io/)
