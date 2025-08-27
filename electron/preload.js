@@ -80,12 +80,117 @@ contextBridge.exposeInMainWorld('electronAPI', {
    */
   isElectron: true,
   
-  // 未来可以在这里添加更多 API：
-  // - 文件系统操作
-  // - 系统通知
-  // - 应用窗口控制
-  // - 自动更新功能
-  // - 等等...
+  // === 文件系统集成 API ===
+  
+  /**
+   * 选择多个文件
+   * @param {Object} options - 选择选项
+   * @param {Array} options.filters - 文件过滤器
+   * @returns {Promise<Object>} 文件选择结果
+   */
+  selectFiles: (options) => ipcRenderer.invoke('select-files', options),
+  
+  /**
+   * 选择单个文件夹
+   * @param {Object} options - 选择选项
+   * @returns {Promise<Object>} 文件夹选择结果
+   */
+  selectFolder: (options) => ipcRenderer.invoke('select-folder', options),
+  
+  /**
+   * 选择多个文件夹
+   * @param {Object} options - 选择选项
+   * @returns {Promise<Object>} 文件夹选择结果
+   */
+  selectFolders: (options) => ipcRenderer.invoke('select-folders', options),
+  
+  /**
+   * 在文件管理器中显示文件
+   * @param {string} filePath - 文件路径
+   * @returns {Promise<boolean>} 操作结果
+   */
+  showItemInFolder: (filePath) => ipcRenderer.invoke('show-item-in-folder', filePath),
+  
+  /**
+   * 用默认应用打开文件/文件夹
+   * @param {string} filePath - 文件路径
+   * @returns {Promise<boolean>} 操作结果
+   */
+  openPath: (filePath) => ipcRenderer.invoke('open-path', filePath),
+  
+  /**
+   * 获取文件/文件夹详细信息
+   * @param {string} filePath - 文件路径
+   * @returns {Promise<Object|null>} 文件统计信息
+   */
+  getFileStats: (filePath) => ipcRenderer.invoke('get-file-stats', filePath),
+  
+  /**
+   * 递归读取文件夹内容
+   * @param {string} dirPath - 文件夹路径
+   * @param {Object} options - 读取选项
+   * @param {number} options.maxDepth - 最大递归深度
+   * @param {boolean} options.includeHidden - 是否包含隐藏文件
+   * @returns {Promise<Object>} 文件夹内容
+   */
+  readDirectoryRecursive: (dirPath, options) => ipcRenderer.invoke('read-directory-recursive', dirPath, options),
+  
+  /**
+   * 创建文件夹
+   * @param {string} dirPath - 文件夹路径
+   * @returns {Promise<Object>} 创建结果
+   */
+  createDirectory: (dirPath) => ipcRenderer.invoke('create-directory', dirPath),
+  
+  // === 路径工具函数 ===
+  
+  /**
+   * 路径处理工具
+   */
+  path: {
+    /**
+     * 连接路径
+     * @param {...string} paths - 路径片段
+     * @returns {string} 连接后的路径
+     */
+    join: (...paths) => {
+      const separator = process.platform === 'win32' ? '\\' : '/'
+      return paths.join(separator)
+    },
+    
+    /**
+     * 获取文件名
+     * @param {string} filePath - 文件路径
+     * @returns {string} 文件名
+     */
+    basename: (filePath) => {
+      const separator = process.platform === 'win32' ? '\\' : '/'
+      return filePath.split(separator).pop()
+    },
+    
+    /**
+     * 获取目录路径
+     * @param {string} filePath - 文件路径
+     * @returns {string} 目录路径
+     */
+    dirname: (filePath) => {
+      const separator = process.platform === 'win32' ? '\\' : '/'
+      const parts = filePath.split(separator)
+      parts.pop()
+      return parts.join(separator)
+    },
+    
+    /**
+     * 获取文件扩展名
+     * @param {string} filePath - 文件路径
+     * @returns {string} 扩展名（包含点号）
+     */
+    extname: (filePath) => {
+      const name = filePath.split(/[\\/]/).pop()
+      const lastDot = name.lastIndexOf('.')
+      return lastDot === -1 ? '' : name.slice(lastDot)
+    }
+  }
 })
 
 /**
@@ -93,8 +198,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
  * 
  * 为渲染进程提供必要的进程版本信息
  * 主要用于环境检测和调试
+ * 
+ * 注意: 不直接暴露 process 对象，而是创建新的对象
  */
-contextBridge.exposeInMainWorld('process', {
+contextBridge.exposeInMainWorld('electronProcess', {
   /**
    * 进程版本信息
    * 包含 Electron、Node.js、Chrome 等版本号

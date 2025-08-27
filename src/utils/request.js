@@ -7,17 +7,23 @@ const getBaseURL = () => {
   if (isElectron()) {
     // 检测是否为 Electron 开发模式
     const isElectronDev = window.location.protocol === 'http:' && window.location.hostname === 'localhost'
-    
+    console.log('isElectronDev', isElectronDev)
     if (isElectronDev) {
-      // Electron 开发模式：使用内置代理服务器
-      return 'http://localhost:5174/api'
+      // Electron 开发模式：使用内置代理服务器（不需要 /api 前缀）
+      // return 'http://localhost:5174/api'
+      return 'http://172.21.1.32:8888'
     } else {
       // Electron 预览/生产模式：直接访问后端 API
-      return 'http://127.0.0.1:8888'
+      return 'http://172.21.1.32:8888'
     }
   } else {
     // Web 环境下使用代理
-    return import.meta.env.VITE_APP_BASE_API || '/api'
+    try {
+      return import.meta.env?.VITE_APP_BASE_API || '/api'
+    } catch (error) {
+      console.warn('访问环境变量失败，使用默认值:', error)
+      return '/api'
+    }
   }
 }
 

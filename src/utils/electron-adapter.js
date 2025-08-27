@@ -10,6 +10,7 @@ export function isElectron() {
   // 多种方式检测 Electron 环境
   return !!(
     (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.isElectron) ||
+    (typeof window !== 'undefined' && window.electronProcess && window.electronProcess.versions && window.electronProcess.versions.electron) ||
     (typeof window !== 'undefined' && window.process && window.process.versions && window.process.versions.electron) ||
     (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().indexOf('electron') > -1) ||
     (typeof process !== 'undefined' && process.versions && process.versions.electron)

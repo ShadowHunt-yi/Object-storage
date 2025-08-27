@@ -74,9 +74,35 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
     
-    // 开发环境下自动打开开发者工具
-    if (isDev) {
+          // 开发环境下自动打开开发者工具
+    if (shouldUseDevServer) {
       mainWindow.webContents.openDevTools()
+      
+      // 禁用缓存以避免 304 问题
+      mainWindow.webContents.session.clearCache()
+      
+      // 设置用户代理以便识别
+      mainWindow.webContents.setUserAgent(
+        mainWindow.webContents.getUserAgent() + ' ElectronDesktopApp'
+      )
+      
+      // 添加开发环境快捷键
+      mainWindow.webContents.on('before-input-event', (event, input) => {
+        // Ctrl+R 或 F5 强制刷新（清除缓存）
+        if ((input.control && input.key.toLowerCase() === 'r') || input.key === 'F5') {
+          mainWindow.webContents.session.clearCache().then(() => {
+            mainWindow.webContents.reload()
+          })
+        }
+        // Ctrl+Shift+R 硬刷新
+        if (input.control && input.shift && input.key.toLowerCase() === 'r') {
+          mainWindow.webContents.session.clearStorageData().then(() => {
+            mainWindow.webContents.session.clearCache().then(() => {
+              mainWindow.webContents.reload()
+            })
+          })
+        }
+      })
     }
   })
 
@@ -198,7 +224,7 @@ app.whenReady().then(async () => {
     try {
       proxyServer = new ElectronProxyServer({
         port: 5174,  // 代理服务器端口
-        targetUrl: 'http://127.0.0.1:8888'  // 后端 API 地址
+        targetUrl: 'http://172.21.1.32:8888'  // 后端 API 地址
       })
       await proxyServer.start()
       console.log('🚀 Built-in proxy server started')
@@ -283,6 +309,142 @@ ipcMain.handle('show-save-dialog', async (event, options) => {
 ipcMain.handle('show-open-dialog', async (event, options) => {
   const result = await dialog.showOpenDialog(mainWindow, options)
   return result
+})
+
+// === 文件系统集成 API ===
+
+// 选择多个文件
+ipcMain.handle('select-files', async (event, options = {}) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile', 'multiSelections'],
+    filters: [
+      { name: '所有文件', extensions: ['*'] },
+      { name: '图片', extensions: ['jpg', 'png', 'gif', 'bmp', 'webp', 'svg'] },
+      { name: '文档', extensions: ['pdf', 'doc', 'docx', 'txt', 'md'] },
+      { name: '视频', extensions: ['mp4', 'avi', 'mkv', 'mov', 'wmv'] },
+      { name: '音频', extensions: ['mp3', 'wav', 'flac', 'aac'] },
+      { name: '压缩包', extensions: ['zip', 'rar', '7z', 'tar', 'gz'] }
+    ],
+    ...options
+  })
+  return result
+})
+
+// 选择文件夹
+ipcMain.handle('select-folder', async (event, options = {}) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    ...options
+  })
+  return result
+})
+
+// 选择文件夹（支持多选）
+ipcMain.handle('select-folders', async (event, options = {}) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory', 'multiSelections'],
+    ...options
+  })
+  return result
+})
+
+// 在文件管理器中显示文件
+ipcMain.handle('show-item-in-folder', async (event, filePath) => {
+  shell.showItemInFolder(filePath)
+  return true
+})
+
+// 用默认应用打开文件
+ipcMain.handle('open-path', async (event, filePath) => {
+  const result = await shell.openPath(filePath)
+  return result === '' // 成功时返回空字符串
+})
+
+// 获取文件/文件夹详细信息
+ipcMain.handle('get-file-stats', async (event, filePath) => {
+  try {
+    const fs = await import('fs/promises')
+    const stats = await fs.stat(filePath)
+    return {
+      isFile: stats.isFile(),
+      isDirectory: stats.isDirectory(),
+      size: stats.size,
+      birthtime: stats.birthtime,
+      mtime: stats.mtime,
+      atime: stats.atime
+    }
+  } catch (error) {
+    console.error('Error getting file stats:', error)
+    return null
+  }
+})
+
+// 递归读取文件夹内容
+ipcMain.handle('read-directory-recursive', async (event, dirPath, options = {}) => {
+  try {
+    const fs = await import('fs/promises')
+    const path = await import('path')
+    
+    const { maxDepth = 10, includeHidden = false } = options
+    
+    async function readDirRecursive(currentPath, currentDepth = 0) {
+      if (currentDepth >= maxDepth) {
+        return []
+      }
+
+      const items = []
+      const entries = await fs.readdir(currentPath, { withFileTypes: true })
+
+      for (const entry of entries) {
+        // 跳过隐藏文件（如果设置不包含隐藏文件）
+        if (!includeHidden && entry.name.startsWith('.')) {
+          continue
+        }
+
+        const fullPath = path.join(currentPath, entry.name)
+        const stats = await fs.stat(fullPath)
+
+        const item = {
+          name: entry.name,
+          path: fullPath,
+          relativePath: path.relative(dirPath, fullPath),
+          isDirectory: entry.isDirectory(),
+          isFile: entry.isFile(),
+          size: stats.size,
+          mtime: stats.mtime,
+          depth: currentDepth
+        }
+
+        items.push(item)
+
+        // 如果是文件夹，递归读取
+        if (entry.isDirectory()) {
+          const subItems = await readDirRecursive(fullPath, currentDepth + 1)
+          items.push(...subItems)
+        }
+      }
+
+      return items
+    }
+
+    const result = await readDirRecursive(dirPath)
+    return { success: true, files: result }
+  } catch (error) {
+    console.error('Error reading directory:', error)
+    return { success: false, error: error.message, files: [] }
+  }
+})
+
+// 创建文件夹
+ipcMain.handle('create-directory', async (event, dirPath) => {
+  try {
+    const fs = await import('fs/promises')
+    await fs.mkdir(dirPath, { recursive: true })
+    return { success: true }
+  } catch (error) {
+    console.error('Error creating directory:', error)
+    return { success: false, error: error.message }
+  }
 })
 
 /**

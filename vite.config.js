@@ -240,10 +240,16 @@ export default defineConfig(({ command, mode }) => {
       port: 5173,
       open: true,
       host: true,
+      // 禁用缓存以避免 304 问题
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
       // API 代理配置 - 将 /api 请求代理到后端服务
       proxy: {
         '/api': {
-          target: 'http://127.0.0.1:8888',
+          target: 'http://172.21.1.32:8888',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '')
         }

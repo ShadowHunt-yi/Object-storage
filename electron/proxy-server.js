@@ -64,18 +64,8 @@ export class ElectronProxyServer {
           return
         }
 
-        // 代理 API 请求
-        if (req.url.startsWith('/api')) {
-          this.proxyRequest(req, res)
-        } else {
-          // 未知路径返回 404
-          res.writeHead(404, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ 
-            error: 'Not Found',
-            message: `Path ${req.url} not found`,
-            availablePaths: ['/api/*', '/health']
-          }))
-        }
+        // 代理所有 API 请求（除了健康检查）
+        this.proxyRequest(req, res)
       })
 
       // 启动服务器监听
@@ -141,8 +131,8 @@ export class ElectronProxyServer {
    * @param {http.ServerResponse} res - 响应对象
    */
   proxyRequest(req, res) {
-    // 路径重写：移除 /api 前缀
-    const targetPath = req.url.replace('/api', '') || '/'
+    // 直接使用原始路径（不需要移除前缀）
+    const targetPath = req.url || '/'
     const targetUrl = new URL(targetPath, this.targetUrl)
     
     // 记录代理请求日志
