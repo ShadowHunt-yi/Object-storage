@@ -9,9 +9,8 @@ const getBaseURL = () => {
     const isElectronDev = window.location.protocol === 'http:' && window.location.hostname === 'localhost'
     console.log('isElectronDev', isElectronDev)
     if (isElectronDev) {
-      // Electron 开发模式：使用内置代理服务器（不需要 /api 前缀）
-      // return 'http://localhost:5174/api'
-      return 'http://172.21.1.32:8888'
+      // Electron 开发模式：使用内置代理服务器，通过 /api 前缀转发
+      return 'http://localhost:5174/api'
     } else {
       // Electron 预览/生产模式：直接访问后端 API
       return 'http://172.21.1.32:8888'
