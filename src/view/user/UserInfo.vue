@@ -1,25 +1,41 @@
 <template>
   <div>
     <el-card class="box-card">
-      <div slot="header">
-        {{ userinfo.username }}
+      <div slot="header" align="center" class="card-header">
+        <i class="el-icon-user"></i>
+        <span>{{ userinfo.username }}</span>
       </div>
-      <div class="card-body">
-        <div>邮箱：
-          <el-tag>{{userinfo.email}}</el-tag>
+      <div class="card-body" align="center">
+        <div class="info-item">
+          <i class="el-icon-message"></i>
+          <span>邮箱：</span>
+          <el-tag type="info">{{ userinfo.email }}</el-tag>
         </div>
-        <div>手机号：
-          <el-tag>{{userinfo.mobile}}</el-tag>
+        <div class="info-item">
+          <i class="el-icon-mobile-phone"></i>
+          <span>手机号：</span>
+          <el-tag type="info">{{ userinfo.mobile }}</el-tag>
         </div>
-        <div style="display: flex;justify-content: space-around;margin-top: 10px">
-          <el-button type="primary" @click="showEditDialog()">修改信息</el-button>
-          <el-button type="danger" @click="showEditPassword()">修改密码</el-button>
+        <div class="button-group">
+          <el-button type="primary" icon="el-icon-edit" @click="showEditDialog()"
+            >修改信息</el-button
+          >
+          <el-button type="danger" icon="el-icon-lock" @click="showEditPassword()"
+            >修改密码</el-button
+          >
         </div>
       </div>
     </el-card>
     <!-- 修改用户的对话框 -->
-    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClose()">
-      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
+    <el-dialog
+      title="修改用户"
+      :visible.sync="editDialogVisible"
+      width="30%"
+      @close="editDialogClose()"
+      append-to-body
+      custom-class="custom-dialog"
+    >
+      <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
         <el-form-item label="用户名">
           <el-input v-model="editForm.username" disabled></el-input>
         </el-form-item>
@@ -36,16 +52,37 @@
       </span>
     </el-dialog>
     <!-- 修改密码 -->
-    <el-dialog :visible.sync="editPasswordVisible" width="50%" @close="editPasswordClose">
-      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleFormRef">
-        <el-form-item prop="old">
-          <el-input placeholder="请输入旧密码" type="password" v-model="ruleForm.old" show-password></el-input>
+    <el-dialog
+      :visible.sync="editPasswordVisible"
+      width="30%"
+      @close="editPasswordClose"
+      append-to-body
+      custom-class="custom-dialog"
+    >
+      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleFormRef" label-width="80px">
+        <el-form-item label="旧密码" prop="old">
+          <el-input
+            placeholder="请输入旧密码"
+            type="password"
+            v-model="ruleForm.old"
+            show-password
+          ></el-input>
         </el-form-item>
-        <el-form-item prop="new">
-          <el-input placeholder="请输入新密码" type="password" v-model="ruleForm.new" show-password></el-input>
+        <el-form-item label="新密码" prop="new">
+          <el-input
+            placeholder="请输入新密码"
+            type="password"
+            v-model="ruleForm.new"
+            show-password
+          ></el-input>
         </el-form-item>
-        <el-form-item prop="checkpassword">
-          <el-input placeholder="新确认密码" type="password" v-model="ruleForm.checkpassword" show-password></el-input>
+        <el-form-item label="确认密码" prop="checkpassword">
+          <el-input
+            placeholder="请再次输入新密码"
+            type="password"
+            v-model="ruleForm.checkpassword"
+            show-password
+          ></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -58,31 +95,10 @@
 
 <script>
 import qs from 'qs'
+import { userAPI } from '@/api'
+import { validateEmail, validateMobile, validatePasswordConfirm } from '@/utils/validate'
 export default {
-  data () {
-    var checkEmail = (rule, value, callback) => {
-      const regEmail = /^([a-zA-Z0-9._-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/
-
-      if (regEmail.test(value)) {
-        // 合法的邮箱
-        return callback()
-      }
-      callback(new Error('请输入合法的邮箱'))
-    }
-
-    var checkMobile = (rule, value, callback) => {
-      const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/
-      if (regMobile.test(value)) {
-        return callback()
-      }
-      callback(new Error('请输入合法的手机号'))
-    }
-    var validatePass = (rule, value, callback) => {
-      if (value === this.ruleForm.new) {
-        return callback()
-      }
-      callback(new Error('两次输入密码不一致!'))
-    }
+  data() {
     return {
       userinfo: {
         id: '',
@@ -99,11 +115,11 @@ export default {
       editFormRules: {
         email: [
           { required: true, message: '请输入邮箱', trigger: 'blur' },
-          { validator: checkEmail, trigger: 'blur' }
+          { validator: validateEmail, trigger: 'blur' }
         ],
         mobile: [
           { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: checkMobile, trigger: 'blur' }
+          { validator: validateMobile, trigger: 'blur' }
         ]
       },
       editDialogVisible: false,
@@ -124,39 +140,48 @@ export default {
         ],
         checkpassword: [
           { required: true, message: '请再次输入新密码', trigger: 'blur' },
-          { validator: validatePass, trigger: 'blur' }
+          { validator: validatePasswordConfirm, trigger: 'blur' }
         ]
       }
     }
   },
-  created () {
-    this.initUserInfo()
+  created() {
+    // this.initUserInfo()
+    this.userinfo = {
+      id: 1,
+      username: 'admin',
+      mobile: '18888888888',
+      email: 'admin@163.com'
+    }
   },
   methods: {
-    async initUserInfo () {
-      const { data: res } = await this.$http.get('/api/users/info')
-      if (res !== 200) {
+    async initUserInfo() {
+      const { data: res } = await userAPI.getUserInfo()
+      if (res.status !== 200) {
         return this.$message.error('获取用户信息失败')
       }
       this.userinfo = res.data
     },
-    showEditDialog () {
+    showEditDialog() {
       this.editForm = this.userinfo
       this.editDialogVisible = true
     },
-    async showEditPassword () {
+    async showEditPassword() {
       this.editPasswordVisible = true
     },
-    editDialogClose () {
+    editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    editPasswordClose () {
+    editPasswordClose() {
       this.$refs.ruleFormRef.resetFields()
     },
-    editUser () {
-      this.$refs.editFormRef.validate(async valid => {
+    editUser() {
+      this.$refs.editFormRef.validate(async (valid) => {
         if (!valid) return
-        const { data: res } = await this.$http.put('/api/users/' + this.editForm.id, { email: this.editForm.email, mobile: this.editForm.mobile })
+        const { data: res } = await userAPI.updateUser(this.editForm.id, {
+          email: this.editForm.email,
+          mobile: this.editForm.mobile
+        })
         if (res.status !== 200) {
           return this.$message.error('修改信息失败！')
         }
@@ -165,14 +190,18 @@ export default {
         this.$message.success('修改信息成功！')
       })
     },
-    editPassword () {
-      this.$refs.ruleFormRef.validate(async valid => {
+    editPassword() {
+      this.$refs.ruleFormRef.validate(async (valid) => {
         if (!valid) return
-        const { data: res } = await this.$http.post('/api/users/checkPass', qs.stringify({ password: this.ruleForm.old }))
+        const { data: res } = await userAPI.checkPassword(
+          qs.stringify({ password: this.ruleForm.old })
+        )
         if (res.status !== 200) {
           return this.$message.error('原密码错误')
         }
-        const { data: response } = await this.$http.post('/api/users/updatePassword', qs.stringify({ password: this.ruleForm.checkpassword }))
+        const { data: response } = await userAPI.updatePassword(
+          qs.stringify({ password: this.ruleForm.checkpassword })
+        )
         if (response.code !== 200) {
           return this.$message.error('更新失败')
         }
@@ -186,20 +215,46 @@ export default {
 
 <style lang="less" scoped>
 .box-card {
-  width: 400px;
+  width: 600px;
+  margin: 0 auto;
+  padding: 20px;
 }
+
+.card-header {
+  font-size: 20px;
+  font-weight: bold;
+  i {
+    margin-right: 10px;
+  }
+}
+
 .card-body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-content: space-between;
-  div {
-    margin-bottom: 5px;
-  }
+  align-items: center;
 }
-.el-form-item__content {
+
+.info-item {
   display: flex;
   align-items: center;
-  // 垂直居中
+  margin-bottom: 15px;
+  i {
+    margin-right: 10px;
+    font-size: 18px;
+  }
+  span {
+    margin-right: 10px;
+    font-size: 16px;
+  }
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 20px;
+  .el-button {
+    width: 45%;
+  }
 }
 </style>

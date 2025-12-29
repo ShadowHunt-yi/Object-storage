@@ -3,38 +3,38 @@ import axiosExtra from 'axios-extra'
 const baseUrl = '/api'
 
 const http = axios.create({
-    baseURL: baseUrl,
+  baseURL: baseUrl
 })
 
 const httpExtra = axiosExtra.create({
-    maxConcurrent: 5, //并发为1
-    queueOptions: {
-        retry: 3, //请求失败时,最多会重试3次
-        retryIsJump: false //是否立即重试, 否则将在请求队列尾部插入重试请求
-    }
+  maxConcurrent: 5, //并发为1
+  queueOptions: {
+    retry: 3, //请求失败时,最多会重试3次
+    retryIsJump: false //是否立即重试, 否则将在请求队列尾部插入重试请求
+  }
 })
 
-http.interceptors.response.use(response => {
-        return response.data
-    })
-    /**
-     * 添加 WWW-Authenticate
-     * */
+http.interceptors.response.use((response) => {
+  return response.data
+})
+/**
+ * 添加 WWW-Authenticate
+ * */
 
 function addHeaders(config) {
-    const token = window.sessionStorage.getItem('token') || '';
-    console.log(config['headers'])
-    config.headers['Authorization'] = `Bearer ${token}`
-    return config
+  const token = window.sessionStorage.getItem('token') || ''
+  /* config.headers['Authorization'] = `Bearer ${token}` */
+  return config
 }
 http.interceptors.request.use(addHeaders)
-    /**
-     * 根据文件的md5获取未上传完的任务
-     * @param identifier 文件md5
-     * @returns {Promise<AxiosResponse<any>>}
-     */
-const taskInfo = (identifier) => {
-    return http.get(`/v1/minio/tasks/${identifier}`);
+
+/**
+ * 根据文件的md5获取未上传完的任务
+ * @param identifier 文件md5
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+const taskInfo = (identifier, bucketName) => {
+  return http.get(`/v1/minio/tasks/${identifier}/${bucketName}`)
 }
 
 /**
@@ -45,8 +45,12 @@ const taskInfo = (identifier) => {
  * @param chunkSize 分块大小
  * @returns {Promise<AxiosResponse<any>>}
  */
-const initTask = ({ identifier, fileName, totalSize, chunkSize }) => {
-    return http.post('/v1/minio/tasks', { identifier, fileName, totalSize, chunkSize })
+const initTask = ({ identifier, fileName, totalSize, chunkSize, bucketName }) => {
+  return http.post(
+    '/v1/minio/tasks',
+    { identifier, fileName, totalSize, chunkSize },
+    { params: { bucketName } }
+  )
 }
 
 /**
@@ -55,9 +59,9 @@ const initTask = ({ identifier, fileName, totalSize, chunkSize }) => {
  * @param partNumber 分片编号
  * @returns {Promise<AxiosResponse<any>>}
  */
-const preSignUrl = ({ identifier, partNumber }) => {
-    console.log(identifier);
-    return http.get(`/v1/minio/tasks/${identifier}/${partNumber}`)
+const preSignUrl = ({ identifier, partNumber, bucketName }) => {
+  console.log(identifier, 'id')
+  return http.get(`/v1/minio/tasks/pre/${identifier}/${partNumber}`, { params: { bucketName } })
 }
 
 /**
@@ -65,15 +69,8 @@ const preSignUrl = ({ identifier, partNumber }) => {
  * @param identifier
  * @returns {Promise<AxiosResponse<any>>}
  */
-const merge = (identifier) => {
-    return http.post(`/v1/minio/tasks/merge/${identifier}`)
+const merge = (identifier, bucketName) => {
+  return http.post(`/v1/minio/tasks/merge/${identifier}/${bucketName}`)
 }
 
-export {
-    taskInfo,
-    initTask,
-    preSignUrl,
-    merge,
-    addHeaders,
-    httpExtra
-}
+export { taskInfo, initTask, preSignUrl, merge, addHeaders, httpExtra }

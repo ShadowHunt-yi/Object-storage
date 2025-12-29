@@ -3,7 +3,7 @@
     <!-- 卡片视图 -->
     <el-card>
       <!-- 添加角色按钮区域 -->
-      <el-row style="margin-bottom: 20px;">
+      <el-row style="margin-bottom: 20px">
         <el-col>
           <el-button type="primary" @click="dialogVisible = true">添加角色</el-button>
         </el-col>
@@ -13,27 +13,40 @@
         <!-- 展开列 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
-            <el-row :class="['bdbottom',index1 === 0 ? 'bdtop': '','vcenter']"
-              v-for="(item1,index1) in scope.row.children" :key="item1.id">
+            <el-row
+              :class="['bdbottom', index1 === 0 ? 'bdtop' : '', 'vcenter']"
+              v-for="(item1, index1) in scope.row.children"
+              :key="item1.id"
+            >
               <!-- 渲染一级权限 -->
               <el-col :span="5">
-                <el-tag closable @close="removeRightById(scope.row,item1.id)">{{item1.name}}</el-tag>
+                <el-tag closable @close="removeRightById(scope.row, item1.id)">{{
+                  item1.name
+                }}</el-tag>
                 <i class="el-icon-caret-right"></i>
               </el-col>
               <!-- 渲染二级和三级权限 -->
               <el-col :span="19">
-                <el-row :class="[index2 === 0 ? '': 'bdtop','vcenter']" v-for="(item2,index2) in item1.children"
-                  :key="item2.id">
+                <el-row
+                  :class="[index2 === 0 ? '' : 'bdtop', 'vcenter']"
+                  v-for="(item2, index2) in item1.children"
+                  :key="item2.id"
+                >
                   <el-col>
-                    <el-tag type="success" closable @close="removeRightById(scope.row,item2.id)">
-                      {{item2.name}}
+                    <el-tag type="success" closable @close="removeRightById(scope.row, item2.id)">
+                      {{ item2.name }}
                     </el-tag>
                     <i class="el-icon-caret-right"></i>
                   </el-col>
                   <el-col :span="18">
-                    <el-tag type="warning" v-for="item3 in item2.children" :key="item3.id" closable
-                      @close="removeRightById(scope.row,item3.id)">
-                      {{item3.name}}
+                    <el-tag
+                      type="warning"
+                      v-for="item3 in item2.children"
+                      :key="item3.id"
+                      closable
+                      @close="removeRightById(scope.row, item3.id)"
+                    >
+                      {{ item3.name }}
                     </el-tag>
                   </el-col>
                 </el-row>
@@ -46,17 +59,33 @@
         <el-table-column label="角色描述" prop="description"></el-table-column>
         <el-table-column label="操作" width="300px">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" icon="el-icon-edit" @click="showEditDialog(scope.row.id)">编辑
+            <el-button
+              size="mini"
+              type="primary"
+              icon="el-icon-edit"
+              @click="showEditDialog(scope.row.id)"
+              >编辑
             </el-button>
-            <el-button size="mini" type="danger" icon="el-icon-delete" @click="removeRole(scope.row.id)">删除</el-button>
-            <el-button size="mini" type="warning" icon="el-icon-setting" @click="showSetRightDialog(scope.row)">分配权限
+            <el-button
+              size="mini"
+              type="danger"
+              icon="el-icon-delete"
+              @click="removeRole(scope.row.id)"
+              >删除</el-button
+            >
+            <el-button
+              size="mini"
+              type="warning"
+              icon="el-icon-setting"
+              @click="showSetRightDialog(scope.row)"
+              >分配权限
             </el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
     <!-- 添加角色 -->
-    <el-dialog title="添加角色" :visible.sync="dialogVisible" width="50%" @close="roleFormClose()">
+    <el-dialog title="添加角色" :visible.sync="dialogVisible" width="50%" @close="roleFormClose()" append-to-body>
       <!-- 内容主体区域 -->
       <el-form ref="roleFormRef" :model="roleForm" :rules="roleFormRules" label-width="80px">
         <el-form-item label="角色名" prop="name">
@@ -74,7 +103,13 @@
     </el-dialog>
 
     <!-- 修改用户的对话框 -->
-    <el-dialog title="修改角色" :visible.sync="editDialogVisible" width="50%" @close="editDialogClose()">
+    <el-dialog
+      title="修改角色"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editDialogClose()"
+      append-to-body
+    >
       <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="80px">
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="editForm.name"></el-input>
@@ -90,12 +125,24 @@
     </el-dialog>
 
     <!-- 分配权限的对话框 -->
-    <el-dialog title="分配权限" :visible.sync="setRightDialogVisible" width="50%" @close="setRightDialogClosed()">
+    <el-dialog
+      title="分配权限"
+      :visible.sync="setRightDialogVisible"
+      width="50%"
+      @close="setRightDialogClosed()"
+      append-to-body
+    >
       <!-- 树形控件 -->
-      <el-tree :data="rightsList" :props="treeProps" show-checkbox node-key="id" :default-checked-keys="defkeys"
-        ref="treeRef"></el-tree>
+      <el-tree
+        :data="rightsList"
+        :props="treeProps"
+        show-checkbox
+        node-key="id"
+        :default-checked-keys="defkeys"
+        ref="treeRef"
+      ></el-tree>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="setRightDialogVisible= false">取 消</el-button>
+        <el-button @click="setRightDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="allotRights()">确 定</el-button>
       </span>
     </el-dialog>
@@ -104,10 +151,11 @@
 
 <script>
 import qs from 'qs'
+import { roleAPI } from '@/api'
 export default {
-  data () {
+  data() {
     return {
-    // 所有角色列表
+      // 所有角色列表
       roleList: [],
       rightsList: [],
       dialogVisible: false,
@@ -131,9 +179,6 @@ export default {
       },
       treeProps: {
         label: 'name',
-        // function (data, node) {
-        //   return data.name
-        // },
         children: 'children'
       },
       // 默认选中的节点ID值
@@ -142,22 +187,22 @@ export default {
       roleId: ''
     }
   },
-  created () {
+  created() {
     this.getRolesList()
   },
   methods: {
-  // 获取所有角色列表
-    async getRolesList () {
-      const { data: res } = await this.$http.get('/api/roles/tree')
+    // 获取所有角色列表
+    async getRolesList() {
+      const { data: res } = await roleAPI.getRolesTree()
       if (res.status !== 200) {
         return this.$message.error('获取角色列表失败')
       }
       this.roleList = res.data
     },
-    addRole () {
-      this.$refs.roleFormRef.validate(async valid => {
+    addRole() {
+      this.$refs.roleFormRef.validate(async (valid) => {
         if (!valid) return
-        const { data: res } = await this.$http.post('/api/roles/addRole', this.roleForm)
+        const { data: res } = await roleAPI.addRole(this.roleForm)
         if (res.status !== 200) {
           return this.$message.error('添加角色失败！')
         }
@@ -166,21 +211,24 @@ export default {
         this.getRolesList()
       })
     },
-    roleFormClose () {
+    roleFormClose() {
       this.$refs.roleFormRef.resetFields()
     },
-    async showEditDialog (id) {
-      const { data: res } = await this.$http.get('/api/roles/' + id)
+    async showEditDialog(id) {
+      const { data: res } = await roleAPI.getRole(id)
       if (res.status !== 200) {
         return this.$message.error('查询数据失败')
       }
       this.editForm = res.data
       this.editDialogVisible = true
     },
-    editRole () {
-      this.$refs.editFormRef.validate(async valid => {
+    editRole() {
+      this.$refs.editFormRef.validate(async (valid) => {
         if (!valid) return
-        const { data: res } = await this.$http.put('/api/roles/' + this.editForm.id, { name: this.editForm.name, description: this.editForm.description })
+        const { data: res } = await roleAPI.updateRole(this.editForm.id, {
+          name: this.editForm.name,
+          description: this.editForm.description
+        })
         if (res.status !== 200) {
           return this.$message.error('修改角色失败！')
         }
@@ -189,45 +237,45 @@ export default {
         this.$message.success('修改角色成功！')
       })
     },
-    editDialogClose () {
+    editDialogClose() {
       this.$refs.editFormRef.resetFields()
     },
-    async removeRole (id) {
+    async removeRole(id) {
       const confirmResult = await this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).catch(err => err)
+      }).catch((err) => err)
       if (confirmResult !== 'confirm') {
         this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete('/api/roles/' + id)
+      const { data: res } = await roleAPI.deleteRole(id)
       if (res.status !== 200) {
         this.$message.error('删除失败')
       }
       this.$message.success('删除成功')
       this.getRolesList()
     },
-    async removeRightById (role, rightId) {
+    async removeRightById(role, rightId) {
       const confirmResult = await this.$confirm('此操作将永久删除该权限, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).catch(err => err)
+      }).catch((err) => err)
       if (confirmResult !== 'confirm') {
         this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete(`/api/roles/${role.id}/rights/${rightId}`)
+      const { data: res } = await roleAPI.deleteRoleRight(role.id, rightId)
       if (res.status !== 200) {
         this.$message.error(res.msg)
       }
       this.$message.success('删除成功')
       role.children = res.data
     },
-    async  showSetRightDialog (role) {
+    async showSetRightDialog(role) {
       this.roleId = role.id
       // 获取所有权限的设置
-      const { data: res } = await this.$http.get('/api/rights/tree')
+      const { data: res } = await rightAPI.getRightsTree()
       if (res.status !== 200) {
         return this.$message.error('获取权限数据失败')
       }
@@ -237,22 +285,27 @@ export default {
       this.setRightDialogVisible = true
     },
     // 通过递归的形式，获取角色下所有三级权限的id，并保存到数组中
-    getLeafKeys (node, arr) {
+    getLeafKeys(node, arr) {
       // 不包含children属性，则是三级节点
       if (node.children.length === 0) {
         return arr.push(node.id)
       }
-      node.children.forEach(item => this.getLeafKeys(item, arr))
+      node.children.forEach((item) => this.getLeafKeys(item, arr))
     },
-    setRightDialogClosed () {
+    setRightDialogClosed() {
       this.defkeys = []
     },
     // ...是展开运算符
-    async allotRights () {
-      const keys = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
+    async allotRights() {
+      const keys = [
+        ...this.$refs.treeRef.getCheckedKeys(),
+        ...this.$refs.treeRef.getHalfCheckedKeys()
+      ]
       // 用逗号来拼接
       const idStr = keys.join(',')
-      const { data: res } = await this.$http.post('/api/roles/rights', qs.stringify({ id: this.roleId, rids: idStr }))
+      const { data: res } = await roleAPI.assignRights(
+        qs.stringify({ id: this.roleId, rids: idStr })
+      )
       if (res.status !== 200) {
         return this.$message.error('分配权限失败')
       }

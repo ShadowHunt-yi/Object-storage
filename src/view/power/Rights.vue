@@ -8,31 +8,31 @@
         <el-table-column label="路径" prop="path"></el-table-column>
         <el-table-column label="权限等级" prop="level">
           <template slot-scope="scope">
-            <el-tag v-if="scope.row.level===1">一级</el-tag>
-            <el-tag type="success" v-else-if="scope.row.level===2">二级</el-tag>
+            <el-tag v-if="scope.row.level === 1">一级</el-tag>
+            <el-tag type="success" v-else-if="scope.row.level === 2">二级</el-tag>
             <el-tag type="warning" v-else>三级</el-tag>
           </template>
         </el-table-column>
       </el-table>
-
     </el-card>
   </div>
 </template>
 
 <script>
+import { rightAPI } from '@/api'
 export default {
-  data () {
+  data() {
     return {
       // 权限列表
       rightsList: []
     }
   },
-  created () {
+  created() {
     this.getRightsList()
   },
   methods: {
-    async getRightsList () {
-      const { data: res } = await this.$http.get('/api/rights/list')
+    async getRightsList() {
+      const { data: res } = await rightAPI.getRightsList()
       if (res.status !== 200) {
         return this.$message.error('获取权限列表失败')
       }
@@ -42,5 +42,4 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

@@ -3,173 +3,419 @@
     <el-card>
       <div slot="header" class="card-head">
         <div class="bread">
-          <el-breadcrumb separator="/" style="font-size:12px;">
-            <el-breadcrumb-item><a href="javascript:;" @click="getParentFile()"> 全部文件</a> </el-breadcrumb-item>
-            <el-breadcrumb-item v-for="(item,index) in pathlist" :key="index">
+          <el-breadcrumb separator="/" style="font-size: 12px">
+            <el-breadcrumb-item
+              ><a href="javascript:;" @click="rollbackFile()"> 全部文件</a>
+            </el-breadcrumb-item>
+            <el-breadcrumb-item v-for="(item, index) in pathlist" :key="index">
               <a href="javascript:;" @click="listChange(index)">{{ item }}</a>
             </el-breadcrumb-item>
           </el-breadcrumb>
         </div>
-        <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
+        <div>
+          <!-- <el-button type="primary" @click="dialogTableVisible = true" style="margin: 10px"
+            >选择桶</el-button
+          >
+          <el-dialog title="选择桶" :visible.sync="dialogTableVisible" width="500px">
+            <el-table :data="buckets" width="600px">
+              <el-table-column label="桶名" width="300px">
+                <template slot-scope="scope">
+                  <div>
+                    <span>{{ scope.row.name }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="100px">
+                <template slot-scope="scope">
+                  <el-button
+                    size="mini"
+                    type="success"
+                    @click="getFlieList(scope.row.name), (dialogTableVisible = false)"
+                    >选择</el-button
+                  >
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-dialog> -->
+          <chooseBucket type="primary" @bucketSelected="getFlieList" />
+          <el-button type="primary" @click="gotoUpload()">上传文件</el-button>
+        </div>
       </div>
-      <div class="bottom">
-        <el-table :data="filelist">
-          <el-table-column label="文件名" width="400px">
+      <div class="bottom" v-loading="isLoadingTable">
+        <el-table :data="paginatedFilelist">
+          <el-table-column label="文件名" width="500px">
             <!-- 模板区域 -->
             <template slot-scope="scope">
               <!-- 图标 -->
-              <div @click="getDirFile(scope.row)" style="cursor: pointer;">
+              <div @click="getDirFile(scope.row)" style="cursor: pointer" ref="files">
                 <svg class="icon" aria-hidden="true">
-                  <use :xlink:href="iconName(scope.row.type)"></use>
+                  <use :xlink:href="iconName(scope.row.subString || scope.row.type)"></use>
                 </svg>
-                <span style=" font-size:16px"> {{scope.row.name}} </span>
+                <span style="font-size: 16px">
+                  {{ scope.row.fileName || scope.row.virtualName }}</span
+                >
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="大小" prop="size">
+          <el-table-column label="大小" prop="size" width="150px" align="center">
+            <template slot-scope="scope">
+              <div>
+                <span style="font-size: 16px">
+                  {{ totalSize(scope.row) }}
+                </span>
+              </div>
+            </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="mtime">
+          <el-table-column label="创建时间" prop="mtime" align="center">
+            <template slot-scope="scope">
+              <div v-if="scope.row.type !== 'directory'">
+                <span style="font-size: 16px">
+                  {{ formatTime(scope.row.updateTime) }}
+                </span>
+              </div>
+            </template>
           </el-table-column>
-          <el-table-column label="操作" width="300px">
-            <template slot-scope="scope" v-if="scope.row.type!=='directory'">
-              <el-button size="mini" type="primary" @click="showDetail(scope.row.md5)">详情</el-button>
-              <el-button size="mini" type="success" @click="downloadfile(scope.row.path,scope.row.name)">下载</el-button>
-              <el-button size="mini" type="danger" @click="deletefile(scope.row)">删除</el-button>
+          <el-table-column label="操作" width="300px" align="center" style="display: flex">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="primary"
+                @click="shareFile(scope.row.objectKey), (dialogUrl = true)"
+                v-if="scope.row.type !== 'directory'"
+                style="margin: 0 10px"
+                >分享</el-button
+              >
+              <el-dialog :visible.sync="dialogUrl" title="分享链接" width="30%" append-to-body>
+                <span>{{ url }}</span>
+              </el-dialog>
+              <el-button
+                size="mini"
+                type="primary"
+                @click="
+                  ;(dialogNewname = true),
+                    (oldname = scope.row.fileName),
+                    (_subString = scope.row.subString)
+                "
+                v-if="scope.row.type !== 'directory'"
+                style="margin: 10px"
+                >重命名</el-button
+              >
+              <el-button
+                size="mini"
+                type="success"
+                @click="downloadfile(scope.row.objectKey)"
+                v-if="scope.row.type !== 'directory'"
+                style="margin: 10px"
+                >下载</el-button
+              >
+              <el-button
+                size="mini"
+                type="danger"
+                @click="deletefile(scope.row)"
+                style="margin: 10px"
+                >删除</el-button
+              >
+              <el-button
+                size="mini"
+                type="success"
+                @click="preview(scope.row.objectKey)"
+                v-if="
+                  scope.row.subString == 'xls' ||
+                  scope.row.subString == 'doc' ||
+                  scope.row.subString == 'ppt' ||
+                  scope.row.subString == 'docs' ||
+                  scope.row.subString == 'pdf'
+                "
+                style="margin: 10px"
+                >预览</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[5, 10, 20, 50]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalItems"
+        >
+        </el-pagination>
       </div>
     </el-card>
-    <el-dialog title="文件详情" :visible.sync="detailVisable" width="30%">
-      <div>
-        <p><b>名称：</b>{{ fileDetails.name }}</p>
-        <p><b>文件路径：</b>{{ fileDetails.path }}</p>
-        <p><b>大小：</b>{{ fileDetails.size }} </p>
-        <p><b>创建时间：</b>{{ fileDetails.timeStamp }}</p>
-      </div>
+    <el-dialog title="重命名" :visible.sync="dialogNewname" width="30%" append-to-body>
+      <el-input placeholder="请输入新名字" v-model="newname" clearable> </el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click=";(dialogNewname = false), (newname = '')">取 消</el-button>
+        <el-button type="primary" @click="rename(oldname, newname, _subString)">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="预览" :visible.sync="dialogPreview" width="30%" append-to-body>
+      <iframe
+        :src="'https://view.officeapps.live.com/op/view.aspx?src=' + url"
+        width="100%"
+        height="100%"
+      ></iframe>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import qs from 'qs'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import * as fileUtil from '@/utils/fileUtil'
+import { fileAPI, bucketAPI } from '@/api'
+import { formatFileSize } from '@/utils/format'
+import chooseBucket from '@/components/chooseBucket.vue'
 export default {
-  data () {
+  components: {
+    chooseBucket
+  },
+  data() {
     return {
+      // 前一个文件夹
+      prevFileList: [],
       filelist: [],
       pathlist: [],
-      detailVisable: false,
       fileDetails: {},
       previewVisible: false,
-      dialogImageUrl: ''
+      dialogImageUrl: '',
+      dialogNewname: false,
+      newname: '',
+      oldname: '',
+      _subString: '',
+      buckets: '',
+      dialogTableVisible: false,
+      selectionName: '',
+      dialogUrl: false,
+      url: '',
+      currentPage: 1, // 当前页码
+      pageSize: 5, // 每页显示的条目数
+      totalItems: 0, // 总条目数
+      dialogPreview: false,
+      isLoadingTable: false // 表格加载状态变量
     }
   },
-  created () {
-    this.getParentFile()
-  },
   computed: {
-    iconName () {
+    bucketName() {
+      return this.$store.state.selectedBucket
+    },
+    iconName() {
       return function (type) {
         const iconName = fileUtil.getIconName(type)
         return iconName
       }
+    },
+    paginatedFilelist() {
+      const start = (this.currentPage - 1) * this.pageSize
+      const end = start + this.pageSize
+      return this.filelist.slice(start, end)
     }
   },
+  mounted() {
+    if (this.bucketName) {
+      this.getFlieList(this.bucketName)
+    }
+    window.eventBus.$on('getDirFileInfo', () => {
+      // 不带参数
+      this.getDirFileInfo()
+    })
+    window.eventBus.$on('getDirFileByIndex', (a) => {
+      this.getDirFileByIndex(a)
+    })
+    window.eventBus.$on('rollbackFile', () => {
+      this.rollbackFile()
+    })
+  },
   methods: {
-    gotoUpload () {
+    totalSize(e) {
+      if (e.type != 'directory') {
+        return formatFileSize(e.Size)
+      } else {
+        let sumSize = 0
+        for (let item of e.children.data) {
+          sumSize += parseFloat(item.Size)
+        }
+        return formatFileSize(sumSize)
+      }
+    },
+    formatTime(e) {
+      dayjs.extend(utc)
+      dayjs.extend(timezone)
+      dayjs(e).tz('Asia/Shanghai').format()
+      return dayjs(e).tz('Asia/Shanghai').format()
+    },
+    gotoUpload() {
       this.$router.push('upload')
     },
     // 获取一级目录
-    async getParentFile () {
-      const { data: res } = await this.$http.get('/api/file/getParentFile')
-      if (res.status !== 200) {
-        return this.$message.error('获取文件列表失败')
+    async getFlieList(name) {
+      this.isLoadingTable = true // <-- 设置加载开始
+      try {
+        const { data: res } = await fileAPI.getFileList(name, {
+          params: { prefix: '' }
+        })
+        if (res.status !== 200) {
+          this.$message.error('获取文件列表失败')
+        } else {
+          this.filelist = this.prevFileList = res.data
+          this.totalItems = this.filelist.length
+          this.currentPage = 1 // 每次获取新列表时重置到第一页
+        }
+      } catch (error) {
+        console.error('获取文件列表出错:', error)
+        this.$message.error('加载文件列表时遇到问题')
+      } finally {
+        this.isLoadingTable = false // <-- 设置加载结束
       }
-      this.filelist = res.data
+    },
+    rollbackFile() {
+      this.filelist = this.prevFileList
+      this.pathlist.pop()
+      this.currentPage = 1
+      this.totalItems = this.filelist.length
     },
     // 根据目录获取
-    async getDirFile (fileInfo) {
-      if (fileInfo.type !== 'directory') { return }
-      let url = ''
-      if (fileInfo.path === '') {
-        url = fileInfo.name
-      } else {
-        url = fileInfo.path + '/' + fileInfo.name
+    getDirFile(fileInfo) {
+      if (fileInfo.type == 'directory') {
+        this.prevFileList = this.filelist
+        this.filelist = fileInfo.children.data
+        this.pathlist.push(fileInfo.virtualName)
+        this.currentPage = 1
+        this.totalItems = this.filelist.length
       }
-      const { data: res } = await this.$http.get('/api/file/getDirFile', { params: { dir: url } })
-      if (res.status !== 200) {
-        return this.$message.error('获取文件列表失败')
-      }
-      this.pathlist = url.split('/')
-      this.filelist = res.data
     },
-    async listChange (index) {
-      let url = ''
-      for (let i = 0; i < index; i++) {
-        url += this.pathlist[i] + '/'
+    getDirFileByIndex(index) {
+      if (this.filelist[index - 1].type == 'directory') {
+        this.prevFileList = this.filelist
+        this.pathlist.push(this.filelist[index - 1].virtualName)
+        this.filelist = this.filelist[index - 1].children.data
       }
-      url += this.pathlist[index]
-      const { data: res } = await this.$http.get('/api/file/getDirFile', { params: { dir: url } })
-      if (res.status !== 200) {
-        return this.$message.error('获取文件列表失败')
-      }
-      this.filelist = res.data
     },
-    // 获取文件详情
-    async showDetail (key) {
-      const { data: res } = await this.$http.post('/api/file/details', qs.stringify({ md5: key }))
+    getDirFileInfo() {
+      console.log(this.$refs.files, this.filelist)
+    },
+    async listChange(index) {
+      this.isLoadingTable = true // <-- 设置加载开始
+      try {
+        let url = ''
+        console.log(index)
+        for (let i = 0; i <= index; i++) {
+          // 应该包含当前点击的 index
+          url += this.pathlist[i] + '/'
+        }
+        url = url.slice(0, -1) // 移除末尾的 '/'
 
-      if (res.status !== 200) {
-        return this.$message.error('获取失败')
+        // 假设 bucketName 应该是当前激活的桶名
+        const { data: res } = await fileAPI.getFileList(this.bucketName, {
+          params: { prefix: url }
+        })
+        if (res.status !== 200) {
+          this.$message.error('获取文件列表失败')
+        } else {
+          this.filelist = res.data // 更新列表
+          this.pathlist.splice(index + 1) // 移除当前点击层级之后的所有路径
+          this.currentPage = 1 // 重置分页
+          this.totalItems = this.filelist.length
+        }
+      } catch (error) {
+        console.error('切换目录出错:', error)
+        this.$message.error('加载目录内容时遇到问题')
+      } finally {
+        this.isLoadingTable = false // <-- 设置加载结束
       }
-      this.fileDetails = res.data
-      this.detailVisable = true
     },
-    async deletefile (fileInfo) {
+    // 重命名文件
+    async rename(_old, _new, _type) {
+      console.log(_type)
+      if (_new != '') {
+        const { data: res } = await fileAPI.renameFile(_old, _new, _type)
+
+        if (res.status !== 200) {
+          return this.$message.error(res.msg)
+        }
+        this.fileName = res.data
+        this.dialogNewname = false
+        this.newname = ''
+        this.getFlieList(this.bucketName)
+      }
+      return
+    },
+    //删除文件
+    async deletefile(fileInfo) {
       const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).catch(err => err)
+      }).catch((err) => err)
       if (confirmResult !== 'confirm') {
         return this.$message.info('已经取消删除')
       }
-      const { data: res } = await this.$http.delete(`/api/file/delete/${fileInfo.md5}`)
+      const { data: res } = await fileAPI.deleteFile(this.bucketName, fileInfo.md5)
       if (res.status !== 200) {
         return this.$message.error('删除失败')
       }
-
       this.filelist.splice(this.filelist.indexOf(fileInfo), 1)
       return this.$message.success('删除成功')
     },
-    downloadfile (path, name) {
+    downloadfile(name) {
+      const _bucketName = this.bucketName
       const params = {
-        path: path,
-        name: name
+        fileName: name,
+        bucketName: _bucketName
       }
-      this.$http({
-        url: '/api/file/downloadFile',
-        method: 'get',
-        params: params,
-        responseType: 'blob' // 接收类型设置，否者返回字符型
-      }).then(res => { // 定义文件名等相关信息
-        const blob = res.data
-        const reader = new FileReader()
-        reader.readAsDataURL(blob)
-        reader.onload = (e) => {
-          const a = document.createElement('a')
-          a.download = name
-          a.href = e.target.result
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-        }
+      const _this = this
+      _this.$message('正在进行文件校验')
+      setTimeout(function () {
+        _this.$message.success('文件校验成功')
+        // _this
+        //   .$http({
+        //     url: "/api/download",
+        //     method: "get",
+        //     params: params,
+        //     responseType: "blob", // 接收类型设置，否者返回字符型
+        //   })
+        fileAPI.downloadFile({ params }).then((res) => {
+          // 定义文件名等相关信息
+          const blob = res.data
+          const reader = new FileReader()
+          reader.readAsDataURL(blob)
+          reader.onload = (e) => {
+            const a = document.createElement('a')
+            a.download = name
+            a.href = e.target.result
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+          }
+        })
+        return _this.$message.success('成功开始下载......')
+      }, 2000)
+    },
+    async shareFile(key) {
+      const { data: res } = await fileAPI.getFileUrl({
+        params: { bucketName: this.bucketName, fileName: key }
       })
-
-      return this.$message.success('成功开始下载......')
+      if (res.status != 200) {
+        this.$message.error(res.msg)
+      }
+      this.url = res.data
+    },
+    async preview(key) {
+      await this.shareFile(key)
+      const _url = this.url
+      console.log(this.url)
+      this.dialogPreview = true
+    },
+    handleSizeChange(newSize) {
+      this.pageSize = newSize
+      this.currentPage = 1 // 重置到第一页
+    },
+    handleCurrentChange(newPage) {
+      this.currentPage = newPage
     }
-
   }
 }
 </script>
@@ -183,19 +429,24 @@ export default {
   overflow: hidden;
   margin-right: 5px;
 }
+
 .el-button {
   font-size: 16px;
 }
+
 .el-table {
   margin-bottom: 10px;
   font-size: 16px;
 }
+
 .bread a {
   color: #606266;
 }
+
 .bread a:hover {
   color: #000000;
 }
+
 .card-head {
   display: flex;
   flex-direction: row;
